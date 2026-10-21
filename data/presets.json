@@ -1,0 +1,109 @@
+{
+  "notes": "Illustrative defaults only. Money values are USD; the \"india\" variant holds exact INR anchor values used when the display currency is INR. human_share_pct = share of conversations that reach a human today. tax_reclaimable = false where the sector is often VAT/GST-exempt (healthcare, education), so tax on AI spend becomes a real cost.",
+  "presets": {
+    "d2c_ecommerce": {
+      "label": "D2C e-commerce",
+      "use_case": "chatbot",
+      "users_per_day": 1667,
+      "requests_per_user": 4,
+      "ticket_usd": 24,
+      "margin_pct": 40,
+      "purchase_type": "repeat",
+      "purchases_per_year": 3,
+      "conversion_pct": 3,
+      "human_cost_per_conv_usd": 0.6,
+      "deflection_pct": 60,
+      "min_plausible_ticket_usd": 3,
+      "india": {
+        "ticket_inr": 2000,
+        "human_cost_per_conv_inr": 50
+      },
+      "human_share_pct": 15,
+      "tax_reclaimable": true
+    },
+    "saas_b2b": {
+      "label": "SaaS (B2B)",
+      "use_case": "chatbot",
+      "users_per_day": 300,
+      "requests_per_user": 5,
+      "ticket_usd": 6000,
+      "margin_pct": 80,
+      "purchase_type": "repeat",
+      "purchases_per_year": 1,
+      "conversion_pct": 2,
+      "human_cost_per_conv_usd": 8,
+      "deflection_pct": 50,
+      "min_plausible_ticket_usd": 100,
+      "human_share_pct": 30,
+      "tax_reclaimable": true
+    },
+    "real_estate": {
+      "label": "Real estate",
+      "use_case": "chatbot",
+      "users_per_day": 100,
+      "requests_per_user": 6,
+      "ticket_usd": 70000,
+      "margin_pct": 20,
+      "purchase_type": "one_time",
+      "purchases_per_year": 1,
+      "conversion_pct": 1,
+      "human_cost_per_conv_usd": 10,
+      "deflection_pct": 30,
+      "min_plausible_ticket_usd": 1000,
+      "india": {
+        "ticket_inr": 6500000,
+        "human_cost_per_conv_inr": 400
+      },
+      "human_share_pct": 40,
+      "tax_reclaimable": true
+    },
+    "healthcare_clinic": {
+      "label": "Healthcare clinic",
+      "use_case": "chatbot",
+      "users_per_day": 500,
+      "requests_per_user": 5,
+      "ticket_usd": 120,
+      "margin_pct": 50,
+      "purchase_type": "repeat",
+      "purchases_per_year": 2,
+      "conversion_pct": 10,
+      "human_cost_per_conv_usd": 5,
+      "deflection_pct": 40,
+      "min_plausible_ticket_usd": 10,
+      "human_share_pct": 40,
+      "tax_reclaimable": false
+    },
+    "education": {
+      "label": "Education / ed-tech",
+      "use_case": "chatbot",
+      "users_per_day": 1000,
+      "requests_per_user": 6,
+      "ticket_usd": 500,
+      "margin_pct": 60,
+      "purchase_type": "one_time",
+      "purchases_per_year": 1,
+      "conversion_pct": 2,
+      "human_cost_per_conv_usd": 3,
+      "deflection_pct": 60,
+      "min_plausible_ticket_usd": 10,
+      "human_share_pct": 25,
+      "tax_reclaimable": false
+    },
+    "professional_services": {
+      "label": "Professional services",
+      "use_case": "internal_copilot",
+      "users_per_day": 100,
+      "requests_per_user": 5,
+      "ticket_usd": 5000,
+      "margin_pct": 50,
+      "purchase_type": "one_time",
+      "purchases_per_year": 1,
+      "conversion_pct": 3,
+      "human_cost_per_conv_usd": 20,
+      "deflection_pct": 30,
+      "min_plausible_ticket_usd": 200,
+      "human_share_pct": 50,
+      "tax_reclaimable": true
+    }
+  }
+}

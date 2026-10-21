@@ -1,0 +1,56 @@
+{
+  "notes": "Token counts of representative sample texts (data/samples). 'measured' = Google's countTokens for the model named; 'estimate' = characters ÷ 4, a common rule of thumb for English text. Defaults in usecases.json are compared, not overwritten.",
+  "measured": false,
+  "method": "characters ÷ 4 (estimate)",
+  "date": "2026-10-16",
+  "samples": [
+    {
+      "file": "chatbot_request.txt",
+      "useCase": "chatbot",
+      "field": "in_tokens",
+      "label": "Chatbot request (system prompt, 3 knowledge-base excerpts, history, question)",
+      "chars": 3472,
+      "words": 600,
+      "tokens": 868,
+      "method": "estimate: characters ÷ 4",
+      "current_default": 1500,
+      "ratio_to_default": 0.58
+    },
+    {
+      "file": "invoice_2_pages.txt",
+      "useCase": "invoice_processing",
+      "field": "in_tokens_per_step",
+      "label": "Invoice extraction step (instructions + 2-page OCR text)",
+      "chars": 3907,
+      "words": 427,
+      "tokens": 977,
+      "method": "estimate: characters ÷ 4",
+      "current_default": 2500,
+      "ratio_to_default": 0.39
+    },
+    {
+      "file": "ticket.txt",
+      "useCase": "ticket_triage",
+      "field": "in_tokens_per_step",
+      "label": "Ticket triage step (instructions + one email ticket)",
+      "chars": 1422,
+      "words": 218,
+      "tokens": 356,
+      "method": "estimate: characters ÷ 4",
+      "current_default": 1200,
+      "ratio_to_default": 0.3
+    },
+    {
+      "file": "report_step.txt",
+      "useCase": "report_generation",
+      "field": "in_tokens_per_step",
+      "label": "Report step (instructions + one month of weekly sales data)",
+      "chars": 13073,
+      "words": 580,
+      "tokens": 3268,
+      "method": "estimate: characters ÷ 4",
+      "current_default": 6000,
+      "ratio_to_default": 0.54
+    }
+  ]
+}

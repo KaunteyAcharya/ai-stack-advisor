@@ -1,0 +1,229 @@
+INSTRUCTIONS
+You are preparing the monthly sales report for Leafline management. Using only the data below, write: (1) a five-line executive summary with the month total revenue, orders and change versus the plan of ₹1.9 crore; (2) the top three and bottom three city–category combinations by revenue, with one-line reasons where the data suggests one; (3) delivery: cities where average delivery days exceed 5, and whether returns are higher there; (4) repeat customers: categories with repeat share above 35%; (5) three recommended actions for next month, each tied to a number in the data. Show all amounts in rupees with lakh/crore wording. Do not invent numbers; if something cannot be calculated from the data, say so. Output in Markdown with short headings.
+
+DATA (weekly sales by city and category, September 2025)
+week,city,category,orders,units,revenue_inr,returns,avg_delivery_days,repeat_customer_pct
+2025-W37,Pune,Low-light plants,20,37,16292,0,5.4,34
+2025-W37,Pune,Flowering plants,79,134,115182,3,5.2,37
+2025-W37,Pune,Succulents,167,216,111631,7,5.3,20
+2025-W37,Pune,Self-watering pots,143,211,213144,7,3.0,33
+2025-W37,Pune,Ceramic pots,186,307,233129,6,6.1,45
+2025-W37,Pune,Soil and feed,87,119,111081,2,3.1,27
+2025-W37,Pune,Gift sets,97,130,133060,3,5.4,44
+2025-W37,Mumbai,Low-light plants,31,41,28067,1,4.2,24
+2025-W37,Mumbai,Flowering plants,184,210,106873,4,5.2,46
+2025-W37,Mumbai,Succulents,113,139,75763,2,4.0,31
+2025-W37,Mumbai,Self-watering pots,80,122,89382,1,6.1,32
+2025-W37,Mumbai,Ceramic pots,175,281,211007,5,4.5,39
+2025-W37,Mumbai,Soil and feed,189,268,219065,3,4.8,29
+2025-W37,Mumbai,Gift sets,80,113,101163,4,2.9,43
+2025-W37,Bengaluru,Low-light plants,34,48,15274,0,6.5,25
+2025-W37,Bengaluru,Flowering plants,134,163,96398,5,3.1,46
+2025-W37,Bengaluru,Succulents,179,324,316450,10,5.5,26
+2025-W37,Bengaluru,Self-watering pots,22,29,7205,0,5.0,25
+2025-W37,Bengaluru,Ceramic pots,153,228,182120,2,6.0,25
+2025-W37,Bengaluru,Soil and feed,87,158,45273,3,2.5,45
+2025-W37,Bengaluru,Gift sets,135,248,49327,7,3.3,47
+2025-W37,Delhi,Low-light plants,122,201,84348,2,3.3,35
+2025-W37,Delhi,Flowering plants,29,50,40532,1,4.5,19
+2025-W37,Delhi,Succulents,40,73,21731,2,6.1,19
+2025-W37,Delhi,Self-watering pots,179,320,343509,10,5.6,31
+2025-W37,Delhi,Ceramic pots,65,109,106165,2,3.4,30
+2025-W37,Delhi,Soil and feed,180,278,137970,7,5.4,28
+2025-W37,Delhi,Gift sets,151,217,77852,3,6.4,48
+2025-W37,Hyderabad,Low-light plants,134,241,242564,2,5.1,22
+2025-W37,Hyderabad,Flowering plants,110,170,148624,6,4.4,24
+2025-W37,Hyderabad,Succulents,100,123,95491,3,4.7,33
+2025-W37,Hyderabad,Self-watering pots,156,217,185707,0,3.7,34
+2025-W37,Hyderabad,Ceramic pots,56,94,41531,1,5.1,31
+2025-W37,Hyderabad,Soil and feed,34,58,53394,2,6.1,38
+2025-W37,Hyderabad,Gift sets,193,216,187009,7,5.4,45
+2025-W37,Chennai,Low-light plants,27,33,8324,0,2.8,18
+2025-W37,Chennai,Flowering plants,129,240,84674,1,3.3,38
+2025-W37,Chennai,Succulents,64,94,101009,2,5.2,41
+2025-W37,Chennai,Self-watering pots,91,130,30558,1,5.7,47
+2025-W37,Chennai,Ceramic pots,47,87,55493,0,3.3,36
+2025-W37,Chennai,Soil and feed,51,59,25102,2,4.7,32
+2025-W37,Chennai,Gift sets,199,231,127530,4,2.5,18
+2025-W37,Kolkata,Low-light plants,94,110,42990,5,5.6,41
+2025-W37,Kolkata,Flowering plants,99,177,185177,5,5.1,35
+2025-W37,Kolkata,Succulents,83,118,74018,2,4.8,40
+2025-W37,Kolkata,Self-watering pots,140,225,188117,7,5.9,48
+2025-W37,Kolkata,Ceramic pots,99,147,153100,6,3.9,20
+2025-W37,Kolkata,Soil and feed,82,148,120996,4,6.3,42
+2025-W37,Kolkata,Gift sets,57,74,66499,0,6.2,42
+2025-W37,Ahmedabad,Low-light plants,134,224,148352,4,6.0,35
+2025-W37,Ahmedabad,Flowering plants,177,233,185929,5,4.1,24
+2025-W37,Ahmedabad,Succulents,126,162,160211,6,3.9,38
+2025-W37,Ahmedabad,Self-watering pots,178,212,96862,10,2.5,22
+2025-W37,Ahmedabad,Ceramic pots,92,103,82768,5,3.2,24
+2025-W37,Ahmedabad,Soil and feed,191,317,107037,1,5.0,18
+2025-W37,Ahmedabad,Gift sets,166,261,223419,1,3.8,39
+2025-W38,Pune,Low-light plants,192,295,209266,9,5.3,40
+2025-W38,Pune,Flowering plants,128,151,33346,5,3.4,35
+2025-W38,Pune,Succulents,65,83,61255,2,5.8,25
+2025-W38,Pune,Self-watering pots,183,209,167539,4,5.7,38
+2025-W38,Pune,Ceramic pots,165,195,196467,5,5.8,31
+2025-W38,Pune,Soil and feed,176,305,254498,10,5.9,24
+2025-W38,Pune,Gift sets,150,184,53860,9,6.3,20
+2025-W38,Mumbai,Low-light plants,34,45,46200,2,6.3,26
+2025-W38,Mumbai,Flowering plants,56,63,37980,2,3.1,28
+2025-W38,Mumbai,Succulents,107,137,31439,0,2.9,37
+2025-W38,Mumbai,Self-watering pots,104,182,152026,3,5.3,30
+2025-W38,Mumbai,Ceramic pots,130,243,212277,8,5.3,36
+2025-W38,Mumbai,Soil and feed,164,203,48495,7,5.1,31
+2025-W38,Mumbai,Gift sets,118,166,103750,1,2.8,20
+2025-W38,Bengaluru,Low-light plants,84,116,41774,3,3.0,20
+2025-W38,Bengaluru,Flowering plants,20,35,33688,0,5.6,28
+2025-W38,Bengaluru,Succulents,92,168,150709,0,6.5,24
+2025-W38,Bengaluru,Self-watering pots,136,196,41138,1,5.5,41
+2025-W38,Bengaluru,Ceramic pots,65,116,105808,1,4.3,27
+2025-W38,Bengaluru,Soil and feed,66,119,114601,3,4.5,44
+2025-W38,Bengaluru,Gift sets,168,294,254199,10,5.3,27
+2025-W38,Delhi,Low-light plants,148,201,192477,1,5.9,38
+2025-W38,Delhi,Flowering plants,167,246,220455,8,2.7,25
+2025-W38,Delhi,Succulents,55,62,43387,3,5.0,44
+2025-W38,Delhi,Self-watering pots,176,308,112944,6,4.3,30
+2025-W38,Delhi,Ceramic pots,117,199,128523,3,4.5,25
+2025-W38,Delhi,Soil and feed,147,252,112808,2,5.0,35
+2025-W38,Delhi,Gift sets,189,294,136606,7,4.8,37
+2025-W38,Hyderabad,Low-light plants,123,151,55546,1,3.8,37
+2025-W38,Hyderabad,Flowering plants,177,286,151676,4,4.1,22
+2025-W38,Hyderabad,Succulents,48,55,33466,1,2.9,37
+2025-W38,Hyderabad,Self-watering pots,93,136,36663,5,3.6,27
+2025-W38,Hyderabad,Ceramic pots,42,53,30403,1,4.9,35
+2025-W38,Hyderabad,Soil and feed,156,270,168240,8,5.2,22
+2025-W38,Hyderabad,Gift sets,132,223,218970,5,6.4,27
+2025-W38,Chennai,Low-light plants,199,225,61396,4,5.9,45
+2025-W38,Chennai,Flowering plants,150,231,91313,5,5.6,24
+2025-W38,Chennai,Succulents,166,273,192039,9,3.7,19
+2025-W38,Chennai,Self-watering pots,152,230,168525,6,5.2,19
+2025-W38,Chennai,Ceramic pots,147,277,260678,6,4.8,25
+2025-W38,Chennai,Soil and feed,133,207,119121,0,6.0,38
+2025-W38,Chennai,Gift sets,196,264,224373,11,4.8,37
+2025-W38,Kolkata,Low-light plants,56,72,41901,1,2.7,35
+2025-W38,Kolkata,Flowering plants,161,285,73129,3,5.0,31
+2025-W38,Kolkata,Succulents,77,103,25326,2,4.2,37
+2025-W38,Kolkata,Self-watering pots,111,170,96687,4,6.1,46
+2025-W38,Kolkata,Ceramic pots,103,182,193448,4,4.1,37
+2025-W38,Kolkata,Soil and feed,29,39,8014,1,2.9,25
+2025-W38,Kolkata,Gift sets,140,179,76074,1,5.5,27
+2025-W38,Ahmedabad,Low-light plants,132,225,43402,7,6.1,41
+2025-W38,Ahmedabad,Flowering plants,192,222,76171,0,6.4,32
+2025-W38,Ahmedabad,Succulents,70,106,98778,3,5.7,18
+2025-W38,Ahmedabad,Self-watering pots,41,65,55536,0,3.7,30
+2025-W38,Ahmedabad,Ceramic pots,159,261,195299,1,6.2,48
+2025-W38,Ahmedabad,Soil and feed,131,220,71324,7,3.1,28
+2025-W38,Ahmedabad,Gift sets,145,208,124307,9,4.3,35
+2025-W39,Pune,Low-light plants,139,164,54788,2,5.9,28
+2025-W39,Pune,Flowering plants,199,305,90219,6,4.5,18
+2025-W39,Pune,Succulents,118,207,118236,1,2.8,37
+2025-W39,Pune,Self-watering pots,98,118,109684,0,6.2,40
+2025-W39,Pune,Ceramic pots,180,294,233385,9,3.6,38
+2025-W39,Pune,Soil and feed,104,114,33059,1,2.7,33
+2025-W39,Pune,Gift sets,42,54,27280,2,3.5,25
+2025-W39,Mumbai,Low-light plants,149,253,200554,8,3.2,26
+2025-W39,Mumbai,Flowering plants,118,168,119756,3,4.7,44
+2025-W39,Mumbai,Succulents,173,247,124150,10,5.5,46
+2025-W39,Mumbai,Self-watering pots,63,118,119325,3,4.8,37
+2025-W39,Mumbai,Ceramic pots,181,226,138519,5,5.6,40
+2025-W39,Mumbai,Soil and feed,145,230,42598,3,5.5,35
+2025-W39,Mumbai,Gift sets,26,40,40589,0,6.3,38
+2025-W39,Bengaluru,Low-light plants,119,213,213808,7,2.7,41
+2025-W39,Bengaluru,Flowering plants,85,141,36656,2,2.8,27
+2025-W39,Bengaluru,Succulents,87,118,62578,0,4.1,31
+2025-W39,Bengaluru,Self-watering pots,164,288,65387,4,4.8,37
+2025-W39,Bengaluru,Ceramic pots,44,53,28814,0,3.6,38
+2025-W39,Bengaluru,Soil and feed,53,99,96739,2,3.1,31
+2025-W39,Bengaluru,Gift sets,146,194,111123,3,4.1,24
+2025-W39,Delhi,Low-light plants,21,27,19996,1,2.6,46
+2025-W39,Delhi,Flowering plants,36,43,35767,1,5.2,35
+2025-W39,Delhi,Succulents,189,217,86716,2,4.0,28
+2025-W39,Delhi,Self-watering pots,56,63,20079,2,6.4,23
+2025-W39,Delhi,Ceramic pots,113,181,53302,6,5.2,40
+2025-W39,Delhi,Soil and feed,189,312,97534,4,4.3,26
+2025-W39,Delhi,Gift sets,47,67,59787,2,5.2,42
+2025-W39,Hyderabad,Low-light plants,173,265,48443,4,6.3,38
+2025-W39,Hyderabad,Flowering plants,153,270,146132,7,3.9,34
+2025-W39,Hyderabad,Succulents,23,36,6548,1,4.5,30
+2025-W39,Hyderabad,Self-watering pots,48,72,24968,2,2.9,19
+2025-W39,Hyderabad,Ceramic pots,159,246,223024,8,5.2,40
+2025-W39,Hyderabad,Soil and feed,170,240,238976,4,4.0,19
+2025-W39,Hyderabad,Gift sets,35,41,8492,1,5.2,24
+2025-W39,Chennai,Low-light plants,21,24,19254,1,6.0,43
+2025-W39,Chennai,Flowering plants,190,321,217737,7,2.8,29
+2025-W39,Chennai,Succulents,105,160,102857,4,5.1,33
+2025-W39,Chennai,Self-watering pots,151,207,196569,0,2.7,38
+2025-W39,Chennai,Ceramic pots,197,249,46836,3,2.7,31
+2025-W39,Chennai,Soil and feed,141,225,123766,7,2.6,43
+2025-W39,Chennai,Gift sets,177,257,125106,2,5.1,21
+2025-W39,Kolkata,Low-light plants,72,117,29559,2,6.2,19
+2025-W39,Kolkata,Flowering plants,184,238,171817,0,6.1,37
+2025-W39,Kolkata,Succulents,66,105,52003,2,4.2,47
+2025-W39,Kolkata,Self-watering pots,168,314,304315,1,3.6,33
+2025-W39,Kolkata,Ceramic pots,117,140,98694,2,4.1,36
+2025-W39,Kolkata,Soil and feed,171,236,66683,2,3.5,19
+2025-W39,Kolkata,Gift sets,185,312,240690,9,2.8,36
+2025-W39,Ahmedabad,Low-light plants,177,213,124664,4,5.6,38
+2025-W39,Ahmedabad,Flowering plants,191,216,64776,10,5.9,37
+2025-W39,Ahmedabad,Succulents,40,60,34922,2,5.1,26
+2025-W39,Ahmedabad,Self-watering pots,35,41,23091,2,5.1,43
+2025-W39,Ahmedabad,Ceramic pots,184,328,276823,4,5.2,41
+2025-W39,Ahmedabad,Soil and feed,151,228,172420,6,4.9,23
+2025-W39,Ahmedabad,Gift sets,179,301,110278,4,3.1,44
+2025-W40,Pune,Low-light plants,59,82,79021,2,5.5,21
+2025-W40,Pune,Flowering plants,141,246,44342,6,4.1,23
+2025-W40,Pune,Succulents,24,31,18407,1,4.9,37
+2025-W40,Pune,Self-watering pots,26,37,13696,1,2.9,25
+2025-W40,Pune,Ceramic pots,136,180,185804,1,3.4,43
+2025-W40,Pune,Soil and feed,94,178,75305,0,5.8,31
+2025-W40,Pune,Gift sets,87,159,118750,4,5.2,28
+2025-W40,Mumbai,Low-light plants,180,303,54565,6,2.7,32
+2025-W40,Mumbai,Flowering plants,83,139,86271,0,6.3,45
+2025-W40,Mumbai,Succulents,159,240,170902,5,5.2,43
+2025-W40,Mumbai,Self-watering pots,78,128,131685,3,5.5,43
+2025-W40,Mumbai,Ceramic pots,146,262,70303,5,4.1,46
+2025-W40,Mumbai,Soil and feed,48,81,37606,2,4.3,19
+2025-W40,Mumbai,Gift sets,140,161,95374,1,2.7,24
+2025-W40,Bengaluru,Low-light plants,122,202,187864,2,2.7,30
+2025-W40,Bengaluru,Flowering plants,31,56,52415,1,6.3,47
+2025-W40,Bengaluru,Succulents,173,217,182552,5,6.5,26
+2025-W40,Bengaluru,Self-watering pots,174,213,225391,4,4.5,19
+2025-W40,Bengaluru,Ceramic pots,62,93,78871,3,4.0,34
+2025-W40,Bengaluru,Soil and feed,164,246,260643,7,4.3,33
+2025-W40,Bengaluru,Gift sets,83,112,23282,2,3.9,30
+2025-W40,Delhi,Low-light plants,164,251,245584,1,3.4,42
+2025-W40,Delhi,Flowering plants,68,106,59266,3,4.5,28
+2025-W40,Delhi,Succulents,42,60,37708,2,2.9,43
+2025-W40,Delhi,Self-watering pots,46,84,45660,2,4.6,32
+2025-W40,Delhi,Ceramic pots,122,135,77123,7,4.3,40
+2025-W40,Delhi,Soil and feed,110,125,74948,3,6.4,31
+2025-W40,Delhi,Gift sets,89,113,30793,2,5.6,27
+2025-W40,Hyderabad,Low-light plants,197,249,102887,10,5.0,46
+2025-W40,Hyderabad,Flowering plants,170,307,171229,3,4.5,24
+2025-W40,Hyderabad,Succulents,154,249,130566,7,4.8,47
+2025-W40,Hyderabad,Self-watering pots,32,57,44316,1,3.8,31
+2025-W40,Hyderabad,Ceramic pots,165,312,226935,6,5.7,24
+2025-W40,Hyderabad,Soil and feed,126,177,175954,5,6.1,25
+2025-W40,Hyderabad,Gift sets,156,274,66541,7,5.9,38
+2025-W40,Chennai,Low-light plants,23,28,19096,1,2.5,22
+2025-W40,Chennai,Flowering plants,176,268,86164,6,5.0,18
+2025-W40,Chennai,Succulents,120,158,74317,3,4.8,33
+2025-W40,Chennai,Self-watering pots,166,207,206661,5,4.5,46
+2025-W40,Chennai,Ceramic pots,135,240,74249,8,2.9,42
+2025-W40,Chennai,Soil and feed,89,113,78427,3,5.3,21
+2025-W40,Chennai,Gift sets,181,256,229361,9,5.3,36
+2025-W40,Kolkata,Low-light plants,178,216,135043,9,5.3,26
+2025-W40,Kolkata,Flowering plants,84,147,94537,1,5.1,37
+2025-W40,Kolkata,Succulents,127,170,168443,7,3.3,43
+2025-W40,Kolkata,Self-watering pots,192,344,117500,3,3.0,28
+2025-W40,Kolkata,Ceramic pots,145,267,53906,7,4.5,20
+2025-W40,Kolkata,Soil and feed,27,39,27735,0,4.1,31
+2025-W40,Kolkata,Gift sets,75,109,89010,1,2.5,47
+2025-W40,Ahmedabad,Low-light plants,163,272,275413,4,3.3,29
+2025-W40,Ahmedabad,Flowering plants,29,49,52920,2,3.3,31
+2025-W40,Ahmedabad,Succulents,124,175,63810,6,5.5,30
+2025-W40,Ahmedabad,Self-watering pots,25,39,15230,0,6.2,36
+2025-W40,Ahmedabad,Ceramic pots,179,201,171687,7,5.4,18
+2025-W40,Ahmedabad,Soil and feed,81,138,85147,4,3.0,28
+2025-W40,Ahmedabad,Gift sets,23,29,21747,1,2.9,45

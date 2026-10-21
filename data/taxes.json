@@ -1,0 +1,577 @@
+{
+  "notes": "Indirect taxes on buying cloud, API and SaaS services. Prices in prices.json exclude tax. Reclaimable taxes are not added to cost for registered businesses. Not tax advice.",
+  "regions": {
+    "IN": {
+      "tax_name": "GST",
+      "default_variant": "IN",
+      "variants": [
+        {
+          "id": "IN",
+          "label": "GST 18% (IT and online information services)",
+          "components": [
+            {
+              "name": "GST 18%",
+              "rate_pct": 18,
+              "recoverable": true,
+              "source_url": "https://taxinformation.cbic.gov.in/",
+              "last_verified": "2026-10-14",
+              "is_sample": true,
+              "notes": "SAMPLE until verified: 18% is the standard GST rate for IT and OIDAR services. Check the CBIC rate notification for your service code."
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Registered businesses can usually claim input tax credit; exempt businesses (for example many healthcare and education services) cannot.",
+        "Services from foreign vendors: GST is paid under reverse charge (B2B) or collected by the vendor (OIDAR).",
+        "Payments to foreign vendors may need a withholding-tax review under the Income-tax Act and tax treaties; review with a tax advisor."
+      ]
+    },
+    "US": {
+      "tax_name": "Sales tax",
+      "default_variant": "US-none",
+      "variants": [
+        {
+          "id": "US-none",
+          "label": "My state does not tax SaaS / cloud services",
+          "components": []
+        },
+        {
+          "id": "US-custom",
+          "label": "My state taxes SaaS / cloud services (enter rate)",
+          "components": [
+            {
+              "name": "State + local sales tax",
+              "rate_pct": null,
+              "recoverable": false,
+              "source_url": "user input",
+              "last_verified": "2026-10-14",
+              "is_sample": false,
+              "notes": "Enter your combined state and local rate. Sales tax is not reclaimable."
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "There is no federal sales tax. Whether SaaS and cloud services are taxable, and at what rate, depends on the state (and sometimes the city).",
+        "US sales tax is a cost to the buyer; there is no input-tax credit."
+      ]
+    },
+    "CA": {
+      "tax_name": "GST/HST/PST",
+      "default_variant": "CA-ON",
+      "variants": [
+        {
+          "id": "CA-AB",
+          "label": "Alberta: GST 5%",
+          "components": [
+            {
+              "name": "GST 5%",
+              "rate_pct": 5,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        },
+        {
+          "id": "CA-BC",
+          "label": "British Columbia: GST 5% + PST 7%",
+          "components": [
+            {
+              "name": "GST 5%",
+              "rate_pct": 5,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            },
+            {
+              "name": "PST 7% (software)",
+              "rate_pct": 7,
+              "recoverable": false,
+              "source_url": "https://www2.gov.bc.ca/gov/content/taxes/sales-taxes/pst/software",
+              "last_verified": "2026-10-14",
+              "is_sample": true,
+              "notes": "SAMPLE until verified. BC PST applies to software, including some cloud software; not reclaimable."
+            }
+          ]
+        },
+        {
+          "id": "CA-MB",
+          "label": "Manitoba: GST 5% + RST 7%",
+          "components": [
+            {
+              "name": "GST 5%",
+              "rate_pct": 5,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            },
+            {
+              "name": "RST 7%",
+              "rate_pct": 7,
+              "recoverable": false,
+              "source_url": "https://www.gov.mb.ca/finance/taxation/taxes/retail.html",
+              "last_verified": "2026-10-14",
+              "is_sample": true,
+              "notes": "SAMPLE until verified. Check whether your service is taxable; not reclaimable."
+            }
+          ]
+        },
+        {
+          "id": "CA-NB",
+          "label": "New Brunswick: HST 15%",
+          "components": [
+            {
+              "name": "HST 15%",
+              "rate_pct": 15,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        },
+        {
+          "id": "CA-NL",
+          "label": "Newfoundland and Labrador: HST 15%",
+          "components": [
+            {
+              "name": "HST 15%",
+              "rate_pct": 15,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        },
+        {
+          "id": "CA-NT",
+          "label": "Northwest Territories: GST 5%",
+          "components": [
+            {
+              "name": "GST 5%",
+              "rate_pct": 5,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        },
+        {
+          "id": "CA-NS",
+          "label": "Nova Scotia: HST 14%",
+          "components": [
+            {
+              "name": "HST 14%",
+              "rate_pct": 14,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        },
+        {
+          "id": "CA-NU",
+          "label": "Nunavut: GST 5%",
+          "components": [
+            {
+              "name": "GST 5%",
+              "rate_pct": 5,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        },
+        {
+          "id": "CA-ON",
+          "label": "Ontario: HST 13%",
+          "components": [
+            {
+              "name": "HST 13%",
+              "rate_pct": 13,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        },
+        {
+          "id": "CA-PE",
+          "label": "Prince Edward Island: HST 15%",
+          "components": [
+            {
+              "name": "HST 15%",
+              "rate_pct": 15,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        },
+        {
+          "id": "CA-QC",
+          "label": "Quebec: GST 5% + QST 9.975%",
+          "components": [
+            {
+              "name": "GST 5%",
+              "rate_pct": 5,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            },
+            {
+              "name": "QST 9.975%",
+              "rate_pct": 9.975,
+              "recoverable": true,
+              "source_url": "https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/",
+              "last_verified": "2026-10-14",
+              "is_sample": true,
+              "notes": "SAMPLE until verified. Registered businesses claim QST back as input tax refunds."
+            }
+          ]
+        },
+        {
+          "id": "CA-SK",
+          "label": "Saskatchewan: GST 5% + PST 6%",
+          "components": [
+            {
+              "name": "GST 5%",
+              "rate_pct": 5,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            },
+            {
+              "name": "PST 6%",
+              "rate_pct": 6,
+              "recoverable": false,
+              "source_url": "https://www.saskatchewan.ca/business/taxes-licensing-and-reporting/provincial-taxes-policies-and-bulletins/provincial-sales-tax",
+              "last_verified": "2026-10-14",
+              "is_sample": true,
+              "notes": "SAMPLE until verified. Saskatchewan PST applies to many software and computer services; not reclaimable."
+            }
+          ]
+        },
+        {
+          "id": "CA-YT",
+          "label": "Yukon: GST 5%",
+          "components": [
+            {
+              "name": "GST 5%",
+              "rate_pct": 5,
+              "recoverable": true,
+              "source_url": "https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "GST/HST (and QST) are reclaimable as input tax credits by registered businesses; provincial sales taxes (PST/RST) are not.",
+        "Non-resident digital vendors register and charge GST/HST to Canadian customers."
+      ]
+    },
+    "AU": {
+      "tax_name": "GST",
+      "default_variant": "AU",
+      "variants": [
+        {
+          "id": "AU",
+          "label": "GST 10%",
+          "components": [
+            {
+              "name": "GST 10%",
+              "rate_pct": 10,
+              "recoverable": true,
+              "source_url": "https://www.ato.gov.au/businesses-and-organisations/gst-excise-and-indirect-taxes/gst",
+              "last_verified": "2026-10-14",
+              "is_sample": true,
+              "notes": "SAMPLE until verified (the ATO page could not be fetched automatically)."
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "GST-registered businesses claim GST credits; imported services bought by registered businesses are usually not charged GST or are reverse-charged."
+      ]
+    },
+    "AE": {
+      "tax_name": "VAT",
+      "default_variant": "AE",
+      "variants": [
+        {
+          "id": "AE",
+          "label": "VAT 5%",
+          "components": [
+            {
+              "name": "VAT 5%",
+              "rate_pct": 5,
+              "recoverable": true,
+              "source_url": "https://tax.gov.ae/en/taxes/Vat/vat.topics.aspx",
+              "last_verified": "2026-10-14",
+              "is_sample": false,
+              "notes": "Rate as shown by the Federal Tax Authority VAT calculator."
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Services imported from abroad are reverse-charged for VAT-registered businesses.",
+        "Designated free zones have special VAT rules for some supplies; review with a tax advisor."
+      ]
+    },
+    "GB": {
+      "tax_name": "VAT",
+      "default_variant": "GB",
+      "variants": [
+        {
+          "id": "GB",
+          "label": "VAT 20%",
+          "components": [
+            {
+              "name": "VAT 20%",
+              "rate_pct": 20,
+              "recoverable": true,
+              "source_url": "https://www.gov.uk/vat-rates",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Services bought from overseas suppliers are reverse-charged for VAT-registered businesses.",
+        "VAT-exempt businesses (for example many healthcare and education providers) cannot reclaim VAT."
+      ]
+    },
+    "CH": {
+      "tax_name": "VAT (MWST/TVA)",
+      "default_variant": "CH",
+      "variants": [
+        {
+          "id": "CH",
+          "label": "VAT 8.1%",
+          "components": [
+            {
+              "name": "VAT 8.1%",
+              "rate_pct": 8.1,
+              "recoverable": true,
+              "source_url": "https://www.estv.admin.ch/estv/en/home/value-added-tax/vat-rates-switzerland.html",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Services bought from foreign suppliers are subject to acquisition tax (reverse charge) above the annual threshold; registered businesses can reclaim it."
+      ]
+    },
+    "DE": {
+      "tax_name": "VAT",
+      "default_variant": "DE",
+      "variants": [
+        {
+          "id": "DE",
+          "label": "VAT 19%",
+          "components": [
+            {
+              "name": "VAT 19%",
+              "rate_pct": 19,
+              "recoverable": true,
+              "source_url": "https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Services bought from a supplier in another country are usually reverse-charged: you account for the VAT yourself and reclaim it if you are fully taxable.",
+        "VAT-exempt activities (for example many healthcare, education and financial services) cannot reclaim VAT, so it becomes a real cost."
+      ]
+    },
+    "NL": {
+      "tax_name": "VAT",
+      "default_variant": "NL",
+      "variants": [
+        {
+          "id": "NL",
+          "label": "VAT 21%",
+          "components": [
+            {
+              "name": "VAT 21%",
+              "rate_pct": 21,
+              "recoverable": true,
+              "source_url": "https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Services bought from a supplier in another country are usually reverse-charged: you account for the VAT yourself and reclaim it if you are fully taxable.",
+        "VAT-exempt activities (for example many healthcare, education and financial services) cannot reclaim VAT, so it becomes a real cost."
+      ]
+    },
+    "IE": {
+      "tax_name": "VAT",
+      "default_variant": "IE",
+      "variants": [
+        {
+          "id": "IE",
+          "label": "VAT 23%",
+          "components": [
+            {
+              "name": "VAT 23%",
+              "rate_pct": 23,
+              "recoverable": true,
+              "source_url": "https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Services bought from a supplier in another country are usually reverse-charged: you account for the VAT yourself and reclaim it if you are fully taxable.",
+        "VAT-exempt activities (for example many healthcare, education and financial services) cannot reclaim VAT, so it becomes a real cost."
+      ]
+    },
+    "FR": {
+      "tax_name": "VAT",
+      "default_variant": "FR",
+      "variants": [
+        {
+          "id": "FR",
+          "label": "VAT 20%",
+          "components": [
+            {
+              "name": "VAT 20%",
+              "rate_pct": 20,
+              "recoverable": true,
+              "source_url": "https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Services bought from a supplier in another country are usually reverse-charged: you account for the VAT yourself and reclaim it if you are fully taxable.",
+        "VAT-exempt activities (for example many healthcare, education and financial services) cannot reclaim VAT, so it becomes a real cost."
+      ]
+    },
+    "BE": {
+      "tax_name": "VAT",
+      "default_variant": "BE",
+      "variants": [
+        {
+          "id": "BE",
+          "label": "VAT 21%",
+          "components": [
+            {
+              "name": "VAT 21%",
+              "rate_pct": 21,
+              "recoverable": true,
+              "source_url": "https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Services bought from a supplier in another country are usually reverse-charged: you account for the VAT yourself and reclaim it if you are fully taxable.",
+        "VAT-exempt activities (for example many healthcare, education and financial services) cannot reclaim VAT, so it becomes a real cost."
+      ]
+    },
+    "AT": {
+      "tax_name": "VAT",
+      "default_variant": "AT",
+      "variants": [
+        {
+          "id": "AT",
+          "label": "VAT 20%",
+          "components": [
+            {
+              "name": "VAT 20%",
+              "rate_pct": 20,
+              "recoverable": true,
+              "source_url": "https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Services bought from a supplier in another country are usually reverse-charged: you account for the VAT yourself and reclaim it if you are fully taxable.",
+        "VAT-exempt activities (for example many healthcare, education and financial services) cannot reclaim VAT, so it becomes a real cost."
+      ]
+    },
+    "FI": {
+      "tax_name": "VAT",
+      "default_variant": "FI",
+      "variants": [
+        {
+          "id": "FI",
+          "label": "VAT 25.5%",
+          "components": [
+            {
+              "name": "VAT 25.5%",
+              "rate_pct": 25.5,
+              "recoverable": true,
+              "source_url": "https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Services bought from a supplier in another country are usually reverse-charged: you account for the VAT yourself and reclaim it if you are fully taxable.",
+        "VAT-exempt activities (for example many healthcare, education and financial services) cannot reclaim VAT, so it becomes a real cost."
+      ]
+    },
+    "LU": {
+      "tax_name": "VAT",
+      "default_variant": "LU",
+      "variants": [
+        {
+          "id": "LU",
+          "label": "VAT 17%",
+          "components": [
+            {
+              "name": "VAT 17%",
+              "rate_pct": 17,
+              "recoverable": true,
+              "source_url": "https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm",
+              "last_verified": "2026-10-14",
+              "is_sample": false
+            }
+          ]
+        }
+      ],
+      "notes": [
+        "Services bought from a supplier in another country are usually reverse-charged: you account for the VAT yourself and reclaim it if you are fully taxable.",
+        "VAT-exempt activities (for example many healthcare, education and financial services) cannot reclaim VAT, so it becomes a real cost."
+      ]
+    }
+  }
+}

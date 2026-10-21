@@ -1,0 +1,9 @@
+INSTRUCTIONS
+Classify the support ticket below. Return JSON: {"category": one of [delivery, damaged_item, refund, payment, account, product_question, b2b_order, other], "priority": one of [low, normal, high, urgent], "team": one of [logistics, quality, finance, customer_care, b2b_sales], "language": ISO code, "sentiment": one of [positive, neutral, negative], "summary": one sentence, "needs_human": true/false}. Urgent = safety issue, legal threat, or order value above ₹50,000. High = damaged live plants, payment taken twice, or customer waiting more than 7 days. Route refunds over ₹5,000 to finance. Mark needs_human true for legal threats, repeated complaints (3 or more on the same order) or anything you are unsure about.
+
+TICKET
+Ticket ID: T-882301   Channel: email   Received: 14-09-2025 09:12   Customer since: 2023, 11 orders
+Subject: Third time asking — order LL-238877 still not delivered, charged twice
+
+Hello, I placed order LL-238877 on 2 September (3 peace lilies and 2 large ceramic pots, ₹6,840). The tracking has said "out for delivery" since 8 September and nobody has come. I also see two payments of ₹6,840 on my credit card statement. I have written to you twice already (tickets T-879102 and T-880455) and got only automatic replies. If this is not sorted by Monday I will raise a chargeback with my bank and post a review. Please call me on the number on my account, not email.
+Regards, Meera

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="description" content="How AI Stack Advisor works: method, assumptions, limitations and privacy.">
+  <title>About · AI Stack Advisor</title>
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/styles.css">
+  <script src="./assets/theme.js"></script>
+  <script src="./assets/about.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="./index.html" aria-label="AI Stack Advisor home">
+        <span>AI Stack Advisor</span>
+      </a>
+      <nav class="header-nav" aria-label="Main">
+        <a href="./index.html">Open the advisor</a>
+        <button type="button" class="btn-ghost" id="theme-toggle" aria-label="Toggle dark mode">Theme</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap about">
+    <h1>About this tool</h1>
+
+    <section>
+      <h2>What it does</h2>
+      <p>AI Stack Advisor helps a business owner decide how to build an AI solution such as a chatbot, voice agent, document processor or internal copilot. It compares four approaches:</p>
+      <ol>
+        <li><strong>SaaS subscription</strong>: an off-the-shelf tool priced per seat, per conversation or per resolution.</li>
+        <li><strong>API-based custom build</strong>: hosted LLM APIs plus a managed database and light hosting.</li>
+        <li><strong>Self-hosted open source</strong>: an open-weight model on rented GPUs.</li>
+        <li><strong>Hybrid</strong>: routine requests self-hosted, complex ones through an API.</li>
+      </ol>
+      <p>For each option it estimates monthly cost, 12- and 36-month total cost of ownership, the API vs self-hosting break-even volume, the business value and ROI from your ticket size and margin, and a weighted score for privacy, time to launch, team fit, quality, lock-in and scalability. It then writes a plain-language recommendation you can print as a PDF.</p>
+    </section>
+
+    <section>
+      <h2>How the method works</h2>
+      <ul>
+        <li><strong>Volume.</strong> Requests per month = users per day × requests per user × 30, growing each month. Document processing counts documents × pages × tokens per page instead.</li>
+        <li><strong>API cost.</strong> (input tokens × input price + output tokens × output price) ÷ 1,000,000 per request, plus database, hosting, vector database, voice and maintenance labour.</li>
+        <li><strong>Self-hosting.</strong> Quality need → model size → VRAM → cheapest GPU that fits → number of GPUs for peak traffic with 30% headroom (minimum 2 for high availability). GPUs run 730 hours a month. Operations labour is included.</li>
+        <li><strong>SaaS.</strong> The cheapest plan type whose limits fit your volume, including required base seats. List prices only; volume customers usually negotiate.</li>
+        <li><strong>TCO.</strong> One-time build cost + the sum of monthly costs, recomputed each month as volume grows. Growth stops after a set number of months, and the total with no growth is shown too.</li>
+        <li><strong>Tax.</strong> Prices exclude VAT, GST and sales tax. Tax a registered business can reclaim is not added; tax it can't reclaim (US sales tax, Canadian PST, or any tax for an exempt business) is added to vendor spend.</li>
+        <li><strong>Value.</strong> Break-even extra sales = monthly AI cost ÷ gross profit on a first sale (conservative), with a second figure using 12-month customer value for repeat buyers.</li>
+        <li><strong>Recommendation.</strong> 50% cost score (lower 36-month TCO is better) and 50% weighted non-cost score; for high-ticket businesses cost weighs 25%. A robustness check moves each weight ±10 points and reports a close call if the winner changes.</li>
+      </ul>
+      <p>Every formula is written out in <a href="https://github.com/KaunteyAcharya/ai-stack-advisor/blob/main/docs/METHODOLOGY.md" rel="noopener">METHODOLOGY.md</a>.</p>
+    </section>
+
+    <section>
+      <h2>Prices and exchange rates</h2>
+      <p>Every price comes from an official vendor pricing page and records its source link and the date it was last checked. Values that could not be verified are marked as samples, and the tool shows a banner whenever a sample value affects a result. A weekly automated check opens an issue for prices older than 30 days.</p>
+      <p>Results can be shown in INR, USD, EUR, GBP, CHF, CAD, AUD and AED. Everything is calculated in USD and converted using the European Central Bank's reference rates, refreshed weekly through a reviewed pull request. AED uses its fixed peg of 3.6725 per USD.</p>
+    </section>
+
+    <section>
+      <h2>Limitations</h2>
+      <ul>
+        <li>These are estimates for planning, not quotes. Vendor prices change often.</li>
+        <li>GPU throughput figures are assumptions. Benchmark your own model before committing.</li>
+        <li>Open-weight models may trail frontier models on some tasks. Test quality on your own data.</li>
+        <li>Engineer hourly costs and build or maintenance hours are editable assumptions.</li>
+        <li>Data-protection notes name the relevant law to review with a legal advisor; they are not legal advice.</li>
+        <li>Tax treatment is simplified and is not tax advice.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Privacy</h2>
+      <p>Everything runs in your browser; nothing is sent anywhere. There is no server, no analytics, no tracking and no cookies. A shareable link stores your inputs in the link itself. Your last inputs may be remembered in this browser's local storage; you can clear them with “Reset to defaults”.</p>
+    </section>
+
+    <section>
+      <h2>Creator</h2>
+      <p>Built by <strong>Kauntey Acharya</strong> as a portfolio project demonstrating AI consulting judgment: build vs buy, total cost of ownership and ROI. It is not a commercial service.</p>
+      <p>
+        <a href="https://kaunteyacharya.github.io" rel="noopener">Portfolio</a> ·
+        <a href="https://github.com/KaunteyAcharya" rel="noopener">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/kauntey-acharya" rel="noopener">LinkedIn</a> ·
+        <a href="https://github.com/KaunteyAcharya/ai-stack-advisor" rel="noopener">Source code</a>
+      </p>
+    </section>
+
+    <p class="disclaimer">Estimates for planning and educational purposes only. Prices change frequently; verify current vendor pricing before making decisions. Not financial or legal advice.</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <p>Built by <strong>Kauntey Acharya</strong> ·
+        <a href="https://kaunteyacharya.github.io" rel="noopener">Portfolio</a> ·
+        <a href="https://github.com/KaunteyAcharya" rel="noopener">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/kauntey-acharya" rel="noopener">LinkedIn</a> ·
+        <a href="https://github.com/KaunteyAcharya/ai-stack-advisor" rel="noopener">Source code</a>
+      </p>
+      <p class="muted">Runs entirely in your browser. No analytics, no cookies, no tracking.</p>
+    </div>
+  </footer>
+</body>
+</html>

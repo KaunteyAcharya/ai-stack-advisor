@@ -1,0 +1,20 @@
+node_modules/
+_site/
+*.log
+price-report.md
+fx-error.txt
+body.md
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Local tooling
+.claude/

@@ -1,0 +1,249 @@
+{
+  "notes": "Staff hourly costs (USD, fully loaded) come from data/labour.json (official statistics; see sources there). Engineer hourly costs are SAMPLE assumptions except the US (BLS). Data-protection notes are not legal advice.",
+  "currencies": {
+    "INR": {
+      "locale": "en-IN",
+      "format": "indian"
+    },
+    "USD": {
+      "locale": "en-US",
+      "format": "international"
+    },
+    "CAD": {
+      "locale": "en-CA",
+      "format": "international"
+    },
+    "AUD": {
+      "locale": "en-AU",
+      "format": "international"
+    },
+    "AED": {
+      "locale": "en-AE",
+      "format": "international"
+    },
+    "GBP": {
+      "locale": "en-GB",
+      "format": "international"
+    },
+    "CHF": {
+      "locale": "de-CH",
+      "format": "swiss"
+    },
+    "EUR": {
+      "locale": "de-DE",
+      "format": "european"
+    }
+  },
+  "regions": [
+    {
+      "code": "IN",
+      "name": "India",
+      "currency": "INR",
+      "locale": "en-IN",
+      "residency": "india",
+      "data_protection_note": "Digital Personal Data Protection Act, 2023 (DPDP Act)",
+      "engineer_hourly_usd": 15,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "GST",
+      "staff_hourly_usd": 1.31,
+      "fte_hours_per_month": 192,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "US",
+      "name": "United States",
+      "currency": "USD",
+      "locale": "en-US",
+      "residency": "us",
+      "data_protection_note": "Sector and state laws, e.g. HIPAA (health) and CCPA/CPRA (California)",
+      "engineer_hourly_usd": 74.42,
+      "engineer_hourly_is_sample": false,
+      "tax_label": "Sales tax",
+      "staff_hourly_usd": 38.27,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "CA",
+      "name": "Canada",
+      "currency": "CAD",
+      "locale": "en-CA",
+      "residency": "canada",
+      "data_protection_note": "PIPEDA and provincial privacy laws",
+      "engineer_hourly_usd": 80,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "GST/HST",
+      "staff_hourly_usd": 29.07,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "AU",
+      "name": "Australia",
+      "currency": "AUD",
+      "locale": "en-AU",
+      "residency": "australia",
+      "data_protection_note": "Privacy Act 1988",
+      "engineer_hourly_usd": 80,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "GST",
+      "staff_hourly_usd": 42.86,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "AE",
+      "name": "United Arab Emirates",
+      "currency": "AED",
+      "locale": "en-AE",
+      "residency": "uae",
+      "data_protection_note": "Federal Decree-Law No. 45 of 2021 (PDPL), plus DIFC/ADGM free-zone data protection rules",
+      "engineer_hourly_usd": 60,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "VAT",
+      "staff_hourly_usd": 20,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": true
+    },
+    {
+      "code": "GB",
+      "name": "United Kingdom",
+      "currency": "GBP",
+      "locale": "en-GB",
+      "residency": "uk",
+      "data_protection_note": "UK GDPR and Data Protection Act 2018",
+      "engineer_hourly_usd": 75,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "VAT",
+      "staff_hourly_usd": 30.13,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "CH",
+      "name": "Switzerland",
+      "currency": "CHF",
+      "locale": "de-CH",
+      "residency": "switzerland",
+      "data_protection_note": "Revised Federal Act on Data Protection (revised FADP)",
+      "engineer_hourly_usd": 110,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "VAT (MWST)",
+      "staff_hourly_usd": 56.03,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "DE",
+      "name": "Germany",
+      "currency": "EUR",
+      "locale": "de-DE",
+      "residency": "eu_eea",
+      "data_protection_note": "EU General Data Protection Regulation (GDPR)",
+      "engineer_hourly_usd": 75,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "VAT (MwSt)",
+      "staff_hourly_usd": 50.35,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "NL",
+      "name": "Netherlands",
+      "currency": "EUR",
+      "locale": "nl-NL",
+      "residency": "eu_eea",
+      "data_protection_note": "EU General Data Protection Regulation (GDPR)",
+      "engineer_hourly_usd": 75,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "VAT (BTW)",
+      "staff_hourly_usd": 53.59,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "IE",
+      "name": "Ireland",
+      "currency": "EUR",
+      "locale": "en-IE",
+      "residency": "eu_eea",
+      "data_protection_note": "EU General Data Protection Regulation (GDPR)",
+      "engineer_hourly_usd": 75,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "VAT",
+      "staff_hourly_usd": 49.45,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "FR",
+      "name": "France",
+      "currency": "EUR",
+      "locale": "fr-FR",
+      "residency": "eu_eea",
+      "data_protection_note": "EU General Data Protection Regulation (GDPR)",
+      "engineer_hourly_usd": 70,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "VAT (TVA)",
+      "staff_hourly_usd": 49.56,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "BE",
+      "name": "Belgium",
+      "currency": "EUR",
+      "locale": "nl-BE",
+      "residency": "eu_eea",
+      "data_protection_note": "EU General Data Protection Regulation (GDPR)",
+      "engineer_hourly_usd": 70,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "VAT (BTW/TVA)",
+      "staff_hourly_usd": 53.93,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "AT",
+      "name": "Austria",
+      "currency": "EUR",
+      "locale": "de-AT",
+      "residency": "eu_eea",
+      "data_protection_note": "EU General Data Protection Regulation (GDPR)",
+      "engineer_hourly_usd": 70,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "VAT (USt)",
+      "staff_hourly_usd": 51.8,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "FI",
+      "name": "Finland",
+      "currency": "EUR",
+      "locale": "fi-FI",
+      "residency": "eu_eea",
+      "data_protection_note": "EU General Data Protection Regulation (GDPR)",
+      "engineer_hourly_usd": 70,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "VAT (ALV)",
+      "staff_hourly_usd": 44.08,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    },
+    {
+      "code": "LU",
+      "name": "Luxembourg",
+      "currency": "EUR",
+      "locale": "fr-LU",
+      "residency": "eu_eea",
+      "data_protection_note": "EU General Data Protection Regulation (GDPR)",
+      "engineer_hourly_usd": 80,
+      "engineer_hourly_is_sample": true,
+      "tax_label": "VAT (TVA)",
+      "staff_hourly_usd": 63.55,
+      "fte_hours_per_month": 160,
+      "staff_hourly_is_sample": false
+    }
+  ]
+}

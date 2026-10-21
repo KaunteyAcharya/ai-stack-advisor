@@ -1,0 +1,333 @@
+{
+  "notes": "Hourly labour costs from official statistics. Loaded cost = value × employer on-cost multiplier (1 when the statistic already includes employer costs). These are whole-economy or occupation-group averages, a proxy for the person doing the work today; replace with your own payroll figures where you have them.",
+  "last_reviewed": "2026-10-16",
+  "fx_as_of": "2026-10-13",
+  "regions": {
+    "IN": {
+      "staff": {
+        "value": 110.859375,
+        "currency": "INR",
+        "per": "hour",
+        "loaded": false,
+        "statistic": "PLFS Annual Report 2025: average monthly earnings of regular wage/salaried employees (₹24,217 men, ₹18,353 women; simple mean ₹21,285, as no combined figure is published) ÷ 192 hours (48-hour week)",
+        "period": "2025",
+        "source_url": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2246009",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1.13,
+        "basis": "Employer EPF 12% plus about 1% for EDLI and administration charges, approximated (not verified against current EPFO rules).",
+        "source_url": null,
+        "confidence": "estimate"
+      },
+      "staff_loaded_local": 125.27,
+      "staff_loaded_usd": 1.31,
+      "fx_rate_used": 95.280658
+    },
+    "US": {
+      "staff": {
+        "value": 38.27,
+        "currency": "USD",
+        "per": "hour",
+        "loaded": true,
+        "statistic": "BLS Employer Costs for Employee Compensation: civilian workers, office and administrative support, total compensation per hour worked",
+        "period": "June 2026",
+        "source_url": "https://www.bls.gov/news.release/ecec.t02.htm",
+        "confidence": "benchmark"
+      },
+      "engineer": {
+        "value": 74.42,
+        "currency": "USD",
+        "per": "hour",
+        "loaded": true,
+        "statistic": "BLS Employer Costs for Employee Compensation: civilian workers, professional and related occupations, total compensation per hour worked",
+        "period": "June 2026",
+        "source_url": "https://www.bls.gov/news.release/ecec.t02.htm",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1,
+        "basis": "Total compensation already includes benefits (wages are 70.0% of private-industry compensation, June 2026).",
+        "source_url": "https://www.bls.gov/news.release/ecec.nr0.htm",
+        "confidence": "verified"
+      },
+      "staff_loaded_local": 38.27,
+      "staff_loaded_usd": 38.27,
+      "fx_rate_used": 1
+    },
+    "CA": {
+      "staff": {
+        "value": 37.64,
+        "currency": "CAD",
+        "per": "hour",
+        "loaded": false,
+        "statistic": "Statistics Canada Labour Force Survey: average hourly wages of employees",
+        "period": "September 2026",
+        "source_url": "https://www150.statcan.gc.ca/n1/daily-quotidien/261009/dq261009a-eng.htm",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1.1,
+        "basis": "Employer CPP, EI and other payroll costs, approximated at 10% (not verified against current CRA rates).",
+        "source_url": null,
+        "confidence": "estimate"
+      },
+      "staff_loaded_local": 41.4,
+      "staff_loaded_usd": 29.07,
+      "fx_rate_used": 1.424115
+    },
+    "AU": {
+      "staff": {
+        "value": 54.834210526315786,
+        "currency": "AUD",
+        "per": "hour",
+        "loaded": false,
+        "statistic": "ABS Average Weekly Earnings: full-time adult ordinary time earnings, seasonally adjusted (A$2,083.70 a week ÷ 38-hour week)",
+        "period": "May 2026",
+        "source_url": "https://www.abs.gov.au/statistics/labour/earnings-and-working-conditions/average-weekly-earnings-australia/latest-release",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1.12,
+        "basis": "Superannuation guarantee 12% of ordinary time earnings from 1 July 2025 (payroll tax and workers' compensation not included).",
+        "source_url": "https://www.ato.gov.au/businesses-and-organisations/small-business-newsroom/the-final-sg-rate-increase-is-coming-on-1-july",
+        "confidence": "verified"
+      },
+      "staff_loaded_local": 61.41,
+      "staff_loaded_usd": 42.86,
+      "fx_rate_used": 1.433053
+    },
+    "AE": {
+      "staff": {
+        "value": 20,
+        "currency": "USD",
+        "per": "hour",
+        "loaded": true,
+        "statistic": "No official whole-economy wage statistic found; sample value",
+        "period": null,
+        "source_url": null,
+        "confidence": "estimate"
+      },
+      "multiplier": {
+        "value": 1,
+        "basis": "Included in the sample value.",
+        "source_url": null,
+        "confidence": "estimate"
+      },
+      "staff_loaded_local": 20,
+      "staff_loaded_usd": 20,
+      "fx_rate_used": 1
+    },
+    "GB": {
+      "staff": {
+        "value": 19.67,
+        "currency": "GBP",
+        "per": "hour",
+        "loaded": false,
+        "statistic": "ONS Annual Survey of Hours and Earnings: median hourly earnings excluding overtime, full-time employees",
+        "period": "April 2025 (provisional)",
+        "source_url": "https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/bulletins/annualsurveyofhoursandearnings/2025",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1.1564895944128921,
+        "basis": "Employer National Insurance 15% above £5,000 a year (13.1% of median full-time pay of £766.60/week) plus minimum employer pension 3% of earnings between £6,240 and £50,270 (2.5%).",
+        "source_url": "https://www.gov.uk/guidance/rates-and-thresholds-for-employers-2025-to-2026",
+        "source_url_2": "https://www.gov.uk/workplace-pensions/what-you-your-employer-and-the-government-pay",
+        "confidence": "verified"
+      },
+      "staff_loaded_local": 22.75,
+      "staff_loaded_usd": 30.13,
+      "fx_rate_used": 0.754916
+    },
+    "CH": {
+      "staff": {
+        "value": 40.55427251732102,
+        "currency": "CHF",
+        "per": "hour",
+        "loaded": false,
+        "statistic": "FSO Swiss Earnings Structure Survey: median gross monthly wage, full-time (CHF 7,024 ÷ 173.2 hours: 40-hour week × 4.33)",
+        "period": "2024",
+        "source_url": "https://www.bfs.admin.ch/bfs/en/home/statistics/work-income/wages-income-employment-labour-costs/earnings-structure.html",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1.15,
+        "basis": "Employer social insurance (AHV/IV/EO, unemployment, occupational pension, accident), approximated at 15% (not verified).",
+        "source_url": null,
+        "confidence": "estimate"
+      },
+      "staff_loaded_local": 46.64,
+      "staff_loaded_usd": 56.03,
+      "fx_rate_used": 0.83232
+    },
+    "DE": {
+      "staff": {
+        "value": 45,
+        "currency": "EUR",
+        "per": "hour",
+        "loaded": true,
+        "statistic": "Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded.",
+        "period": "2025",
+        "source_url": "https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1,
+        "basis": "Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025).",
+        "source_url": "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Hourly_labour_costs",
+        "confidence": "verified"
+      },
+      "staff_loaded_local": 45,
+      "staff_loaded_usd": 50.35,
+      "fx_rate_used": 0.893815
+    },
+    "NL": {
+      "staff": {
+        "value": 47.9,
+        "currency": "EUR",
+        "per": "hour",
+        "loaded": true,
+        "statistic": "Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded.",
+        "period": "2025",
+        "source_url": "https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1,
+        "basis": "Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025).",
+        "source_url": "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Hourly_labour_costs",
+        "confidence": "verified"
+      },
+      "staff_loaded_local": 47.9,
+      "staff_loaded_usd": 53.59,
+      "fx_rate_used": 0.893815
+    },
+    "IE": {
+      "staff": {
+        "value": 44.2,
+        "currency": "EUR",
+        "per": "hour",
+        "loaded": true,
+        "statistic": "Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded.",
+        "period": "2025",
+        "source_url": "https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1,
+        "basis": "Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025).",
+        "source_url": "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Hourly_labour_costs",
+        "confidence": "verified"
+      },
+      "staff_loaded_local": 44.2,
+      "staff_loaded_usd": 49.45,
+      "fx_rate_used": 0.893815
+    },
+    "FR": {
+      "staff": {
+        "value": 44.3,
+        "currency": "EUR",
+        "per": "hour",
+        "loaded": true,
+        "statistic": "Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded.",
+        "period": "2025",
+        "source_url": "https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1,
+        "basis": "Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025).",
+        "source_url": "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Hourly_labour_costs",
+        "confidence": "verified"
+      },
+      "staff_loaded_local": 44.3,
+      "staff_loaded_usd": 49.56,
+      "fx_rate_used": 0.893815
+    },
+    "BE": {
+      "staff": {
+        "value": 48.2,
+        "currency": "EUR",
+        "per": "hour",
+        "loaded": true,
+        "statistic": "Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded.",
+        "period": "2024 (2025 not yet released for Belgium)",
+        "source_url": "https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1,
+        "basis": "Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025).",
+        "source_url": "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Hourly_labour_costs",
+        "confidence": "verified"
+      },
+      "staff_loaded_local": 48.2,
+      "staff_loaded_usd": 53.93,
+      "fx_rate_used": 0.893815
+    },
+    "AT": {
+      "staff": {
+        "value": 46.3,
+        "currency": "EUR",
+        "per": "hour",
+        "loaded": true,
+        "statistic": "Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded.",
+        "period": "2025",
+        "source_url": "https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1,
+        "basis": "Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025).",
+        "source_url": "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Hourly_labour_costs",
+        "confidence": "verified"
+      },
+      "staff_loaded_local": 46.3,
+      "staff_loaded_usd": 51.8,
+      "fx_rate_used": 0.893815
+    },
+    "FI": {
+      "staff": {
+        "value": 39.4,
+        "currency": "EUR",
+        "per": "hour",
+        "loaded": true,
+        "statistic": "Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded.",
+        "period": "2025",
+        "source_url": "https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1,
+        "basis": "Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025).",
+        "source_url": "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Hourly_labour_costs",
+        "confidence": "verified"
+      },
+      "staff_loaded_local": 39.4,
+      "staff_loaded_usd": 44.08,
+      "fx_rate_used": 0.893815
+    },
+    "LU": {
+      "staff": {
+        "value": 56.8,
+        "currency": "EUR",
+        "per": "hour",
+        "loaded": true,
+        "statistic": "Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded.",
+        "period": "2025",
+        "source_url": "https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table",
+        "confidence": "benchmark"
+      },
+      "multiplier": {
+        "value": 1,
+        "basis": "Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025).",
+        "source_url": "https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Hourly_labour_costs",
+        "confidence": "verified"
+      },
+      "staff_loaded_local": 56.8,
+      "staff_loaded_usd": 63.55,
+      "fx_rate_used": 0.893815
+    }
+  }
+}

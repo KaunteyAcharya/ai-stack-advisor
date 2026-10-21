@@ -1,0 +1,60 @@
+name: Update exchange rates
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write # only used to report a failed validation
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Fetch ECB rates and write data/fx.json
+        id: fx
+        run: node scripts/update-fx.mjs 2> fx-error.txt
+
+      - name: Open a pull request if rates changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- data/fx.json; then
+            echo "No change in rates."
+            exit 0
+          fi
+          AS_OF=$(node -p "require('./data/fx.json').as_of")
+          BRANCH="fx-update/${AS_OF}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add data/fx.json
+          git commit -m "Update ECB reference rates to ${AS_OF}"
+          git push --force origin "$BRANCH"
+          if gh pr list --head "$BRANCH" --state open --json number --jq 'length' | grep -q '^0$'; then
+            gh pr create --base main --head "$BRANCH" \
+              --title "Update exchange rates to ${AS_OF}" \
+              --body "Automated weekly update from the ECB euro reference rates (AED from the 3.6725 USD peg). Tests run on this PR; merge after review."
+          fi
+
+      - name: Open an issue if validation failed
+        if: failure() && steps.fx.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "The weekly exchange-rate update failed validation, so data/fx.json was not changed."
+            echo
+            echo '```'
+            cat fx-error.txt
+            echo '```'
+          } > body.md
+          gh issue create --title "Exchange-rate update failed validation" --body-file body.md

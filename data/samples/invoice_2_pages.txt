@@ -1,0 +1,51 @@
+INSTRUCTIONS
+Extract the invoice below into JSON with these fields: supplier_name, supplier_gstin, invoice_number, invoice_date (YYYY-MM-DD), due_date, buyer_name, buyer_gstin, place_of_supply, currency, line_items (description, hsn_sac, quantity, unit, unit_price, taxable_value, gst_rate, cgst, sgst, igst, line_total), subtotal, total_tax, round_off, grand_total, bank_account, ifsc. Use null for anything missing. Do not guess numbers. Check that line totals add up to the subtotal and that tax matches the rates; if not, set "needs_review": true and explain why in "review_reason".
+
+DOCUMENT (OCR text, 2 pages)
+
+--- page 1 of 2 ---
+TAX INVOICE                                                     ORIGINAL FOR RECIPIENT
+GreenRoots Horticulture Supplies Pvt. Ltd.
+Plot 14, MIDC Industrial Area, Chakan, Pune 410501, Maharashtra
+GSTIN: 27AAHCG4521M1Z8   PAN: AAHCG4521M   CIN: U01403PN2016PTC165832
+Phone: +91 20 6712 4400   Email: accounts@greenroots.example
+
+Invoice No: GRH/25-26/03187              Invoice Date: 12-09-2025
+Due Date: 12-10-2025 (Net 30)            Place of Supply: Maharashtra (27)
+PO Reference: LL-PO-0912                  E-way Bill No: 3412 9876 5521
+
+Bill To:                                  Ship To:
+Leafline Retail LLP                       Leafline Fulfilment Centre
+4th Floor, Baner Business Bay             Gat No. 211, Hinjewadi Phase 3
+Baner, Pune 411045                        Pune 411057
+GSTIN: 27AAKFL7781Q1ZK                    Contact: Warehouse desk, +91 98220 11223
+
+Sl  Description                              HSN/SAC   Qty   Unit   Rate (₹)   Taxable (₹)   GST%
+1   Sansevieria trifasciata, 6" nursery pot  0602      240   Nos    145.00     34,800.00     5
+2   Zamioculcas zamiifolia (ZZ), 6" pot      0602      180   Nos    210.00     37,800.00     5
+3   Epipremnum aureum (pothos), hanging 8"   0602      150   Nos    165.00     24,750.00     5
+4   Self-watering planter, 7", matte white   3924      300   Nos    189.00     56,700.00     18
+5   Self-watering planter, 9", matte grey    3924      120   Nos    259.00     31,080.00     18
+6   Coco peat block 5 kg, low EC             5305      200   Nos     98.00     19,600.00     5
+7   Perlite 4 L bag                          2530      160   Nos     74.00     11,840.00     5
+
+--- page 2 of 2 ---
+Sl  Description                              HSN/SAC   Qty   Unit   Rate (₹)   Taxable (₹)   GST%
+8   Liquid plant feed 500 ml, NPK 19:19:19   3105      400   Nos     86.00     34,400.00     5
+9   Corrugated plant shipping box, 3-ply     4819      600   Nos     22.50     13,500.00     18
+10  Freight and handling, Chakan to Hinjewadi 9965     1     Lot   4,500.00      4,500.00     18
+
+                                               Taxable value               2,68,970.00
+                                               CGST @ 2.5% on 1,63,190.00     4,079.75
+                                               SGST @ 2.5% on 1,63,190.00     4,079.75
+                                               CGST @ 9% on 1,05,780.00       9,520.20
+                                               SGST @ 9% on 1,05,780.00       9,520.20
+                                               Total tax                     27,199.90
+                                               Round off                        +0.10
+                                               GRAND TOTAL (₹)              2,96,170.00
+Amount in words: Rupees Two Lakh Ninety-Six Thousand One Hundred Seventy Only
+
+Bank details: HDFC Bank, Chakan branch   A/c No: 50200041237788   IFSC: HDFC0001732
+Terms: Payment within 30 days. Interest at 18% p.a. on overdue amounts. Goods once sold will not be taken back except under the plant arrival guarantee. Subject to Pune jurisdiction.
+This is a computer-generated invoice.                    For GreenRoots Horticulture Supplies Pvt. Ltd.
+                                                          Authorised Signatory

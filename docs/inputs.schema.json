@@ -1,0 +1,975 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kaunteyacharya.github.io/ai-stack-advisor/docs/inputs.schema.json",
+  "title": "AI Stack Advisor inputs",
+  "description": "The single inputs object the engine works from. Money is USD; percentages are 0–100. A future chat intake only needs to produce this object.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "company": {
+      "type": "string",
+      "maxLength": 80,
+      "description": "Optional, used only in the report title"
+    },
+    "region": {
+      "type": "string",
+      "description": "Region code from data/regions.json, e.g. IN, US, DE, AE"
+    },
+    "industry": {
+      "type": "string",
+      "description": "Preset key from data/presets.json"
+    },
+    "displayCurrency": {
+      "enum": [
+        "INR",
+        "USD",
+        "EUR",
+        "GBP",
+        "CHF",
+        "CAD",
+        "AUD",
+        "AED"
+      ],
+      "description": "Currency results are shown in"
+    },
+    "compareCurrency": {
+      "type": "string",
+      "description": "Optional second currency, empty for none"
+    },
+    "numberFormat": {
+      "enum": [
+        "auto",
+        "indian",
+        "international",
+        "european"
+      ],
+      "description": "Number grouping style"
+    },
+    "useCase": {
+      "enum": [
+        "chatbot",
+        "voice_agent",
+        "document_processing",
+        "data_assistant",
+        "internal_copilot",
+        "invoice_processing",
+        "lead_qualification",
+        "report_generation",
+        "ticket_triage",
+        "stock_report",
+        "content_engine"
+      ],
+      "description": "Use case"
+    },
+    "inTokens": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Input tokens per chat request"
+    },
+    "outTokens": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Output tokens per chat request"
+    },
+    "voiceMinutesPerConversation": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Voice minutes per conversation (voice agent)"
+    },
+    "ttsCharsPerMinute": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Spoken characters per minute (voice agent)"
+    },
+    "docsPerMonth": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Documents per month (document processing)"
+    },
+    "pagesPerDoc": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Pages per document"
+    },
+    "tokensPerPage": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Tokens per page"
+    },
+    "docOutTokens": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Output tokens per document"
+    },
+    "chatOverDocs": {
+      "type": "boolean",
+      "description": "Document processing also has chat over the documents"
+    },
+    "ocrCostPerPageUsd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "OCR cost per page in USD (assumption)"
+    },
+    "rag": {
+      "type": "boolean",
+      "description": "Uses a knowledge base (adds a vector database)"
+    },
+    "cachedSharePct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Share of each request input that repeats and is served from the provider cache (0–100); applies only to prompts at or above the provider minimum (2,048 tokens)"
+    },
+    "tasksPerMonth": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Agent: tasks per month (invoices, leads, reports, tickets, content pieces)"
+    },
+    "stepsPerTask": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Agent: LLM steps per task"
+    },
+    "inTokensPerStep": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Agent: base input tokens per step"
+    },
+    "contextGrowthPerStep": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Agent: tokens added to the context by each step"
+    },
+    "outTokensPerStep": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Agent: output tokens per step"
+    },
+    "pagesPerTask": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Agent: pages per task needing OCR"
+    },
+    "useBatch": {
+      "type": "boolean",
+      "description": "Agent: use batch API prices (asynchronous work)"
+    },
+    "saasStepsPerTask": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Agent: workflow-tool tasks (steps) per agent task"
+    },
+    "externalFeePerTaskUsd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Agent: external API fees per task in USD (assumption)"
+    },
+    "humanMinutesPerTask": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Agent: minutes a person spends per task today"
+    },
+    "successPct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Agent: share of tasks completed without a person (0–100)"
+    },
+    "reviewPct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Agent: share of tasks a person reviews (0–100)"
+    },
+    "reviewMinutes": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Agent: minutes per review"
+    },
+    "errorPct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Agent: share of tasks with an error that slips through (0–100)"
+    },
+    "costPerErrorUsd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Agent: cost of one error in USD"
+    },
+    "staffHourlyUsd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Agent: loaded hourly cost of the person doing the work today, USD"
+    },
+    "fteHoursPerMonth": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Working hours per FTE per month"
+    },
+    "valueUnit": {
+      "enum": [
+        "hours",
+        "fte"
+      ],
+      "description": "Show time saved as hours or FTEs"
+    },
+    "marketDataMonthlyUsd": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Stock report: market data feed per month in USD; null = price data default"
+    },
+    "videosPerMonth": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Content engine: videos per month"
+    },
+    "secondsPerVideo": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Content engine: seconds per video"
+    },
+    "videoTier": {
+      "enum": [
+        "lite",
+        "fast",
+        "standard"
+      ],
+      "description": "Content engine: video model tier"
+    },
+    "imagesPerMonth": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Content engine: images per month"
+    },
+    "xPostsPerMonth": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Content engine: posts on X per month"
+    },
+    "repliesPerMonth": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Content engine: replies to comments on your own posts per month"
+    },
+    "xRepliesSharePct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Content engine: share of replies on X (paid API) (0–100)"
+    },
+    "replyInTokens": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Content engine: input tokens per reply"
+    },
+    "replyOutTokens": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Content engine: output tokens per reply"
+    },
+    "usersPerDay": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Users per day"
+    },
+    "requestsPerUser": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Requests per user per day"
+    },
+    "peakSharePct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Peak-hour share of daily traffic (0–100)"
+    },
+    "growthPct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Monthly growth rate (0–100)"
+    },
+    "growthMonths": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Growth applies for this many months, then volume stays flat"
+    },
+    "seats": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Internal seats for SaaS pricing"
+    },
+    "saasBilling": {
+      "enum": [
+        "annual",
+        "monthly"
+      ],
+      "description": "SaaS billing period; annual seat prices are used where the vendor lists them"
+    },
+    "personalData": {
+      "type": "boolean"
+    },
+    "externalAllowed": {
+      "enum": [
+        "yes",
+        "only_no_training",
+        "no"
+      ],
+      "description": "May data be sent to external AI providers"
+    },
+    "residency": {
+      "enum": [
+        "none",
+        "india",
+        "eu_eea",
+        "uk",
+        "switzerland",
+        "us",
+        "canada",
+        "australia",
+        "uae"
+      ],
+      "description": "Data residency requirement"
+    },
+    "latency": {
+      "enum": [
+        "relaxed",
+        "standard",
+        "realtime"
+      ]
+    },
+    "uptime": {
+      "enum": [
+        "best_effort",
+        "business_hours",
+        "high_availability"
+      ]
+    },
+    "quality": {
+      "enum": [
+        "basic",
+        "good",
+        "best_available"
+      ]
+    },
+    "engineers": {
+      "enum": [
+        "none",
+        "one",
+        "small_team"
+      ]
+    },
+    "devops": {
+      "enum": [
+        "none",
+        "some",
+        "strong"
+      ]
+    },
+    "engineerHourlyUsd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Engineer hourly cost in USD"
+    },
+    "taxVariant": {
+      "type": "string",
+      "description": "Tax variant id from data/taxes.json (e.g. CA-QC); empty = region default"
+    },
+    "taxRegistered": {
+      "type": "boolean",
+      "description": "Registered for VAT/GST and able to reclaim it"
+    },
+    "customTaxPct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Rate for tax components without a fixed rate, e.g. US state + local sales tax (0–100)"
+    },
+    "ticketUsd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Average ticket size in USD"
+    },
+    "marginPct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Gross margin (0–100)"
+    },
+    "purchaseType": {
+      "enum": [
+        "one_time",
+        "repeat"
+      ]
+    },
+    "purchasesPerYear": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Purchases per year (repeat)"
+    },
+    "ltvUsd": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "12-month customer gross profit in USD; null = calculate"
+    },
+    "conversationsPerMonth": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "description": "Conversations or leads per month; null = users/day × 30 (or documents)"
+    },
+    "conversionPct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Current conversion rate (0–100)"
+    },
+    "humanCostPerConvUsd": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Human cost per conversation in USD"
+    },
+    "humanSharePct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Share of conversations that reach a human today (0–100)"
+    },
+    "deflectionPct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Share of conversations the AI can fully handle (0–100)"
+    },
+    "targetSharePct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Max share of conversation value spent on AI (0–100)"
+    },
+    "shareSelfPct": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Hybrid: share of requests self-hosted (0–100); null = automatic (cheapest split from 10% to 90%)"
+    },
+    "buildHours": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "properties": {
+        "A": {
+          "type": "number",
+          "minimum": 0
+        },
+        "B": {
+          "type": "number",
+          "minimum": 0
+        },
+        "C": {
+          "type": "number",
+          "minimum": 0
+        },
+        "D": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "evalHours": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "properties": {
+        "A": {
+          "type": "number",
+          "minimum": 0
+        },
+        "B": {
+          "type": "number",
+          "minimum": 0
+        },
+        "C": {
+          "type": "number",
+          "minimum": 0
+        },
+        "D": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "description": "One-time hours to test quality on your own data before launch, per option"
+    },
+    "maintenanceHours": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "properties": {
+        "A": {
+          "type": "number",
+          "minimum": 0
+        },
+        "B": {
+          "type": "number",
+          "minimum": 0
+        },
+        "C": {
+          "type": "number",
+          "minimum": 0
+        },
+        "D": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "weights": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "privacy": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "timeToLaunch": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "teamFit": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "quality": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "lockIn": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "scalability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "costWeightPct": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Cost vs non-cost weight; null = automatic (50, or 25 for high-ticket)"
+    },
+    "discountRatePct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Annual discount rate for the present value of 36-month costs (0–100)"
+    },
+    "openModelGapPct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Percentage points fewer tasks completed by self-hosted open models (assumption; hybrid applies it to its self-hosted share)"
+    },
+    "workloadName": {
+      "type": "string",
+      "maxLength": 40,
+      "description": "Optional name for this workload (workload 1 when at top level)"
+    },
+    "extraWorkloadEffortPct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Extra build and maintenance effort for each additional workload on the same stack, as % of the base (0–100)"
+    },
+    "extraWorkloads": {
+      "type": "array",
+      "maxItems": 10,
+      "description": "Workloads 2 to 11. Each item holds only per-workload fields; everything else is shared with workload 1.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "workloadName": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Optional name for this workload (workload 1 when at top level)"
+          },
+          "useCase": {
+            "enum": [
+              "chatbot",
+              "voice_agent",
+              "document_processing",
+              "data_assistant",
+              "internal_copilot",
+              "invoice_processing",
+              "lead_qualification",
+              "report_generation",
+              "ticket_triage",
+              "stock_report",
+              "content_engine"
+            ],
+            "description": "Use case"
+          },
+          "quality": {
+            "enum": [
+              "basic",
+              "good",
+              "best_available"
+            ]
+          },
+          "inTokens": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Input tokens per chat request"
+          },
+          "outTokens": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Output tokens per chat request"
+          },
+          "voiceMinutesPerConversation": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Voice minutes per conversation (voice agent)"
+          },
+          "ttsCharsPerMinute": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Spoken characters per minute (voice agent)"
+          },
+          "docsPerMonth": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Documents per month (document processing)"
+          },
+          "pagesPerDoc": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Pages per document"
+          },
+          "tokensPerPage": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Tokens per page"
+          },
+          "docOutTokens": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Output tokens per document"
+          },
+          "chatOverDocs": {
+            "type": "boolean",
+            "description": "Document processing also has chat over the documents"
+          },
+          "ocrCostPerPageUsd": {
+            "type": "number",
+            "minimum": 0,
+            "description": "OCR cost per page in USD (assumption)"
+          },
+          "rag": {
+            "type": "boolean",
+            "description": "Uses a knowledge base (adds a vector database)"
+          },
+          "tasksPerMonth": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent: tasks per month (invoices, leads, reports, tickets, content pieces)"
+          },
+          "stepsPerTask": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent: LLM steps per task"
+          },
+          "inTokensPerStep": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent: base input tokens per step"
+          },
+          "contextGrowthPerStep": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent: tokens added to the context by each step"
+          },
+          "outTokensPerStep": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent: output tokens per step"
+          },
+          "pagesPerTask": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent: pages per task needing OCR"
+          },
+          "useBatch": {
+            "type": "boolean",
+            "description": "Agent: use batch API prices (asynchronous work)"
+          },
+          "saasStepsPerTask": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent: workflow-tool tasks (steps) per agent task"
+          },
+          "externalFeePerTaskUsd": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent: external API fees per task in USD (assumption)"
+          },
+          "humanMinutesPerTask": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent: minutes a person spends per task today"
+          },
+          "successPct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Agent: share of tasks completed without a person (0–100)"
+          },
+          "reviewPct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Agent: share of tasks a person reviews (0–100)"
+          },
+          "reviewMinutes": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent: minutes per review"
+          },
+          "errorPct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Agent: share of tasks with an error that slips through (0–100)"
+          },
+          "costPerErrorUsd": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent: cost of one error in USD"
+          },
+          "staffHourlyUsd": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Agent: loaded hourly cost of the person doing the work today, USD"
+          },
+          "marketDataMonthlyUsd": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Stock report: market data feed per month in USD; null = price data default"
+          },
+          "videosPerMonth": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Content engine: videos per month"
+          },
+          "secondsPerVideo": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Content engine: seconds per video"
+          },
+          "videoTier": {
+            "enum": [
+              "lite",
+              "fast",
+              "standard"
+            ],
+            "description": "Content engine: video model tier"
+          },
+          "imagesPerMonth": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Content engine: images per month"
+          },
+          "xPostsPerMonth": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Content engine: posts on X per month"
+          },
+          "repliesPerMonth": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Content engine: replies to comments on your own posts per month"
+          },
+          "xRepliesSharePct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Content engine: share of replies on X (paid API) (0–100)"
+          },
+          "replyInTokens": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Content engine: input tokens per reply"
+          },
+          "replyOutTokens": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Content engine: output tokens per reply"
+          },
+          "minutesSavedPerRequest": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Internal tools: staff minutes saved per request"
+          },
+          "usersPerDay": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Users per day"
+          },
+          "requestsPerUser": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Requests per user per day"
+          },
+          "peakSharePct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Peak-hour share of daily traffic (0–100)"
+          },
+          "seats": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Internal seats for SaaS pricing"
+          },
+          "ticketUsd": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Average ticket size in USD"
+          },
+          "marginPct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Gross margin (0–100)"
+          },
+          "purchaseType": {
+            "enum": [
+              "one_time",
+              "repeat"
+            ]
+          },
+          "purchasesPerYear": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Purchases per year (repeat)"
+          },
+          "ltvUsd": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "12-month customer gross profit in USD; null = calculate"
+          },
+          "conversationsPerMonth": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "Conversations or leads per month; null = users/day × 30 (or documents)"
+          },
+          "conversionPct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Current conversion rate (0–100)"
+          },
+          "humanCostPerConvUsd": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Human cost per conversation in USD"
+          },
+          "humanSharePct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Share of conversations that reach a human today (0–100)"
+          },
+          "deflectionPct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Share of conversations the AI can fully handle (0–100)"
+          },
+          "targetSharePct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Max share of conversation value spent on AI (0–100)"
+          },
+          "cachedSharePct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Share of each request input that repeats and is served from the provider cache (0–100); applies only to prompts at or above the provider minimum (2,048 tokens)"
+          }
+        }
+      }
+    },
+    "minutesSavedPerRequest": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Internal tools: staff minutes saved per request"
+    },
+    "uncertainKeys": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "usersPerDay",
+          "tasksPerMonth",
+          "growthPct",
+          "successPct",
+          "humanMinutesPerTask",
+          "minutesSavedPerRequest",
+          "conversionPct",
+          "deflectionPct",
+          "humanSharePct"
+        ]
+      },
+      "description": "Inputs marked \"not sure\"; results are also shown with these at the low and high end of a plausible band"
+    }
+  }
+}

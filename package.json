@@ -1,0 +1,16 @@
+{
+  "name": "ai-stack-advisor",
+  "version": "1.0.0",
+  "description": "Browser-only build-vs-buy, TCO and ROI advisor for AI solutions.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\"",
+    "check-prices": "node scripts/check-prices.mjs --max-age-days 30",
+    "fx-update": "node scripts/update-fx.mjs",
+    "docs:scoring": "node scripts/scoring-table.mjs --write",
+    "count-tokens": "node scripts/count-tokens.mjs"
+  },
+  "author": "Kauntey Acharya",
+  "license": "MIT"
+}

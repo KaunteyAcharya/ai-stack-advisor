@@ -1,0 +1,550 @@
+{
+  "currency_note": "All prices in USD unless an entry has a \"currency\" field; those are converted to USD on load using data/fx.json.",
+  "entries": [
+    {
+      "id": "llm_budget_gemini_2_5_flash_lite",
+      "category": "llm_api",
+      "tier": "budget",
+      "label": "Budget LLM API (Gemini 2.5 Flash-Lite)",
+      "unit": "usd_per_million_tokens",
+      "input_price": 0.1,
+      "output_price": 0.4,
+      "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "last_verified": "2026-10-15",
+      "is_sample": false,
+      "notes": "Paid tier, standard (non-batch) text pricing. Batch API: $0.05 in / $0.20 out. Context caching: $0.01 per 1M cached input tokens (implicit caching is on by default for Gemini 2.5; minimum 2,048 input tokens per request, stated for Flash and Pro and assumed for Flash-Lite). Explicit caches also pay storage per hour, not modelled.",
+      "batch_input_price": 0.05,
+      "batch_output_price": 0.2,
+      "cached_input_price": 0.01,
+      "cache_min_tokens": 2048
+    },
+    {
+      "id": "llm_mid_gemini_2_5_flash",
+      "category": "llm_api",
+      "tier": "mid",
+      "label": "Mid-tier LLM API (Gemini 2.5 Flash)",
+      "unit": "usd_per_million_tokens",
+      "input_price": 0.3,
+      "output_price": 2.5,
+      "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "last_verified": "2026-10-15",
+      "is_sample": false,
+      "notes": "Paid tier, standard (non-batch) text pricing. Batch API: $0.15 in / $1.25 out. Context caching: $0.03 per 1M cached input tokens (implicit caching is on by default for Gemini 2.5; minimum 2,048 input tokens per request, stated for Flash and Pro and assumed for Flash-Lite). Explicit caches also pay storage per hour, not modelled.",
+      "batch_input_price": 0.15,
+      "batch_output_price": 1.25,
+      "cached_input_price": 0.03,
+      "cache_min_tokens": 2048
+    },
+    {
+      "id": "llm_premium_gemini_2_5_pro",
+      "category": "llm_api",
+      "tier": "premium",
+      "label": "Premium LLM API (Gemini 2.5 Pro)",
+      "unit": "usd_per_million_tokens",
+      "input_price": 1.25,
+      "output_price": 10,
+      "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "last_verified": "2026-10-15",
+      "is_sample": false,
+      "notes": "Paid tier, prompts <= 200k tokens. Batch API: $0.625 in / $5.00 out. Context caching: $0.125 per 1M cached input tokens (implicit caching is on by default for Gemini 2.5; minimum 2,048 input tokens per request, stated for Flash and Pro and assumed for Flash-Lite). Explicit caches also pay storage per hour, not modelled.",
+      "batch_input_price": 0.625,
+      "batch_output_price": 5,
+      "cached_input_price": 0.125,
+      "cache_min_tokens": 2048
+    },
+    {
+      "id": "gpu_l4_runpod",
+      "category": "gpu_rental",
+      "gpu_class": "l4",
+      "label": "NVIDIA L4 24 GB (RunPod pod)",
+      "unit": "usd_per_hour",
+      "price": 0.59,
+      "source_url": "https://www.runpod.io/pricing",
+      "last_verified": "2026-10-14",
+      "is_sample": true,
+      "notes": "Visible table shows $0.59/hr; page's structured data shows $0.44 community / $0.49 secure. Flagged as sample until confirmed in the RunPod console.",
+      "vram_gb": 24
+    },
+    {
+      "id": "gpu_l40s_runpod",
+      "category": "gpu_rental",
+      "gpu_class": "l40s",
+      "vram_gb": 48,
+      "label": "NVIDIA L40S 48 GB (RunPod pod)",
+      "unit": "usd_per_hour",
+      "price": 1.09,
+      "source_url": "https://www.runpod.io/pricing",
+      "last_verified": "2026-10-14",
+      "is_sample": true,
+      "notes": "Visible table shows $1.09/hr; structured data shows $0.79 community / $1.09 secure. Flagged as sample until confirmed."
+    },
+    {
+      "id": "gpu_a100_80gb_runpod",
+      "category": "gpu_rental",
+      "gpu_class": "a100_80gb",
+      "label": "NVIDIA A100 80 GB (RunPod pod)",
+      "unit": "usd_per_hour",
+      "price": 1.79,
+      "source_url": "https://www.runpod.io/pricing",
+      "last_verified": "2026-10-14",
+      "is_sample": true,
+      "notes": "Visible table shows $1.79/hr; structured data shows $1.19-$1.59. Flagged as sample until confirmed.",
+      "vram_gb": 80
+    },
+    {
+      "id": "gpu_throughput_l4",
+      "category": "gpu_throughput",
+      "gpu_class": "l4",
+      "label": "L4 throughput assumption (~8B open model, batched serving)",
+      "unit": "output_tokens_per_second",
+      "value": 400,
+      "source_url": "assumption",
+      "last_verified": "2026-10-14",
+      "is_sample": true,
+      "notes": "ASSUMPTION, not a vendor price. Aggregate output tokens/sec with batching; benchmark on your own model."
+    },
+    {
+      "id": "gpu_throughput_l40s",
+      "category": "gpu_throughput",
+      "gpu_class": "l40s",
+      "label": "L40S throughput assumption (~32B 4-bit open model, batched serving)",
+      "unit": "output_tokens_per_second",
+      "value": 500,
+      "source_url": "assumption",
+      "last_verified": "2026-10-14",
+      "is_sample": true,
+      "notes": "ASSUMPTION, not a vendor price. Benchmark on your own model."
+    },
+    {
+      "id": "gpu_throughput_a100_80gb",
+      "category": "gpu_throughput",
+      "gpu_class": "a100_80gb",
+      "label": "A100 80 GB throughput assumption (~70B 4-bit open model, batched serving)",
+      "unit": "output_tokens_per_second",
+      "value": 600,
+      "source_url": "assumption",
+      "last_verified": "2026-10-14",
+      "is_sample": true,
+      "notes": "ASSUMPTION, not a vendor price. Benchmark on your own model."
+    },
+    {
+      "id": "managed_db_supabase_pro",
+      "category": "managed_db",
+      "label": "Managed Postgres (Supabase Pro)",
+      "unit": "usd_per_month",
+      "price": 25,
+      "source_url": "https://supabase.com/pricing",
+      "last_verified": "2026-10-14",
+      "is_sample": false,
+      "notes": "From $25/month; includes 8 GB disk and $10 compute credits."
+    },
+    {
+      "id": "self_managed_db_droplet",
+      "category": "self_managed_db",
+      "label": "Self-managed Postgres server (DigitalOcean Basic Droplet 2 vCPU / 4 GiB)",
+      "unit": "usd_per_month",
+      "price": 24,
+      "source_url": "https://www.digitalocean.com/pricing/droplets",
+      "last_verified": "2026-10-14",
+      "is_sample": false,
+      "notes": "Server cost only; administration labour is counted in maintenance hours."
+    },
+    {
+      "id": "vector_db_pinecone_standard",
+      "category": "vector_db",
+      "label": "Vector database (Pinecone Standard, minimum usage)",
+      "unit": "usd_per_month",
+      "price": 50,
+      "source_url": "https://www.pinecone.io/pricing/",
+      "last_verified": "2026-10-14",
+      "is_sample": false,
+      "notes": "$50/month minimum usage; small RAG workloads stay at the minimum."
+    },
+    {
+      "id": "hosting_droplet_small",
+      "category": "hosting",
+      "label": "App hosting (DigitalOcean Basic Droplet 1 vCPU / 2 GiB)",
+      "unit": "usd_per_month",
+      "price": 12,
+      "source_url": "https://www.digitalocean.com/pricing/droplets",
+      "last_verified": "2026-10-14",
+      "is_sample": false,
+      "notes": "Light web/API hosting."
+    },
+    {
+      "id": "storage_selfhost",
+      "category": "storage",
+      "label": "Model and data storage (self-hosted)",
+      "unit": "usd_per_month",
+      "price": 20,
+      "source_url": "sample",
+      "last_verified": "2026-10-14",
+      "is_sample": true,
+      "notes": "SAMPLE placeholder. Verify against your storage provider."
+    },
+    {
+      "id": "monitoring_selfhost",
+      "category": "monitoring",
+      "label": "Monitoring and logging (self-hosted)",
+      "unit": "usd_per_month",
+      "price": 30,
+      "source_url": "sample",
+      "last_verified": "2026-10-14",
+      "is_sample": true,
+      "notes": "SAMPLE placeholder. Verify against your monitoring provider."
+    },
+    {
+      "id": "stt_deepgram_nova3",
+      "category": "voice_stt",
+      "label": "Speech-to-text (Deepgram Nova-3 streaming, monolingual)",
+      "unit": "usd_per_minute",
+      "price": 0.0048,
+      "source_url": "https://deepgram.com/pricing",
+      "last_verified": "2026-10-14",
+      "is_sample": false,
+      "notes": "Pay-as-you-go. Page labels streaming rates as limited-time promotional."
+    },
+    {
+      "id": "tts_deepgram_aura2",
+      "category": "voice_tts",
+      "label": "Text-to-speech (Deepgram Aura-2)",
+      "unit": "usd_per_1k_characters",
+      "price": 0.03,
+      "source_url": "https://deepgram.com/pricing",
+      "last_verified": "2026-10-14",
+      "is_sample": false,
+      "notes": "Converted to per-minute using the use case's characters-per-minute assumption."
+    },
+    {
+      "id": "telephony_us",
+      "category": "telephony",
+      "region": "US",
+      "label": "Telephony, inbound local (Twilio US)",
+      "unit": "usd_per_minute",
+      "price": 0.0085,
+      "source_url": "https://www.twilio.com/en-us/voice/pricing/us",
+      "last_verified": "2026-10-14",
+      "is_sample": false,
+      "notes": "Receive calls on local numbers; number rental ($1.15/mo) not included."
+    },
+    {
+      "id": "telephony_gb",
+      "category": "telephony",
+      "region": "GB",
+      "label": "Telephony, inbound local (Twilio UK)",
+      "unit": "usd_per_minute",
+      "price": 0.01,
+      "source_url": "https://www.twilio.com/en-us/voice/pricing/gb",
+      "last_verified": "2026-10-14",
+      "is_sample": false,
+      "notes": "Receive calls on local numbers; number rental ($3.50/mo) not included."
+    },
+    {
+      "id": "telephony_in",
+      "category": "telephony",
+      "region": "IN",
+      "label": "Telephony, inbound (India)",
+      "unit": "usd_per_minute",
+      "price": 0.01,
+      "source_url": "sample",
+      "last_verified": "2026-10-14",
+      "is_sample": true,
+      "notes": "SAMPLE placeholder. Verify with an Indian telephony provider."
+    },
+    {
+      "id": "telephony_ae",
+      "category": "telephony",
+      "region": "AE",
+      "label": "Telephony, inbound (UAE)",
+      "unit": "usd_per_minute",
+      "price": 0.02,
+      "source_url": "sample",
+      "last_verified": "2026-10-14",
+      "is_sample": true,
+      "notes": "SAMPLE placeholder. Verify with a UAE telephony provider."
+    },
+    {
+      "id": "telephony_default",
+      "category": "telephony",
+      "region": "default",
+      "label": "Telephony, inbound (other regions)",
+      "unit": "usd_per_minute",
+      "price": 0.01,
+      "source_url": "sample",
+      "last_verified": "2026-10-14",
+      "is_sample": true,
+      "notes": "SAMPLE placeholder for regions without a verified rate."
+    },
+    {
+      "id": "saas_claude_team",
+      "category": "saas_chatbot",
+      "pricing_type": "per_seat",
+      "use_cases": [
+        "internal_copilot",
+        "data_assistant"
+      ],
+      "label": "Per-seat AI assistant (Claude Team, standard seat)",
+      "unit": "usd_per_seat_month",
+      "per_seat_price": 25,
+      "min_seats": 2,
+      "max_seats": 150,
+      "source_url": "https://claude.com/pricing",
+      "last_verified": "2026-10-14",
+      "is_sample": false,
+      "notes": "$25/seat/month billed monthly; $20/seat/month billed annually; 2 to 150 seats. List price; volume customers usually negotiate.",
+      "per_seat_price_annual": 20
+    },
+    {
+      "id": "saas_tidio_lyro_50",
+      "category": "saas_chatbot",
+      "pricing_type": "per_conversation",
+      "use_cases": [
+        "chatbot"
+      ],
+      "label": "Per-conversation AI chatbot (Tidio Lyro, 50 conversations)",
+      "unit": "usd_per_month_for_included_conversations",
+      "monthly_price": 32.5,
+      "included_conversations": 50,
+      "max_conversations_per_month": 50,
+      "source_url": "https://www.tidio.com/pricing/",
+      "last_verified": "2026-10-14",
+      "is_sample": false,
+      "notes": "Starting price $32.50/mo for 50 Lyro AI conversations; no base plan required. List price; volume customers usually negotiate. No separate annual price shown; the same price is used for both billing periods."
+    },
+    {
+      "id": "saas_tidio_lyro_1000",
+      "category": "saas_chatbot",
+      "pricing_type": "per_conversation",
+      "use_cases": [
+        "chatbot"
+      ],
+      "label": "Per-conversation AI chatbot (Tidio Lyro, 1,000 conversations)",
+      "unit": "usd_per_month_for_included_conversations",
+      "monthly_price": 400,
+      "included_conversations": 1000,
+      "max_conversations_per_month": 1000,
+      "source_url": "https://www.tidio.com/pricing/",
+      "last_verified": "2026-10-14",
+      "is_sample": true,
+      "notes": "SAMPLE placeholder: the pricing page offers 1,000 conversations but does not show the price. Above 1,000/month the vendor says contact sales. List price; volume customers usually negotiate. No separate annual price shown; the same price is used for both billing periods."
+    },
+    {
+      "id": "saas_intercom_essential_fin",
+      "category": "saas_chatbot",
+      "pricing_type": "per_resolution",
+      "use_cases": [
+        "chatbot",
+        "voice_agent"
+      ],
+      "label": "Per-resolution AI agent (Intercom Fin + Essential seats)",
+      "unit": "usd_per_resolution_plus_seats",
+      "per_resolution_price": 0.99,
+      "per_seat_price": 29,
+      "min_seats": 1,
+      "source_url": "https://www.intercom.com/pricing",
+      "last_verified": "2026-10-14",
+      "is_sample": false,
+      "notes": "Fin $0.99 per outcome plus required Essential seats at $29/seat/month. The page shows one seat price without saying monthly or annual, so the same price is used for both. List price; volume customers usually negotiate."
+    },
+    {
+      "id": "saas_zendesk_team_ai",
+      "category": "saas_chatbot",
+      "pricing_type": "per_resolution",
+      "use_cases": [
+        "chatbot",
+        "voice_agent"
+      ],
+      "label": "Per-resolution AI agent (Zendesk automated resolutions + Suite Team seats)",
+      "unit": "usd_per_resolution_plus_seats",
+      "per_resolution_price": 2,
+      "per_seat_price": 69,
+      "min_seats": 1,
+      "source_url": "https://www.zendesk.com/pricing/",
+      "last_verified": "2026-10-14",
+      "is_sample": false,
+      "notes": "Pay-as-you-go automated resolutions $2.00 plus Suite Team at $69/agent/month billed monthly or $55 billed annually. List price; volume customers usually negotiate.",
+      "per_seat_price_annual": 55
+    },
+    {
+      "last_verified": "2026-10-14",
+      "id": "video_veo31_lite_720p",
+      "category": "video_generation",
+      "video_tier": "lite",
+      "label": "AI video generation (Veo 3.1 Lite, 720p, with audio)",
+      "unit": "usd_per_second",
+      "price": 0.05,
+      "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "is_sample": false,
+      "notes": "Per second of generated video, 720p, with audio."
+    },
+    {
+      "last_verified": "2026-10-14",
+      "id": "video_veo31_fast_720p",
+      "category": "video_generation",
+      "video_tier": "fast",
+      "label": "AI video generation (Veo 3.1 Fast, 720p, with audio)",
+      "unit": "usd_per_second",
+      "price": 0.1,
+      "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "is_sample": false,
+      "notes": "Per second of generated video, 720p, with audio."
+    },
+    {
+      "last_verified": "2026-10-14",
+      "id": "video_veo31_standard_720p",
+      "category": "video_generation",
+      "video_tier": "standard",
+      "label": "AI video generation (Veo 3.1 Standard, 720p, with audio)",
+      "unit": "usd_per_second",
+      "price": 0.4,
+      "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "is_sample": false,
+      "notes": "Per second of generated video, 720p, with audio."
+    },
+    {
+      "last_verified": "2026-10-14",
+      "id": "image_gemini_31_flash_image",
+      "category": "image_generation",
+      "label": "AI image generation (Gemini 3.1 Flash Image, 1K)",
+      "unit": "usd_per_image",
+      "price": 0.067,
+      "source_url": "https://ai.google.dev/gemini-api/docs/pricing",
+      "is_sample": false,
+      "notes": "$0.067 per 1K image."
+    },
+    {
+      "last_verified": "2026-10-14",
+      "id": "social_x_api",
+      "category": "social_api",
+      "label": "X API pay-per-use (post create, owned reads)",
+      "unit": "usd_per_request",
+      "post_price": 0.015,
+      "owned_read_price": 0.001,
+      "source_url": "https://docs.x.com/x-api/getting-started/pricing",
+      "is_sample": false,
+      "notes": "Post create $0.015 per request; owned reads (your posts and mentions) $0.001 per resource. Instagram Graph API and YouTube Data API have no per-call fee (quota limits apply)."
+    },
+    {
+      "last_verified": "2026-10-14",
+      "id": "market_data_feed",
+      "category": "market_data",
+      "label": "Stock market data feed",
+      "unit": "usd_per_month",
+      "price": 199,
+      "source_url": "https://massive.com/pricing",
+      "is_sample": true,
+      "notes": "SAMPLE: $199/month is the Stocks Advanced plan, which is marked individual use only. Business use and redistribution in reports need a business licence; pricing is not published. Get a quote."
+    },
+    {
+      "last_verified": "2026-10-14",
+      "id": "saas_zapier_pro",
+      "category": "saas_chatbot",
+      "pricing_type": "per_task",
+      "use_cases": [
+        "invoice_processing",
+        "lead_qualification",
+        "report_generation",
+        "ticket_triage",
+        "stock_report",
+        "content_engine"
+      ],
+      "label": "Workflow automation (Zapier Professional) + your own LLM API key",
+      "unit": "usd_per_month_for_task_tier",
+      "task_tiers": [
+        {
+          "tasks": 750,
+          "annual": 19.99,
+          "monthly": 29.99
+        },
+        {
+          "tasks": 1500,
+          "annual": 39,
+          "monthly": 58.5
+        },
+        {
+          "tasks": 2000,
+          "annual": 49,
+          "monthly": 73.5
+        },
+        {
+          "tasks": 5000,
+          "annual": 89,
+          "monthly": 133.5
+        },
+        {
+          "tasks": 10000,
+          "annual": 129,
+          "monthly": 193.5
+        },
+        {
+          "tasks": 20000,
+          "annual": 189,
+          "monthly": 283.5
+        },
+        {
+          "tasks": 50000,
+          "annual": 289,
+          "monthly": 433.5
+        },
+        {
+          "tasks": 100000,
+          "annual": 489,
+          "monthly": 733.5
+        },
+        {
+          "tasks": 200000,
+          "annual": 769,
+          "monthly": 1149
+        },
+        {
+          "tasks": 300000,
+          "annual": 1069,
+          "monthly": 1599
+        },
+        {
+          "tasks": 400000,
+          "annual": 1269,
+          "monthly": 1899
+        },
+        {
+          "tasks": 500000,
+          "annual": 1499,
+          "monthly": 2199
+        },
+        {
+          "tasks": 750000,
+          "annual": 1999,
+          "monthly": 2999
+        },
+        {
+          "tasks": 1000000,
+          "annual": 2199,
+          "monthly": 3299
+        },
+        {
+          "tasks": 1250000,
+          "annual": 2599,
+          "monthly": 3899
+        },
+        {
+          "tasks": 1500000,
+          "annual": 2999,
+          "monthly": 4499
+        },
+        {
+          "tasks": 1750000,
+          "annual": 3199,
+          "monthly": 4799
+        },
+        {
+          "tasks": 2000000,
+          "annual": 3389,
+          "monthly": 5099
+        }
+      ],
+      "source_url": "https://zapier.com/pricing",
+      "is_sample": false,
+      "notes": "Each action step is a Zapier task. AI steps call your own LLM API key, billed separately at standard (non-batch) prices. Above 2M tasks/month: sales. List price; volume customers usually negotiate."
+    }
+  ]
+}

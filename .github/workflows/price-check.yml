@@ -1,0 +1,36 @@
+name: Price staleness check
+
+on:
+  schedule:
+    - cron: "0 7 * * 1" # Mondays 07:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: List stale or sample prices
+        id: check
+        run: node scripts/check-prices.mjs --max-age-days 30 --out price-report.md
+
+      - name: Open or update the tracking issue
+        if: steps.check.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="Price data needs verification"
+          NUMBER=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number,title --jq ".[] | select(.title == \"$TITLE\") | .number" | head -n1)
+          if [ -n "$NUMBER" ]; then
+            gh issue edit "$NUMBER" --body-file price-report.md
+          else
+            gh issue create --title "$TITLE" --body-file price-report.md
+          fi

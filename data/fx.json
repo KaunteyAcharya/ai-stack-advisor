@@ -1,0 +1,18 @@
+{
+  "base": "USD",
+  "as_of": "2026-10-13",
+  "source": "European Central Bank euro foreign exchange reference rates",
+  "source_url": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
+  "rates": {
+    "USD": 1,
+    "INR": 95.280658,
+    "EUR": 0.893815,
+    "GBP": 0.754916,
+    "CHF": 0.83232,
+    "CAD": 1.424115,
+    "AUD": 1.433053,
+    "AED": 3.6725
+  },
+  "is_sample": false,
+  "notes": "Reference rates for planning only. Converted from EUR base (rate_X_per_USD = EUR_X / EUR_USD). AED derived from its fixed USD peg (3.6725)."
+}
