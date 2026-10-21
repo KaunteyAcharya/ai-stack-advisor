@@ -39,7 +39,9 @@ jobs:
       - name: Collect site files (skip tests, scripts, docs, workflows)
         run: |
           mkdir _site
-          cp -r index.html about.html assets data LICENSE _site/
+          cp -r index.html about.html assets engine data LICENSE _site/
+      - name: Check every file the site loads is included
+        run: node scripts/check-site.mjs _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

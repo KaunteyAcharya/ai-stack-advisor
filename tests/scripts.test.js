@@ -32,3 +32,22 @@ test("METHODOLOGY.md scoring tables match engine/scoring.js (run npm run docs:sc
   const doc = readFileSync(new URL("../docs/METHODOLOGY.md", import.meta.url), "utf8");
   assert.ok(doc.includes(scoringMarkdown()));
 });
+
+test("the deploy workflow publishes every file the site loads", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const { mkdtempSync, cpSync, rmSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const root = new URL("..", import.meta.url);
+  const workflow = readFileSync(new URL(".github/workflows/test-and-deploy.yml", root), "utf8");
+  const items = workflow.match(/cp -r ([^\n]+) _site\//)[1].split(/\s+/);
+  const dir = mkdtempSync(join(tmpdir(), "site-"));
+  try {
+    for (const item of items) cpSync(new URL(item, root), join(dir, item), { recursive: true });
+    const { fileURLToPath } = await import("node:url");
+    const out = execFileSync(process.execPath, [fileURLToPath(new URL("../scripts/check-site.mjs", import.meta.url)), dir], { encoding: "utf8" });
+    assert.match(out, /Site check passed/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
