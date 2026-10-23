@@ -2,7 +2,7 @@
 
 **Build or buy your AI solution?** A free, browser-only consulting tool that compares SaaS, API-based, self-hosted and hybrid AI stacks on monthly cost, 36-month total cost of ownership, break-even volume and ROI, then writes a consultant-style recommendation.
 
-**Write-up:** A quick note about [this project](https://kaunteyacharya.com/notes/tickerbrief/) · more notes at [kaunteyacharya.com](https://kaunteyacharya.com)
+**Write-up:** A quick note about [this project](https://kaunteyacharya.com/notes/ai-stack-advisor/) · more notes at [kaunteyacharya.com](https://kaunteyacharya.com)
 
 [![Test and deploy](https://github.com/KaunteyAcharya/ai-stack-advisor/actions/workflows/test-and-deploy.yml/badge.svg)](https://github.com/KaunteyAcharya/ai-stack-advisor/actions/workflows/test-and-deploy.yml)
 
