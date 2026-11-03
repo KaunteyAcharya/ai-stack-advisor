@@ -66,7 +66,7 @@ test("token measurements cover the samples and compare with defaults", () => {
 
 test("relevant entries keep all assumptions but only the prices used", () => {
   const reg = buildRegister(data, "US");
-  const rel = relevantEntries(reg, ["llm_mid_gemini_2_5_flash"]);
+  const rel = relevantEntries(reg, ["llm_mid_google_gemini_3_8_flash"]);
   assert.equal(rel.filter((e) => e.kind === "price").length, 1);
   assert.equal(rel.filter((e) => e.kind === "assumption").length, reg.filter((e) => e.kind === "assumption").length);
   const counts = confidenceCounts(rel);
@@ -77,7 +77,7 @@ test("relevant entries keep all assumptions but only the prices used", () => {
 
 test("every simulation factor maps to a confidence", () => {
   const reg = buildRegister(data, "US");
-  for (const f of factorsFor(withDefaults({ useCase: "invoice_processing" }))) assert.ok(CONFIDENCE.includes(factorConfidence(f.id, reg, ["llm_mid_gemini_2_5_flash", "gpu_l4_runpod"])), f.id);
-  assert.equal(factorConfidence("llmPrice", reg, ["llm_mid_gemini_2_5_flash"]), "verified");
+  for (const f of factorsFor(withDefaults({ useCase: "invoice_processing" }))) assert.ok(CONFIDENCE.includes(factorConfidence(f.id, reg, ["llm_mid_google_gemini_3_8_flash", "gpu_l4_runpod"])), f.id);
+  assert.equal(factorConfidence("llmPrice", reg, ["llm_mid_google_gemini_3_8_flash"]), "verified");
   assert.equal(factorConfidence("gpuPrice", reg, ["gpu_l4_runpod"]), "estimate", "RunPod rates are still samples");
 });

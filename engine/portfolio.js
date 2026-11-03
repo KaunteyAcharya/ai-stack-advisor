@@ -1,7 +1,7 @@
 // Several workloads at once: one stack for everything, or the best option per workload?
 //
-// Up to EXHAUSTIVE_LIMIT workloads, every assignment of options to workloads is evaluated (4^n).
-// Beyond that (4^11 ≈ 4 million), a local search starts from each single stack and from each
+// Up to EXHAUSTIVE_LIMIT workloads, every assignment of options to workloads is evaluated (5^n).
+// Beyond that (5^11 ≈ 49 million), a local search starts from each single stack and from each
 // workload's own best option, then moves one workload at a time while the score improves.
 // Workloads on the same stack share its fixed costs:
 //   - shared infrastructure (databases, hosting, vector DB, storage, monitoring) is paid once;
@@ -12,15 +12,15 @@
 // Each distinct stack pays its own base effort, which is the real cost of mixing.
 
 import { OPTION_IDS, OPTION_LABELS, workloadsOf } from "./inputs.js";
-import { volume, saasMonthly, apiMonthly, selfhostMonthly, hybridMonthly, gpuPlan, HOURS_PER_MONTH, sum, DEFAULT_SHARE_SELF, oneTimeHours } from "./costs.js";
+import { volume, saasMonthly, apiMonthly, selfhostMonthly, hybridMonthly, hostedOpenMonthly, gpuPlan, gpuLoadArgs, gpuPriceFactor, HOURS_PER_MONTH, sum, DEFAULT_SHARE_SELF, oneTimeHours } from "./costs.js";
 import { pvFactor } from "./tco.js";
-import { gpusNeeded } from "./capacity.js";
+import { gpuLoad, gpusForLoad } from "./capacity.js";
 import { taxProfile, applyTax } from "./tax.js";
 import { scoreOptions, weightedScore } from "./scoring.js";
 import { valueForInputs } from "./value.js";
 import { isAgent, isInternal } from "./agents.js";
 
-export const SHORT_LABELS = { A: "SaaS", B: "API", C: "Self-hosted", D: "Hybrid" };
+export const SHORT_LABELS = { A: "SaaS", B: "API", C: "Self-hosted", D: "Hybrid", E: "Hosted open model" };
 export const EXHAUSTIVE_LIMIT = 5;
 
 const COST_FN = {
@@ -28,6 +28,7 @@ const COST_FN = {
   B: (w, p, m) => apiMonthly(w, p, m),
   C: (w, p, m) => selfhostMonthly(w, p, m),
   D: (w, p, m, share) => hybridMonthly(w, p, m, 1, share),
+  E: (w, p, m) => hostedOpenMonthly(w, p, m),
 };
 
 export function workloadLabel(w, usecasesData) {
@@ -37,23 +38,29 @@ export function workloadLabel(w, usecasesData) {
 /** Effort multiplier for n workloads on one stack. */
 export const effortFactor = (n, extraPct) => 1 + Math.max(0, n - 1) * (extraPct / 100);
 
-/** Self-hosted GPUs for several workloads together: pooled peak tokens/sec, largest model needed. */
+/** Self-hosted GPUs for several workloads together: pooled peak load (prompt, answer, memory) on the largest model needed. */
 export function pooledGpu(ws, prices, m, share) {
   let biggest = null;
-  let tokPerSec = 0;
   let ha = false;
-  for (const w of ws) {
+  const each = ws.map((w) => {
     const v = volume(w, m);
     const plan = gpuPlan(w, prices, v, share);
     if (!biggest || plan.gpu.vram_gb > biggest.gpu.vram_gb) biggest = plan;
-    tokPerSec += v.peakRequestsPerSec * share * v.avgOutTokens * plan.overhead;
     ha = ha || w.uptime === "high_availability";
+    return { w, v, plan };
+  });
+  // Every workload runs on the biggest model's GPUs, so its load is measured there.
+  const load = { prefill: 0, decode: 0, memory: 0 };
+  for (const { w, v, plan } of each) {
+    const l = gpuLoad({ ...gpuLoadArgs(w, prices, v, biggest, biggest.gpu, biggest.thr, plan.overhead), peakRequestsPerSec: v.peakRequestsPerSec * share });
+    for (const k of Object.keys(load)) load[k] += l[k];
   }
-  const gpus = gpusNeeded({ peakRequestsPerSec: 1, outTokens: tokPerSec, gpuTokensPerSec: biggest.thr.value, highAvailability: ha, headroom: prices.selfhost.headroom });
+  const { gpus } = gpusForLoad(load, { highAvailability: ha, headroom: prices.selfhost.headroom });
+  const rate = biggest.gpu.price * gpuPriceFactor(ws[0], m);
   return {
     gpus,
     gpuClass: biggest.gpuClass,
-    line: { label: `GPU rental, shared (${gpus} × ${biggest.gpu.label})`, usd: gpus * biggest.gpu.price * HOURS_PER_MONTH, gpu: true, basis: [{ qty: gpus * HOURS_PER_MONTH, unit: "GPU-hours", rate: biggest.gpu.price }] },
+    line: { label: `GPU rental, shared (${gpus} × ${biggest.gpu.label})`, usd: gpus * rate * HOURS_PER_MONTH, gpu: true, basis: [{ qty: gpus * HOURS_PER_MONTH, unit: "GPU-hours", rate }] },
     priceIds: [biggest.gpu.id, biggest.thr.id],
   };
 }
@@ -132,11 +139,9 @@ export function analyzePortfolio(inputs, prices, opts = {}) {
   };
 
   // Which options each workload may use.
-  const allowed = ws.map((w, i) =>
-    OPTION_IDS.filter((o) => !scoring[i].excluded[o] && !(o === "A" && raw("A", i, 0).unavailable)),
-  );
+  const allowed = ws.map((w, i) => OPTION_IDS.filter((o) => !scoring[i].excluded[o] && !raw(o, i, 0).unavailable));
   const excludedReasons = ws.map((w, i) =>
-    OPTION_IDS.filter((o) => !allowed[i].includes(o)).map((o) => ({ option: o, reason: scoring[i].excluded[o] || raw("A", i, 0).unavailable })),
+    OPTION_IDS.filter((o) => !allowed[i].includes(o)).map((o) => ({ option: o, reason: scoring[i].excluded[o] || raw(o, i, 0).unavailable })),
   );
 
   // The same stack + workload set appears in many combinations: cache its monthly totals.

@@ -2,7 +2,7 @@
 // Explanations are built from fixed templates (no AI-generated text).
 
 import { OPTION_IDS, OPTION_LABELS } from "./inputs.js";
-import { monthlyCosts, volume, hybridMonthly, oneTimeCost, shareSelfOf } from "./costs.js";
+import { monthlyCosts, volume, oneTimeCost, llmCandidates, llmModelFor, openModelFor } from "./costs.js";
 import { taxProfile } from "./tax.js";
 import { projectTco, pvFactor } from "./tco.js";
 import { apiVsSelfhost, costCurve } from "./breakeven.js";
@@ -64,12 +64,28 @@ export function robustnessCheck({ costScores, scores, weights, costWeight, exclu
 }
 
 /**
+ * Your own test results, when both are given, replace the assumed gap: gap = API result − open-model
+ * result (points, never negative), and for agents the API result is the completion rate.
+ */
+export function measuredQuality(inputs) {
+  const api = inputs.evalApiSuccessPct;
+  const open = inputs.evalOpenSuccessPct;
+  if (api == null || open == null) return inputs;
+  return { ...inputs, openModelGapPct: Math.max(0, api - open), ...(isAgent(inputs) ? { successPct: api } : {}), qualityMeasured: true };
+}
+
+/** Points of quality an option gives up: the full gap on open models (C, E), the self-hosted share of it for the hybrid. */
+export function optionGap(inputs, option, shareSelf) {
+  return (inputs.openModelGapPct ?? 0) * (option === "C" || option === "E" ? 1 : option === "D" ? shareSelf : 0);
+}
+
+/**
  * Inputs as seen by an option that runs on open models: self-hosted completes `openModelGapPct`
  * points fewer tasks; the hybrid only on its self-hosted share. Agents lose completion rate,
  * internal tools lose minutes saved, chat loses deflection (support savings).
  */
 export function qualityAdjusted(inputs, option, shareSelf) {
-  const gap = (inputs.openModelGapPct ?? 0) * (option === "C" ? 1 : option === "D" ? shareSelf : 0);
+  const gap = optionGap(inputs, option, shareSelf);
   if (gap <= 0) return inputs;
   const clamp = (x) => Math.max(0, Math.min(100, x));
   return {
@@ -78,6 +94,34 @@ export function qualityAdjusted(inputs, option, shareSelf) {
     deflectionPct: clamp(inputs.deflectionPct - gap),
     minutesSavedPerRequest: inputs.minutesSavedPerRequest * (1 - gap / 100),
   };
+}
+
+/**
+ * Share of tasks (agents) or requests (when you entered test results) an option gets right, in %;
+ * null when there is no success rate to go on.
+ */
+export function successRate(inputs, option, shareSelf) {
+  const base = isAgent(inputs) ? inputs.successPct : inputs.qualityMeasured ? inputs.evalApiSuccessPct : null;
+  return base == null ? null : Math.max(0, base - optionGap(inputs, option, shareSelf));
+}
+
+/**
+ * First month (1-based) from which another option costs less per month than `best` for every remaining
+ * month, with the volume then. Options already cheaper in month 1 are skipped: they lost on other criteria.
+ */
+export function switchPoint(inputs, tco, bestId, viable, months = 36) {
+  let found = null;
+  for (const id of viable) {
+    if (id === bestId) continue;
+    const a = tco[id].monthly;
+    const b = tco[bestId].monthly;
+    if (!(a[0] >= b[0])) continue;
+    let m = months - 1;
+    if (!(a[m] < b[m])) continue;
+    while (m > 0 && a[m - 1] < b[m - 1]) m--;
+    if (!found || m < found.month - 1) found = { option: id, month: m + 1, requestsPerMonth: volume(inputs, m).requestsPerMonth };
+  }
+  return found;
 }
 
 /** Monthly benefit that depends on answer quality: time saved (agents, internal tools) or support savings (chat). */
@@ -90,6 +134,7 @@ const qualityBenefit = (v) => (v ? (v.kind === "agent" ? v.benefit : v.supportSa
  *                  light: boolean (skip report-only extras, for simulations), hybridPct: fixed hybrid split }
  */
 export function analyze(inputs, prices, opts = {}) {
+  inputs = measuredQuality(inputs);
   const money = opts.formatMoney || usd;
   const number = opts.formatNumber || num;
   const months = opts.months ?? 36;
@@ -106,11 +151,13 @@ export function analyze(inputs, prices, opts = {}) {
   const shareSelf = hybrid.pct / 100;
 
   const month1 = monthlyCosts(inputs, prices, 0, 1, { shareSelf });
-  if (month1.A.unavailable && !scoring.excluded.A) scoring.excluded.A = month1.A.unavailable;
+  for (const id of OPTION_IDS) if (month1[id].unavailable && !scoring.excluded[id]) scoring.excluded[id] = month1[id].unavailable;
 
   const tco = projectTco(inputs, prices, { months, shareSelf });
   const light = !!opts.light;
   const tcoNoGrowth = light ? tco : projectTco({ ...inputs, growthPct: 0 }, prices, { months, shareSelf });
+  const priceTrend = !!(inputs.llmPriceChangePct || inputs.gpuPriceChangePct);
+  const tcoFlatPrices = light || !priceTrend ? tco : projectTco({ ...inputs, llmPriceChangePct: 0, gpuPriceChangePct: 0 }, prices, { months, shareSelf });
   const tax = taxProfile(inputs, prices.taxes);
   const breakeven = light ? null : apiVsSelfhost(inputs, prices);
   const curve = opts.curve === false ? null : costCurve(inputs, prices, { shareSelf });
@@ -151,10 +198,12 @@ export function analyze(inputs, prices, opts = {}) {
     flags: month1[id].flags || [],
     pricingType: month1[id].pricingType,
     gpus: month1[id].gpus,
+    gpuSizing: month1[id].sizing ?? null,
     oneTime: tco[id].oneTime,
     tco12: tco[id].tco12,
     tco36: tco[id].tco36,
     tco36NoGrowth: tcoNoGrowth[id].tco36,
+    tco36FlatPrices: tcoFlatPrices[id].tco36,
     pv36: tco[id].pv36,
     valueLostPv: decision[id] - tco[id].pv36,
     decisionCost: decision[id],
@@ -166,6 +215,13 @@ export function analyze(inputs, prices, opts = {}) {
     notes: scoring.notes[id],
     warnings: scoring.warnings[id],
     value: values[id],
+    successPct: successRate(inputs, id, shareSelf),
+    costPerSuccess: (() => {
+      const rate = successRate(inputs, id, shareSelf);
+      const units = agent ? vol.tasks : vol.requestsPerMonth;
+      if (rate == null || !Number.isFinite(month1[id].total) || !(units > 0)) return null;
+      return rate > 0 ? month1[id].total / (units * (rate / 100)) : Infinity;
+    })(),
   }));
 
   const ranked = options.filter((o) => !o.excluded).sort((a, b) => b.finalScore - a.finalScore);
@@ -173,6 +229,8 @@ export function analyze(inputs, prices, opts = {}) {
   for (const o of options) o.status = o.excluded ? "excluded" : o === best ? "recommended" : "viable";
 
   const robustness = best && !light ? robustnessCheck(scoreArgs) : { robust: true, flips: [] };
+  const switchAt = best && !light ? switchPoint(inputs, tco, best.id, viable, months) : null;
+  const cheaperNow = best ? viable.filter((id) => id !== best.id && month1[id].total < best.monthly) : [];
   robustness.margin = ranked.length > 1 ? ranked[0].finalScore - ranked[1].finalScore : null;
   robustness.runnerUp = ranked[1]?.id ?? null;
 
@@ -206,10 +264,13 @@ export function analyze(inputs, prices, opts = {}) {
   for (const o of options) for (const w of o.warnings) warnings.push({ option: o.id, message: w });
   for (const o of options) for (const f of o.flags) warnings.push({ option: o.id, message: `${o.label}: ${f}` });
 
+  // Which provider and model each per-token option uses, and what every provider would cost (month 1).
+  const llm = light ? null : llmChoice(inputs, prices, vol);
+
   const explanation = light
     ? []
     : best
-    ? explain({ inputs, best, options, breakeven, profile, vol, money, number, robustness, hybrid, tax })
+    ? explain({ inputs, best, options, breakeven, profile, vol, money, number, robustness, hybrid, tax, llm, switchAt })
     : ["No option is viable with the current constraints."];
 
   return {
@@ -224,6 +285,11 @@ export function analyze(inputs, prices, opts = {}) {
     monthlyRange,
     tco,
     tcoNoGrowth,
+    tcoFlatPrices,
+    llm,
+    switchAt,
+    cheaperNow,
+    quality: { measured: !!inputs.qualityMeasured, gapPct: inputs.openModelGapPct ?? 0, apiPct: inputs.evalApiSuccessPct ?? null, openPct: inputs.evalOpenSuccessPct ?? null },
     hybrid,
     tax,
     breakeven,
@@ -239,18 +305,25 @@ export function analyze(inputs, prices, opts = {}) {
 }
 
 /** Plain-language sentences built from templates. */
-export function explain({ inputs, best, options, breakeven, profile, vol, money, number = num, robustness, hybrid, tax }) {
+export function explain({ inputs, best, options, breakeven, profile, vol, money, number = num, robustness, hybrid, tax, llm, switchAt }) {
+  inputs = measuredQuality(inputs);
   const out = [];
+  const gapText = inputs.qualityMeasured
+    ? `in your test the open model got ${inputs.evalOpenSuccessPct}% of tasks right against ${inputs.evalApiSuccessPct}% for the API model`
+    : `open models are assumed to complete ${inputs.openModelGapPct ?? 0} percentage points fewer tasks`;
+  const cashText = (v, gross) => ((inputs.cashSavingsPct ?? 100) < 100 ? ` (counting ${inputs.cashSavingsPct}% of the ${money(gross)} of time freed as money saved)` : "");
   const by = Object.fromEntries(options.map((o) => [o.id, o]));
   const reqs = number(vol.requestsPerMonth);
 
   if (best.id === "B" && !by.C.excluded) {
     const be = breakeven.breakevenRequestsPerMonth;
     out.push(
-      `${best.label} is recommended because at ${reqs} requests/month it costs about ${money(best.monthly)}/month, ` +
-        `below the ~${money(breakeven.fixedSelfhostMonthly)}/month fixed cost of self-hosting; ` +
-        `self-hosting only becomes cheaper above ~${number(be)} requests/month.`,
+      `${best.label} is recommended: at ${reqs} requests/month it costs about ${money(best.monthly)}/month. ` +
+        `Self-hosting costs ~${money(breakeven.fixedSelfhostMonthly)}/month before any traffic and only becomes cheaper than paying per request above ~${number(be)} requests/month.`,
     );
+  } else if (best.id === "E") {
+    const open = llm?.open ? ` (${llm.open.label})` : "";
+    out.push(`${best.label}${open} is recommended: at ${reqs} requests/month it costs about ${money(best.monthly)}/month (${money(best.tco36)} over 36 months), with no GPUs to run; ${gapText}, and that is counted in the comparison.`);
   } else if (best.id === "C" || best.id === "D") {
     const why = by.B.excluded ? "data must stay on infrastructure the company controls" : `at ${reqs} requests/month the fixed GPU cost is spread over enough traffic`;
     out.push(`${best.label} is recommended because ${why}. It costs about ${money(best.monthly)}/month and ${money(best.tco36)} over 36 months.`);
@@ -263,13 +336,13 @@ export function explain({ inputs, best, options, breakeven, profile, vol, money,
     const hours = number(Math.round(v.netHours));
     const fte = v.fte.toFixed(v.fte < 10 ? 2 : 1);
     const saved = inputs.valueUnit === "fte" ? `about ${fte} FTE (${hours} hours a month)` : `about ${hours} hours a month (${fte} FTE)`;
-    out.push(`At ${inputs.minutesSavedPerRequest} minutes saved per request, it saves ${saved} of staff time, worth ${money(v.benefit)} a month, against ${money(best.monthly)} of AI cost.`);
+    out.push(`At ${inputs.minutesSavedPerRequest} minutes saved per request, it saves ${saved} of staff time, worth ${money(v.benefit)} a month${cashText(v, v.timeValue)}, against ${money(best.monthly)} of AI cost.`);
     out.push(`It pays for itself if each request saves at least ${v.breakevenMinutesPerRequest < 1 ? "a few seconds" : `${Math.ceil(v.breakevenMinutesPerRequest * 10) / 10} minutes`} of work.`);
   } else if (v?.kind === "agent") {
     const hours = number(Math.round(v.netHours));
     const fte = v.fte.toFixed(v.fte < 10 ? 2 : 1);
     const saved = inputs.valueUnit === "fte" ? `about ${fte} FTE (${hours} hours a month)` : `about ${hours} hours a month (${fte} FTE)`;
-    out.push(`After review time, the agent saves ${saved} of manual work, worth ${money(v.benefit)} a month net of error costs, against ${money(best.monthly)} of AI cost.`);
+    out.push(`After review time, the agent saves ${saved} of manual work, worth ${money(v.benefit)} a month net of error costs${cashText(v, v.timeValue)}, against ${money(best.monthly)} of AI cost.`);
     if (v.net > 0) {
       out.push(`It pays for itself as long as it completes at least ${Math.min(100, Math.ceil(v.breakevenSuccessPct))}% of tasks without a person (assumed: ${inputs.successPct}%).`);
     } else {
@@ -295,10 +368,10 @@ export function explain({ inputs, best, options, breakeven, profile, vol, money,
   }
 
   // Quality gap: value an open-model option gives up, counted as a cost.
-  const gapped = options.filter((o) => !o.excluded && o.valueLostPv > 1 && (o.id === "C" || o.id === "D"));
+  const gapped = options.filter((o) => !o.excluded && o.valueLostPv > 1 && (o.id === "C" || o.id === "D" || o.id === "E"));
   if (gapped.length && (inputs?.openModelGapPct ?? 0) > 0) {
     const worst = gapped.reduce((a, b) => (b.valueLostPv > a.valueLostPv ? b : a));
-    out.push(`Open models are assumed to complete ${inputs.openModelGapPct} percentage points fewer tasks. For ${worst.label.toLowerCase()} that gives up about ${money(worst.valueLostPv)} of value over 36 months (present value), which is added to its cost in the comparison.`);
+    out.push(`${gapText[0].toUpperCase()}${gapText.slice(1)}. For ${worst.label.toLowerCase()} that gives up about ${money(worst.valueLostPv)} of value over 36 months (present value), which is added to its cost in the comparison.`);
   }
 
   if (inputs && inputs.growthPct > 0 && best.tco36NoGrowth < best.tco36) {
@@ -306,6 +379,29 @@ export function explain({ inputs, best, options, breakeven, profile, vol, money,
     out.push(
       `Growth of ${inputs.growthPct}% a month${months < 36 ? ` for ${number(months)} months` : ""} raises the 36-month cost from ${money(best.tco36NoGrowth)} (no growth) to ${money(best.tco36)}.`,
     );
+  }
+
+  if (llm && ["B", "D"].includes(best.id) && llm.candidates.length > 1) {
+    const c = llm.candidates;
+    const next = c.find((x) => x.provider !== llm.api.provider);
+    if (inputs.llmProvider === "cheapest") {
+      out.push(`The LLM is ${llm.api.label}, the cheapest of ${c.length} providers for this quality level and request size${next ? ` (next: ${next.model.label}, ${money(next.monthly)}/month)` : ""}.`);
+    } else if (c[0].provider !== llm.api.provider) {
+      out.push(`You chose ${llm.api.label}; ${c[0].model.label} would cost ${money(c[0].monthly)}/month for the same requests, against ${money(c.find((x) => x.provider === llm.api.provider)?.monthly ?? 0)}.`);
+    }
+  }
+
+  if (best.tco36FlatPrices != null && Math.abs(best.tco36FlatPrices - best.tco36) > 1) {
+    const trend = (what, pct) => `${what} ${pct < 0 ? "fall" : "rise"} ${Math.abs(pct)}% a year`;
+    const parts = [];
+    if (inputs.llmPriceChangePct) parts.push(trend("AI prices", inputs.llmPriceChangePct));
+    if (inputs.gpuPriceChangePct) parts.push(trend("GPU rental prices", inputs.gpuPriceChangePct));
+    out.push(`Assuming ${parts.join(" and ")}, the 36-month cost is ${money(best.tco36)}; at today's prices throughout it would be ${money(best.tco36FlatPrices)}.`);
+  }
+
+  if (switchAt) {
+    const other = by[switchAt.option];
+    out.push(`Switch point: with ${inputs.growthPct}% monthly growth, ${other.label} becomes cheaper per month than ${best.label} from month ${switchAt.month} (about ${number(switchAt.requestsPerMonth)} requests/month). Review the choice before then.`);
   }
 
   if (best.id === "D" && hybrid?.mode === "auto") {
@@ -329,4 +425,14 @@ export function explain({ inputs, best, options, breakeven, profile, vol, money,
   for (const o of options) if (o.excluded) out.push(`${o.label} is excluded: ${o.excluded.toLowerCase()}.`);
   if (by.C.status !== "recommended" && by.C.warnings.length && !by.C.excluded) out.push(`Self-hosting is not recommended for this team: ${by.C.warnings[0]}`);
   return out;
+}
+
+/**
+ * The models behind the per-token options: option B's provider (chosen or cheapest), option E's
+ * hosted open model, and every provider's month-1 LLM cost for this workload, cheapest first.
+ */
+export function llmChoice(inputs, prices, vol = volume(inputs, 0)) {
+  const candidates = llmCandidates(inputs, prices, { v: vol }).map((c) => ({ ...c, monthly: c.perRequest * vol.requestsPerMonth }));
+  const api = llmModelFor(inputs, prices, { v: vol });
+  return { api, open: openModelFor(inputs, prices) || null, candidates, mode: inputs.llmProvider || "cheapest" };
 }

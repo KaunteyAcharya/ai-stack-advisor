@@ -4,97 +4,841 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
-  <meta name="description" content="How AI Stack Advisor works: method, assumptions, limitations and privacy.">
-  <title>About · AI Stack Advisor</title>
+  <title>How AI Stack Advisor calculates AI cost, TCO and ROI: formulas and assumptions</title>
+  <meta name="description" content="Every formula, assumption and price behind AI Stack Advisor: LLM API token costs, self-hosted GPU sizing, SaaS plans, 36-month TCO, API vs self-hosting break-even, ROI, scoring and Monte Carlo simulation.">
+  <meta name="author" content="Kauntey Acharya">
+  <link rel="canonical" href="https://kaunteyacharya.com/ai-stack-advisor/about.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Kauntey Acharya">
+  <meta property="og:url" content="https://kaunteyacharya.com/ai-stack-advisor/about.html">
+  <meta property="og:title" content="How AI Stack Advisor calculates AI cost, TCO and ROI">
+  <meta property="og:description" content="Every formula, assumption and price behind AI Stack Advisor: LLM API token costs, self-hosted GPU sizing, SaaS plans, 36-month TCO, break-even, ROI and simulation.">
+  <meta property="og:image" content="https://kaunteyacharya.com/og/ai-stack-advisor.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="AI Stack Advisor">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How AI Stack Advisor calculates AI cost, TCO and ROI">
+  <meta name="twitter:description" content="Every formula, assumption and price behind AI Stack Advisor: LLM API token costs, self-hosted GPU sizing, SaaS plans, 36-month TCO, break-even, ROI and simulation.">
+  <meta name="twitter:image" content="https://kaunteyacharya.com/og/ai-stack-advisor.png">
+  <!-- GEN:ld (scripts/build-about.mjs) -->
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"TechArticle","@id":"https://kaunteyacharya.com/ai-stack-advisor/about.html#article","headline":"How AI Stack Advisor calculates AI cost, TCO and ROI","description":"Every formula, assumption and price behind AI Stack Advisor: LLM API token costs, self-hosted GPU sizing, SaaS plans, 36-month TCO, API vs self-hosting break-even, ROI, scoring and Monte Carlo simulation.","url":"https://kaunteyacharya.com/ai-stack-advisor/about.html","mainEntityOfPage":"https://kaunteyacharya.com/ai-stack-advisor/about.html","inLanguage":"en","datePublished":"2026-10-21","dateModified":"2026-11-03","author":{"@type":"Person","@id":"https://kaunteyacharya.com/#person","name":"Kauntey Acharya","url":"https://kaunteyacharya.com/"},"about":{"@id":"https://kaunteyacharya.com/ai-stack-advisor/#app"},"isPartOf":{"@id":"https://kaunteyacharya.com/#website"},"keywords":"AI build vs buy, LLM API cost, self-hosted LLM cost, GPU sizing, total cost of ownership, TCO, break-even, ROI, AI cost calculator"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Kauntey Acharya","item":"https://kaunteyacharya.com/"},{"@type":"ListItem","position":2,"name":"AI Stack Advisor","item":"https://kaunteyacharya.com/ai-stack-advisor/"},{"@type":"ListItem","position":3,"name":"How it works","item":"https://kaunteyacharya.com/ai-stack-advisor/about.html"}]}]}</script>
+<!-- /GEN:ld -->
   <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./assets/styles.css">
   <script src="./assets/theme.js"></script>
   <script src="./assets/about.js" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
   <header class="site-header">
     <div class="wrap header-inner">
-      <a class="brand" href="./index.html" aria-label="AI Stack Advisor home">
+      <a class="brand" href="./" aria-label="AI Stack Advisor home">
         <span>AI Stack Advisor</span>
       </a>
       <nav class="header-nav" aria-label="Main">
-        <a href="./index.html">Open the advisor</a>
+        <a href="./">Open the advisor</a>
         <button type="button" class="btn-ghost" id="theme-toggle" aria-label="Toggle dark mode">Theme</button>
       </nav>
     </div>
   </header>
 
-  <main class="wrap about">
-    <h1>About this tool</h1>
+  <main class="wrap about" id="main">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="https://kaunteyacharya.com/">Kauntey Acharya</a> › <a href="./">AI Stack Advisor</a> › <span aria-current="page">How it works</span>
+    </nav>
+    <h1>About AI Stack Advisor: every formula, assumption and price</h1>
+    <p class="lede">AI Stack Advisor is a free calculator that compares five ways to run an AI solution (a SaaS tool, an API build, a self-hosted open model, a hybrid of the two, and a hosted open model) on monthly cost, 36-month total cost of ownership, break-even volume and ROI, then recommends one. This page sets out everything it calculates and every number it assumes, so you can check the result without reading the code.</p>
+    <!-- GEN:updated (scripts/build-about.mjs) -->
+<p class="muted page-date">Method and data last updated <time datetime="2026-11-03">3 November 2026</time>.</p>
+<!-- /GEN:updated -->
+    <p><a class="btn btn-primary" href="./">Open the advisor</a></p>
 
-    <section>
-      <h2>What it does</h2>
-      <p>AI Stack Advisor helps a business owner decide how to build an AI solution such as a chatbot, voice agent, document processor or internal copilot. It compares four approaches:</p>
+    <!-- GEN:toc (scripts/build-about.mjs) -->
+<nav class="toc" aria-labelledby="toc-title">
+<h2 id="toc-title">Contents</h2>
+<ol>
+<li><a href="#overview">What it does</a></li>
+<li><a href="#summary">The method in brief</a></li>
+<li><a href="#method">Full method</a><ol>
+<li><a href="#method-1">1. Volume</a></li>
+<li><a href="#method-2">2. Option B: API-based</a></li>
+<li><a href="#method-2b">2b. Option E: Hosted open model</a></li>
+<li><a href="#method-3">3. Voice add-on: voice agents only, every option</a></li>
+<li><a href="#method-4">4. Option C: Self-hosted</a></li>
+<li><a href="#method-5">5. Option A: SaaS</a></li>
+<li><a href="#method-6">6. Option D: Hybrid</a></li>
+<li><a href="#method-7">7. One-time and maintenance costs</a></li>
+<li><a href="#method-8">8. Total cost of ownership</a></li>
+<li><a href="#method-9">9. Break-even: API vs self-hosting</a></li>
+<li><a href="#method-10">10. Value and ROI</a></li>
+<li><a href="#method-10b">10b. Workflow agents</a></li>
+<li><a href="#method-10c">10c. Internal tools (data assistant, internal copilot)</a></li>
+<li><a href="#method-10d">10d. Several workloads: one stack or a mix</a></li>
+<li><a href="#method-10e">10e. &quot;Not sure?&quot; ranges</a></li>
+<li><a href="#method-11">11. Non-cost scoring</a></li>
+<li><a href="#method-12">12. Recommendation</a></li>
+<li><a href="#method-12b">12b. How sure is this? Simulation and tornado</a></li>
+<li><a href="#method-12c">12c. Assumption register, labour costs and token counts</a></li>
+<li><a href="#method-13">13. Tax</a></li>
+<li><a href="#method-14">14. Exchange rates</a></li>
+</ol></li>
+<li><a href="#data">Reference data</a><ol>
+<li><a href="#data-register">Assumption register</a></li>
+<li><a href="#data-llm-prices">AI model prices</a></li>
+<li><a href="#data-open-prices">Hosted open-model prices</a></li>
+<li><a href="#data-selfhost">Self-hosting model sizes</a></li>
+<li><a href="#data-other-prices">GPU, infrastructure, voice, SaaS and media prices</a></li>
+<li><a href="#data-labour">Labour costs by country</a></li>
+<li><a href="#data-usecases">Use-case defaults</a></li>
+<li><a href="#data-presets">Industry presets</a></li>
+<li><a href="#data-tax">Tax rates</a></li>
+<li><a href="#data-fx">Exchange rates</a></li>
+</ol></li>
+<li><a href="#data-currency">Keeping prices current</a></li>
+<li><a href="#limits">Limitations</a></li>
+<li><a href="#privacy">Privacy</a></li>
+<li><a href="#creator">Creator</a></li>
+<li><a href="#contribute">Contribute</a></li>
+</ol>
+</nav>
+<!-- /GEN:toc -->
+
+    <section aria-labelledby="overview">
+      <h2 id="overview">What it does</h2>
+      <p>AI Stack Advisor helps a business owner decide how to build an AI solution such as a chatbot, voice agent, document processor, internal copilot or workflow agent. It compares five approaches:</p>
       <ol>
-        <li><strong>SaaS subscription</strong>: an off-the-shelf tool priced per seat, per conversation or per resolution.</li>
-        <li><strong>API-based custom build</strong>: hosted LLM APIs plus a managed database and light hosting.</li>
+        <li><strong>SaaS subscription</strong>: an off-the-shelf tool priced per seat, per conversation, per resolution or per task.</li>
+        <li><strong>API-based custom build</strong>: hosted LLM APIs (Google Gemini, OpenAI, Anthropic Claude or Mistral, whichever is cheapest for your requests, or the one you choose) plus a managed database and light hosting.</li>
         <li><strong>Self-hosted open source</strong>: an open-weight model on rented GPUs.</li>
         <li><strong>Hybrid</strong>: routine requests self-hosted, complex ones through an API.</li>
+        <li><strong>Hosted open model</strong>: an open-weight model of the same size as the self-hosted one, run by an inference provider and paid per token. No GPUs to manage, but data goes to that provider.</li>
       </ol>
-      <p>For each option it estimates monthly cost, 12- and 36-month total cost of ownership, the API vs self-hosting break-even volume, the business value and ROI from your ticket size and margin, and a weighted score for privacy, time to launch, team fit, quality, lock-in and scalability. It then writes a plain-language recommendation you can print as a PDF.</p>
+      <p>For each option it estimates monthly cost, 12- and 36-month total cost of ownership, the API vs self-hosting break-even volume, the business value and ROI from your ticket size and margin (or the staff time saved), and a weighted score for privacy, time to launch, team fit, quality, lock-in and scalability. It then writes a plain-language recommendation, names the month another option would become cheaper, runs 300 simulations to show how sure the answer is, and lets you print the report as a PDF. Several workloads can be compared together as one stack or a mix.</p>
     </section>
 
-    <section>
-      <h2>How the method works</h2>
+    <section aria-labelledby="summary">
+      <h2 id="summary">The method in brief</h2>
       <ul>
-        <li><strong>Volume.</strong> Requests per month = users per day × requests per user × 30, growing each month. Document processing counts documents × pages × tokens per page instead.</li>
-        <li><strong>API cost.</strong> (input tokens × input price + output tokens × output price) ÷ 1,000,000 per request, plus database, hosting, vector database, voice and maintenance labour.</li>
-        <li><strong>Self-hosting.</strong> Quality need → model size → VRAM → cheapest GPU that fits → number of GPUs for peak traffic with 30% headroom (minimum 2 for high availability). GPUs run 730 hours a month. Operations labour is included.</li>
-        <li><strong>SaaS.</strong> The cheapest plan type whose limits fit your volume, including required base seats. List prices only; volume customers usually negotiate.</li>
-        <li><strong>TCO.</strong> One-time build cost + the sum of monthly costs, recomputed each month as volume grows. Growth stops after a set number of months, and the total with no growth is shown too.</li>
-        <li><strong>Tax.</strong> Prices exclude VAT, GST and sales tax. Tax a registered business can reclaim is not added; tax it can't reclaim (US sales tax, Canadian PST, or any tax for an exempt business) is added to vendor spend.</li>
-        <li><strong>Value.</strong> Break-even extra sales = monthly AI cost ÷ gross profit on a first sale (conservative), with a second figure using 12-month customer value for repeat buyers.</li>
-        <li><strong>Recommendation.</strong> 50% cost score (lower 36-month TCO is better) and 50% weighted non-cost score; for high-ticket businesses cost weighs 25%. A robustness check moves each weight ±10 points and reports a close call if the winner changes.</li>
+        <li><strong>Volume.</strong> Requests per month = users per day × requests per user × 30, growing each month until growth stops. Document processing counts documents × pages × tokens per page instead; agents count tasks × steps.</li>
+        <li><strong>API cost.</strong> (input tokens × input price + output tokens × output price) ÷ 1,000,000 per request, with cached and batch prices where they apply, plus database, hosting, vector database, voice and maintenance labour.</li>
+        <li><strong>Self-hosting.</strong> Quality need → model size → GPU memory → cheapest GPU that fits → number of GPUs for peak traffic, covering prompt reading, answer writing and the memory long prompts need, with 30% headroom. GPUs run 730 hours a month.</li>
+        <li><strong>SaaS.</strong> The cheapest plan whose limits fit your volume, at list price.</li>
+        <li><strong>Total cost of ownership.</strong> One-time build cost plus every month's cost, recomputed as volume grows and as AI and GPU prices fall by a yearly rate you set; options are ranked on present value.</li>
+        <li><strong>Value.</strong> Break-even extra sales = monthly AI cost ÷ gross profit per sale; staff time freed counts as money saved only in the share you set.</li>
+        <li><strong>Recommendation.</strong> Cost score and non-cost score weighted 50/50 (25/75 for high-ticket businesses), checked by moving each weight ±10 points and by 300 simulations of the uncertain figures.</li>
       </ul>
-      <p>Every formula is written out in <a href="https://github.com/KaunteyAcharya/ai-stack-advisor/blob/main/docs/METHODOLOGY.md" rel="noopener">METHODOLOGY.md</a>.</p>
+      <p>The full method below gives every formula, and the reference data gives every number used, with its source and the date it was last checked.</p>
     </section>
 
-    <section>
-      <h2>Prices and exchange rates</h2>
-      <p>Every price comes from an official vendor pricing page and records its source link and the date it was last checked. Values that could not be verified are marked as samples, and the tool shows a banner whenever a sample value affects a result. A weekly automated check opens an issue for prices older than 30 days.</p>
+    <!-- GEN:method (scripts/build-about.mjs) -->
+<section class="method" aria-labelledby="method">
+<h2 id="method">Full method: every formula</h2>
+<p>This document explains every calculation in AI Stack Advisor in plain language. The code lives in <a href="https://github.com/KaunteyAcharya/ai-stack-advisor/tree/main/engine" rel="noopener"><code>engine/</code></a>; each section names the file.</p>
+<p><strong>Conventions</strong></p>
+<ul>
+<li>All money is computed in <strong>USD</strong> and converted to the display currency only when shown.</li>
+<li>A month is <strong>30 days</strong> and <strong>730 hours</strong>.</li>
+<li>Percentages in the inputs are 0–100. Month index <code>m = 0</code> is month 1.</li>
+<li>Every number marked <em>assumption</em> can be edited in the advisor's form.</li>
+</ul>
+<h2 id="method-1">1. Volume <span class="code-ref"><code>engine/costs.js</code> → <code>volume</code></span></h2>
+<p>Volume depends on the use case.</p>
+<p><strong>Chatbot, voice agent, data assistant, internal copilot</strong></p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mtext>requests per month</mtext><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>users per day</mtext><mo>×</mo><mtext>requests per user</mtext><mo>×</mo><mn>30</mn><mo>×</mo><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>g</mi><msup><mo stretchy="false">)</mo><mrow><mi>min</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>m</mi><mo separator="true">,</mo><mtext> </mtext><mi>M</mi><mo stretchy="false">)</mo></mrow></msup></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mtext>conversations per month</mtext><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>users per day</mtext><mo>×</mo><mn>30</mn><mo>×</mo><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>g</mi><msup><mo stretchy="false">)</mo><mrow><mi>min</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>m</mi><mo separator="true">,</mo><mtext> </mtext><mi>M</mi><mo stretchy="false">)</mo></mrow></msup><mspace width="1em"/><mtext>(or the value you enter)</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{requests per month}(m) &amp;= \text{users per day} \times \text{requests per user} \times 30 \times (1 + g)^{\min(m,\ M)} \\
+\text{conversations per month}(m) &amp;= \text{users per day} \times 30 \times (1 + g)^{\min(m,\ M)} \quad \text{(or the value you enter)}
+\end{aligned}</annotation></semantics></math></div>
+<p>Here <em>m</em> is the month (<em>m</em> = 0 is month 1) and <em>g</em> the monthly growth. <strong>Growth stops</strong> after <em>M</em> months (<code>growth_months</code>, default 12); volume is flat afterwards. Without this, 5% a month for 36 months grows volume about 5.8×, and the 36-month total depends mostly on the growth guess. Every report also shows <strong>TCO-36 with no growth</strong> next to the grown figure.</p>
+<p><strong>Document processing.</strong> One request per document. Users per day count only toward seat pricing unless &quot;chat over documents&quot; is on.</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mtext>requests per month</mtext><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>documents per month</mtext><mo>×</mo><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>g</mi><msup><mo stretchy="false">)</mo><mi>m</mi></msup></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>input tokens per document</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>pages per document</mtext><mo>×</mo><mtext>tokens per page</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>output tokens per document</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>the value you enter (default 800)</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{requests per month}(m) &amp;= \text{documents per month} \times (1 + g)^{m} \\
+\text{input tokens per document} &amp;= \text{pages per document} \times \text{tokens per page} \\
+\text{output tokens per document} &amp;= \text{the value you enter (default 800)}
+\end{aligned}</annotation></semantics></math></div>
+<p>With <strong>chat over documents</strong>, chat requests (<code>users_per_day × requests_per_user × 30</code>) are added, each with the chat token counts. Cost stays exact because the average tokens per request are weighted by request count, and LLM cost is linear in tokens. Nothing is counted twice.</p>
+<p><strong>Peak load</strong> (sizes self-hosted GPUs):</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>peak requests per second</mtext><mo>=</mo><mfrac><mrow><mo stretchy="false">(</mo><mtext>requests per month</mtext><mo>÷</mo><mn>30</mn><mo stretchy="false">)</mo><mo>×</mo><mtext>peak-hour share</mtext></mrow><mn>3600</mn></mfrac></mrow><annotation encoding="application/x-tex">\text{peak requests per second} = \frac{(\text{requests per month} \div 30) \times \text{peak-hour share}}{3600}</annotation></semantics></math></div>
+<h2 id="method-2">2. Option B: API-based <span class="code-ref"><code>apiMonthly</code></span></h2>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>LLM cost per request</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mrow><mtext>input</mtext><mo>×</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>c</mi><mo stretchy="false">)</mo><mo>×</mo><mtext>input price</mtext><mo>+</mo><mtext>input</mtext><mo>×</mo><mi>c</mi><mo>×</mo><mtext>cached price</mtext><mo>+</mo><mtext>output</mtext><mo>×</mo><mtext>output price</mtext></mrow><mn>1,000,000</mn></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>LLM monthly</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>requests per month</mtext><mo>×</mo><mtext>LLM cost per request</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>API monthly</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>LLM monthly</mtext><mo>+</mo><mtext>managed DB</mtext><mo>+</mo><mtext>hosting</mtext><mo>+</mo><msub><mtext>vector DB</mtext><mtext>(if RAG)</mtext></msub></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mo>+</mo><msub><mtext>voice</mtext><mtext>(voice agent)</mtext></msub><mo>+</mo><msub><mtext>OCR</mtext><mtext>(if set)</mtext></msub><mo>+</mo><msub><mtext>maintenance hours</mtext><mi>B</mi></msub><mo>×</mo><mtext>engineer hourly</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{LLM cost per request} &amp;= \frac{\text{input} \times (1 - c) \times \text{input price} + \text{input} \times c \times \text{cached price} + \text{output} \times \text{output price}}{1{,}000{,}000} \\
+\text{LLM monthly} &amp;= \text{requests per month} \times \text{LLM cost per request} \\
+\text{API monthly} &amp;= \text{LLM monthly} + \text{managed DB} + \text{hosting} + \text{vector DB}_{\text{(if RAG)}} \\
+&amp;\quad + \text{voice}_{\text{(voice agent)}} + \text{OCR}_{\text{(if set)}} + \text{maintenance hours}_B \times \text{engineer hourly}
+\end{aligned}</annotation></semantics></math></div>
+<p>The quality need picks the model tier: <code>basic</code> → budget tier, <code>good</code> → mid tier, <code>best_available</code> → premium tier (<code>data/prices.json</code>).</p>
+<p><strong>Provider</strong> (<code>llmCandidates</code>, <code>llmModelFor</code>). Prices are held for four providers (Google Gemini, OpenAI, Anthropic Claude, Mistral), each with a budget and a mid model and, except Mistral, a premium model. With the default setting, &quot;Cheapest for this workload&quot;, every provider's model for the tier is priced on this workload's own request (input, output and cached tokens, at batch prices where batch is on) and the cheapest is used; providers with no model at that tier are left out. If you choose a provider, its model is used, falling back to its mid model when it has none at the tier. The analyst view lists every provider's cost per request and in month 1. Option D's API share uses the same model. Prices that change on a known date (an introductory price) are stored with that date; the later price is used, because it applies to almost all of a 36-month plan.</p>
+<p><strong>Prompt caching.</strong> <em>c</em> is the share of each request's input that repeats across requests (system prompt, instructions, earlier agent steps) and is served from the provider's cache at the published cached-input price (about a tenth of the input price for most models). Caching only applies when the average prompt is at least the provider's minimum (4,096 tokens for Gemini, 1,024 for OpenAI, 512 for Anthropic, none listed for Mistral), so short prompts may get no discount from some providers. Defaults: 40% for chat and voice, 30% for internal tools, 10% for documents, 40–50% for agents. Storage fees for explicit caches are not modelled. Self-hosted servers cache repeated prefixes too, with no minimum: the same share <em>c</em> skips prompt reading on the GPU (<a href="#method-4">section 4</a>).</p>
+<h2 id="method-2b">2b. Option E: Hosted open model <span class="code-ref"><code>hostedOpenMonthly</code></span></h2>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>open monthly</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>requests per month</mtext><mo>×</mo><msub><mtext>LLM cost per request</mtext><mtext>(open-weight model’s price)</mtext></msub></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mo>+</mo><mtext>managed DB</mtext><mo>+</mo><mtext>hosting</mtext><mo>+</mo><msub><mtext>vector DB</mtext><mtext>(if RAG)</mtext></msub><mo>+</mo><mtext>voice</mtext><mo>+</mo><mtext>OCR</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mo>+</mo><msub><mtext>maintenance hours</mtext><mi>E</mi></msub><mo>×</mo><mtext>engineer hourly</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{open monthly} &amp;= \text{requests per month} \times \text{LLM cost per request}_{\text{(open-weight model&#x27;s price)}} \\
+&amp;\quad + \text{managed DB} + \text{hosting} + \text{vector DB}_{\text{(if RAG)}} + \text{voice} + \text{OCR} \\
+&amp;\quad + \text{maintenance hours}_E \times \text{engineer hourly}
+\end{aligned}</annotation></semantics></math></div>
+<p>The same open-weight model size that self-hosting would run (<code>data/selfhost.json</code>: small, medium or large for the quality need), bought per token from an inference provider instead of on rented GPUs (<code>llm_open_hosted</code> in <code>data/prices.json</code>). There is no fixed GPU cost, so it scales from zero like option B, but it carries the full open-model quality gap like option C (<a href="#method-12">section 12</a>). Data is processed by the inference provider, so option E is excluded when data must stay in-house. If no open-model price is in the data, option E is shown as unavailable.</p>
+<h2 id="method-3">3. Voice add-on: voice agents only, every option <span class="code-ref"><code>voiceMonthly</code></span></h2>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>voice minutes</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>conversations per month</mtext><mo>×</mo><mtext>minutes per conversation</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>TTS per minute</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>TTS price per 1,000 characters</mtext><mo>×</mo><mfrac><mtext>spoken characters per minute (assumption: 750)</mtext><mn>1000</mn></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>voice monthly</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>voice minutes</mtext><mo>×</mo><mo stretchy="false">(</mo><mtext>STT per minute</mtext><mo>+</mo><mtext>TTS per minute</mtext><mo>+</mo><mtext>telephony per minute</mtext><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{voice minutes} &amp;= \text{conversations per month} \times \text{minutes per conversation} \\
+\text{TTS per minute} &amp;= \text{TTS price per 1,000 characters} \times \frac{\text{spoken characters per minute (assumption: 750)}}{1000} \\
+\text{voice monthly} &amp;= \text{voice minutes} \times (\text{STT per minute} + \text{TTS per minute} + \text{telephony per minute})
+\end{aligned}</annotation></semantics></math></div>
+<p>Self-hosted speech-to-text and text-to-speech run on the rented GPUs, so the self-hosted option pays <strong>telephony only</strong>. In the hybrid option, the self-hosted share pays telephony only and the API share pays all three.</p>
+<h2 id="method-4">4. Option C: Self-hosted <span class="code-ref"><code>selfhostMonthly</code>, <code>engine/capacity.js</code></span></h2>
+<p>The GPU choice is an explicit chain of <strong>assumptions</strong> in <code>data/selfhost.json</code>:</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Quality need</th><th scope="col">Model size class</th><th scope="col">VRAM needed</th><th scope="col">Cheapest GPU that fits</th></tr></thead>
+<tbody>
+<tr><td>basic</td><td>~8B, 16-bit</td><td>22 GB</td><td>L4 24 GB</td></tr>
+<tr><td>good</td><td>~32B, 4-bit</td><td>40 GB</td><td>L40S 48 GB</td></tr>
+<tr><td>best_available</td><td>~70B, 4-bit</td><td>64 GB</td><td>A100 80 GB</td></tr>
+</tbody></table></div>
+<p>A request uses the GPU twice: <strong>reading the prompt</strong> (prefill, limited by compute) and <strong>writing the answer</strong> (decode). Both share the same GPU time, so their loads add up. Requests in flight also keep their context in GPU memory (the KV cache), so long prompts can need more GPUs for memory than for compute. Speeds per GPU class are assumptions in <code>prices.json</code> (<code>gpu_throughput</code>): answer writing in output tokens/second with batching, and prompt reading from the NVIDIA datasheet:</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>prompt-reading speed (tokens/s)</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>≈</mo><mfrac><mrow><mtext>dense FP16 TFLOPS</mtext><mo>×</mo><mn>50</mn><mi mathvariant="normal">%</mi><mtext> utilisation</mtext></mrow><mrow><mn>2</mn><mo>×</mo><mtext>parameters</mtext></mrow></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>L4, 8B model:</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mfrac><mrow><mn>121</mn><mo>×</mo><mn>0.5</mn></mrow><mrow><mn>16</mn><mtext> GFLOP per token</mtext></mrow></mfrac><mo>≈</mo><mn>3,800</mn></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>L40S, 32B model:</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mfrac><mrow><mn>362</mn><mo>×</mo><mn>0.5</mn></mrow><mn>64</mn></mfrac><mo>≈</mo><mn>2,800</mn></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>A100, 70B model:</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mfrac><mrow><mn>312</mn><mo>×</mo><mn>0.5</mn></mrow><mn>140</mn></mfrac><mo>≈</mo><mn>1,100</mn></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{prompt-reading speed (tokens/s)} &amp;\approx \frac{\text{dense FP16 TFLOPS} \times 50\%\ \text{utilisation}}{2 \times \text{parameters}} \\[6pt]
+\text{L4, 8B model:} &amp;\quad \frac{121 \times 0.5}{16\ \text{GFLOP per token}} \approx 3{,}800 \\
+\text{L40S, 32B model:} &amp;\quad \frac{362 \times 0.5}{64} \approx 2{,}800 \\
+\text{A100, 70B model:} &amp;\quad \frac{312 \times 0.5}{140} \approx 1{,}100
+\end{aligned}</annotation></semantics></math></div>
+<p>Memory per GPU and per token (<code>data/selfhost.json</code>, assumptions): 90% of VRAM is usable; the weights take 16 / 18 / 40 GB; the KV cache takes 128 / 256 / 320 KB per token (from the layouts of Llama 3.1 8B, Qwen 2.5 32B and Llama 3.3 70B at 16 bits). One answer is written at about 30 tokens/second while batched.</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>prompt seconds</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mrow><mtext>input tokens</mtext><mo>×</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>c</mi><mo stretchy="false">)</mo></mrow><mtext>prompt-reading tokens/s</mtext></mfrac><mspace width="1em"/><mtext>(cached share </mtext><mi>c</mi><mtext> skips this)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>prefill load</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>peak requests/s</mtext><mo>×</mo><mtext>prompt seconds</mtext><mo>×</mo><mtext>overhead</mtext><mspace width="1em"/><mtext>(GPUs busy reading prompts)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>decode load</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>peak requests/s</mtext><mo>×</mo><mfrac><mtext>output tokens</mtext><mtext>GPU output tokens/s</mtext></mfrac><mo>×</mo><mtext>overhead</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>concurrent</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>peak requests/s</mtext><mo>×</mo><mrow><mo fence="true">(</mo><mtext>prompt seconds</mtext><mo>+</mo><mfrac><mtext>output tokens</mtext><mn>30</mn></mfrac><mo fence="true">)</mo></mrow><mspace width="1em"/><mtext>(Little’s law)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>KV room (GB)</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>VRAM</mtext><mo>×</mo><mn>0.9</mn><mo>−</mo><mtext>weights (GB)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>memory load</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mrow><mtext>concurrent</mtext><mo>×</mo><mo stretchy="false">(</mo><mtext>input tokens</mtext><mo>+</mo><mtext>output tokens</mtext><mi mathvariant="normal">/</mi><mn>2</mn><mo stretchy="false">)</mo><mo>×</mo><mtext>KV MB per token</mtext></mrow><mrow><mn>1024</mn><mo>×</mo><mtext>KV room (GB)</mtext></mrow></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>GPUs</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>round up</mtext><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mi>max</mi><mo>⁡</mo><mo stretchy="false">(</mo><mtext>prefill load</mtext><mo>+</mo><mtext>decode load</mtext><mo separator="true">,</mo><mtext> memory load</mtext><mo stretchy="false">)</mo><mo>×</mo><mn>1.3</mn><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mtext>(30% headroom; at least 1 GPU, or 2 with high availability)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>overhead</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mn>1.3</mn><mtext> for a voice agent with real-time latency, otherwise </mtext><mn>1</mn></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>GPU monthly</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>GPUs</mtext><mo>×</mo><mtext>GPU hourly price</mtext><mo>×</mo><mn>730</mn><mspace width="1em"/><mtext>(always on)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>ops monthly</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><msub><mtext>maintenance hours</mtext><mi>C</mi></msub><mo>×</mo><mtext>engineer hourly</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>self-host monthly</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>GPU monthly</mtext><mo>+</mo><mtext>self-managed DB</mtext><mo>+</mo><mtext>storage</mtext><mo>+</mo><mtext>monitoring</mtext><mo>+</mo><mtext>ops monthly</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mo>+</mo><msub><mtext>telephony</mtext><mtext>(voice)</mtext></msub><mo>+</mo><msub><mtext>OCR</mtext><mtext>(if set)</mtext></msub></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{prompt seconds} &amp;= \frac{\text{input tokens} \times (1 - c)}{\text{prompt-reading tokens/s}} \quad \text{(cached share } c \text{ skips this)} \\
+\text{prefill load} &amp;= \text{peak requests/s} \times \text{prompt seconds} \times \text{overhead} \quad \text{(GPUs busy reading prompts)} \\
+\text{decode load} &amp;= \text{peak requests/s} \times \frac{\text{output tokens}}{\text{GPU output tokens/s}} \times \text{overhead} \\
+\text{concurrent} &amp;= \text{peak requests/s} \times \left(\text{prompt seconds} + \frac{\text{output tokens}}{30}\right) \quad \text{(Little&#x27;s law)} \\
+\text{KV room (GB)} &amp;= \text{VRAM} \times 0.9 - \text{weights (GB)} \\
+\text{memory load} &amp;= \frac{\text{concurrent} \times (\text{input tokens} + \text{output tokens} / 2) \times \text{KV MB per token}}{1024 \times \text{KV room (GB)}} \\
+\text{GPUs} &amp;= \text{round up}\big(\max(\text{prefill load} + \text{decode load},\ \text{memory load}) \times 1.3\big) \\
+&amp;\quad \text{(30\% headroom; at least 1 GPU, or 2 with high availability)} \\
+\text{overhead} &amp;= 1.3 \text{ for a voice agent with real-time latency, otherwise } 1 \\[6pt]
+\text{GPU monthly} &amp;= \text{GPUs} \times \text{GPU hourly price} \times 730 \quad \text{(always on)} \\
+\text{ops monthly} &amp;= \text{maintenance hours}_C \times \text{engineer hourly} \\
+\text{self-host monthly} &amp;= \text{GPU monthly} + \text{self-managed DB} + \text{storage} + \text{monitoring} + \text{ops monthly} \\
+&amp;\quad + \text{telephony}_{\text{(voice)}} + \text{OCR}_{\text{(if set)}}
+\end{aligned}</annotation></semantics></math></div>
+<p>The report says which limit sets the GPU count (reading prompts, writing answers, or memory). The cheapest GPU class that holds the model is used, unless one request's full context does not fit in its KV cache; then the next GPU class that holds it is used, and if none does, a warning says larger GPUs or a model split across GPUs would be needed (not costed). With several workloads (<a href="#method-10d">section 10d</a>), the three loads are added up on the largest model's GPUs. Serving engines, quantisation and batching change these speeds a lot: benchmark your own setup and replace the assumptions.</p>
+<h2 id="method-5">5. Option A: SaaS <span class="code-ref"><code>saasMonthly</code></span></h2>
+<p>Three pricing types are modelled. Each plan in <code>prices.json</code> lists the use cases it fits.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Type</th><th scope="col">Cost per month</th><th scope="col">Example</th></tr></thead>
+<tbody>
+<tr><td><code>per_seat</code></td><td>max(seats, min_seats) × seat price; only if seats ≤ max seats</td><td>AI assistant seats for internal copilots</td></tr>
+<tr><td><code>per_conversation</code></td><td>tier price; only if conversations ≤ tier limit</td><td>Chatbot with N AI conversations included</td></tr>
+<tr><td><code>per_resolution</code></td><td>max(seats, min_seats) × seat price + conversations × deflection × price per resolution</td><td>AI agent billed per resolved conversation plus required agent seats</td></tr>
+</tbody></table></div>
+<p>Seat prices follow the chosen <strong>billing period</strong>: annual (the default) uses the vendor's listed annual seat price where one exists, otherwise the single listed price.</p>
+<p>The <strong>cheapest plan whose limits fit</strong> is used. If no plan fits the volume, the cheapest one is shown with the flag &quot;volume exceeds plan limit; contact the vendor&quot;. If no plan fits the use case at all (for example document processing), SaaS is excluded. Maintenance labour (<code>maintenance_hours_A × engineer_hourly</code>) and voice costs are added. All SaaS prices are <strong>list prices</strong>; volume customers usually negotiate.</p>
+<h2 id="method-6">6. Option D: Hybrid <span class="code-ref"><code>hybridMonthly</code></span></h2>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>hybrid monthly</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>self-host monthly</mtext><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mtext>sized for </mtext><mi>s</mi><mtext> of peak traffic</mtext><mo separator="true">,</mo><mtext> ops</mtext><mo>=</mo><msub><mtext>maintenance hours</mtext><mi>D</mi></msub><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mo>+</mo><mtext>LLM monthly</mtext><mo>×</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>s</mi><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mo>+</mo><mtext>managed DB</mtext><mo>+</mo><mtext>hosting</mtext><mo>+</mo><msub><mtext>vector DB</mtext><mtext>(if RAG)</mtext></msub><mo>+</mo><mtext>voice</mtext><mo>+</mo><mtext>OCR</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{hybrid monthly} &amp;= \text{self-host monthly}\big(\text{sized for } s \text{ of peak traffic},\ \text{ops} = \text{maintenance hours}_D\big) \\
+&amp;\quad + \text{LLM monthly} \times (1 - s) \\
+&amp;\quad + \text{managed DB} + \text{hosting} + \text{vector DB}_{\text{(if RAG)}} + \text{voice} + \text{OCR}
+\end{aligned}</annotation></semantics></math></div>
+<p><strong>Automatic split.</strong> When you leave the share blank (the default), the engine computes option D's 36-month cost for a self-hosted share <em>s</em> = 10%, 20% … 90% and uses the cheapest. You can also set the share yourself. If data may not leave the company, the hybrid is limited to its self-hosted share (<em>s</em> = 100%).</p>
+<h2 id="method-7">7. One-time and maintenance costs</h2>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Option</th><th scope="col">Build hours</th><th scope="col">Maintenance hours/month</th></tr></thead>
+<tbody>
+<tr><td>A. SaaS</td><td>20</td><td>4</td></tr>
+<tr><td>B. API</td><td>120</td><td>10</td></tr>
+<tr><td>C. Self-hosted</td><td>240</td><td>30</td></tr>
+<tr><td>D. Hybrid</td><td>300</td><td>35</td></tr>
+<tr><td>E. Hosted open model</td><td>120</td><td>10</td></tr>
+</tbody></table></div>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>one-time</mtext><mo>=</mo><mo stretchy="false">(</mo><mtext>build hours</mtext><mo>+</mo><mtext>evaluation hours</mtext><mo stretchy="false">)</mo><mo>×</mo><mtext>engineer hourly</mtext></mrow><annotation encoding="application/x-tex">\text{one-time} = (\text{build hours} + \text{evaluation hours}) \times \text{engineer hourly}</annotation></semantics></math></div>
+<p>Evaluation hours (A 8, B 16, C 32, D 32, E 32) cover testing quality on your own data before launch; open models need more testing. All of these are editable assumptions. The default engineer hourly cost comes from the region and is a sample value.</p>
+<h2 id="method-8">8. Total cost of ownership <span class="code-ref"><code>engine/tco.js</code></span></h2>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><msub><mtext>TCO</mtext><mn>12</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>one-time</mtext><mo>+</mo><munderover><mo>∑</mo><mrow><mi>m</mi><mo>=</mo><mn>0</mn></mrow><mn>11</mn></munderover><mtext>monthly cost</mtext><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><msub><mtext>TCO</mtext><mn>36</mn></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>one-time</mtext><mo>+</mo><munderover><mo>∑</mo><mrow><mi>m</mi><mo>=</mo><mn>0</mn></mrow><mn>35</mn></munderover><mtext>monthly cost</mtext><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{TCO}_{12} &amp;= \text{one-time} + \sum_{m=0}^{11} \text{monthly cost}(m) \\
+\text{TCO}_{36} &amp;= \text{one-time} + \sum_{m=0}^{35} \text{monthly cost}(m)
+\end{aligned}</annotation></semantics></math></div>
+<p>Monthly cost is recomputed every month with the grown volume, so the GPU count (and SaaS tier) can step up.</p>
+<p><strong>Prices that change over time.</strong> AI token prices (options B, D, E, and the AI part of SaaS per-task plans) and GPU rental prices (options C and D) are multiplied each month by</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>price factor</mtext><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mtext>yearly change</mtext><msup><mo stretchy="false">)</mo><mrow><mi>m</mi><mi mathvariant="normal">/</mi><mn>12</mn></mrow></msup><mspace width="1em"/><mtext>(AI default </mtext><mrow><mo>−</mo><mn>30</mn><mi mathvariant="normal">%</mi></mrow><mtext> a year, GPUs </mtext><mrow><mo>−</mo><mn>15</mn><mi mathvariant="normal">%</mi></mrow><mtext>; month 1 uses today’s price)</mtext></mrow><annotation encoding="application/x-tex">\text{price factor}(m) = (1 + \text{yearly change})^{m/12} \quad \text{(AI default } {-30\%} \text{ a year, GPUs } {-15\%}\text{; month 1 uses today&#x27;s price)}</annotation></semantics></math></div>
+<p>Labour, hosting, databases and SaaS seat prices are kept at today's price. The defaults are estimates from recent price cuts, not forecasts; set both to 0 for today's prices throughout. The report shows the 36-month cost both ways.</p>
+<p><strong>Present value.</strong> Options are ranked on present value, not the plain total, because money spent in year 3 is worth less than money spent now:</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mtext>PV</mtext><mn>36</mn></msub><mo>=</mo><mtext>one-time</mtext><mo>+</mo><munderover><mo>∑</mo><mrow><mi>m</mi><mo>=</mo><mn>0</mn></mrow><mn>35</mn></munderover><mfrac><mrow><mtext>monthly cost</mtext><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>r</mi><msup><mo stretchy="false">)</mo><mrow><mo stretchy="false">(</mo><mi>m</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mn>12</mn></mrow></msup></mrow></mfrac><mspace width="1em"/><mo stretchy="false">(</mo><mi>r</mi><mo>=</mo><mtext>annual discount rate, default </mtext><mn>10</mn><mi mathvariant="normal">%</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{PV}_{36} = \text{one-time} + \sum_{m=0}^{35} \frac{\text{monthly cost}(m)}{(1 + r)^{(m + 1)/12}} \quad (r = \text{annual discount rate, default } 10\%)</annotation></semantics></math></div>
+<h2 id="method-9">9. Break-even: API vs self-hosting <span class="code-ref"><code>engine/breakeven.js</code></span></h2>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>fixed self-host monthly</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><msub><mtext>GPU monthly</mtext><mtext>(1 GPU, or 2 for high availability)</mtext></msub><mo>+</mo><mtext>ops monthly</mtext><mo>+</mo><mtext>self-managed DB</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>API cost per request</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>LLM cost per request</mtext><mo>+</mo><mtext>hosted voice (STT + TTS) per request</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>break-even requests</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mtext>fixed self-host monthly</mtext><mtext>API cost per request</mtext></mfrac></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{fixed self-host monthly} &amp;= \text{GPU monthly}_{\text{(1 GPU, or 2 for high availability)}} + \text{ops monthly} + \text{self-managed DB} \\
+\text{API cost per request} &amp;= \text{LLM cost per request} + \text{hosted voice (STT + TTS) per request} \\
+\text{break-even requests} &amp;= \frac{\text{fixed self-host monthly}}{\text{API cost per request}}
+\end{aligned}</annotation></semantics></math></div>
+<p>The <strong>cost-vs-volume curve</strong> recomputes every option's month-1 cost at 41 log-spaced volumes from 1,000 to 10,000,000 requests/month. Crossovers are found where two curves change order, interpolated in log-volume.</p>
+<h2 id="method-10">10. Value and ROI <span class="code-ref"><code>engine/value.js</code></span></h2>
+<p>Headline figures are <strong>conservative</strong>: they use the gross profit on a <strong>first sale</strong> only. Extra sales come from the conversion uplift you test (see the sensitivity tables below).</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>gross profit per sale</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>ticket</mtext><mo>×</mo><mtext>margin</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>value per conversation</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>gross profit per sale</mtext><mo>×</mo><mtext>conversion rate</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>acceptable AI cost per conversation</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>value per conversation</mtext><mo>×</mo><mtext>target share</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>AI cost per conversation</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mtext>option monthly</mtext><mtext>conversations per month</mtext></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>sales per month</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>conversations per month</mtext><mo>×</mo><mtext>conversion rate</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>AI cost per sale</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mtext>option monthly</mtext><mtext>sales per month</mtext></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>AI cost as a share of ticket</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mtext>AI cost per sale</mtext><mtext>ticket</mtext></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>break-even extra sales</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>round up</mtext><mrow><mo fence="true">(</mo><mfrac><mtext>option monthly</mtext><mtext>gross profit per sale</mtext></mfrac><mo fence="true">)</mo></mrow></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>break-even uplift (points)</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mtext>break-even extra sales</mtext><mtext>conversations per month</mtext></mfrac><mo>×</mo><mn>100</mn></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>support savings</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>conversations</mtext><mo>×</mo><mtext>human share</mtext><mo>×</mo><mtext>deflection</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mo>×</mo><mtext>human cost per conversation</mtext><mo>×</mo><mtext>cash share</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>ROI</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mrow><mtext>extra sales</mtext><mo>×</mo><mtext>gross profit per sale</mtext><mo>+</mo><mtext>support savings</mtext><mo>−</mo><mtext>option monthly</mtext></mrow><mtext>option monthly</mtext></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>payback months</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mtext>one-time</mtext><mtext>net monthly benefit</mtext></mfrac><mspace width="1em"/><mtext>(never, if the benefit is 0 or less)</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{gross profit per sale} &amp;= \text{ticket} \times \text{margin} \\
+\text{value per conversation} &amp;= \text{gross profit per sale} \times \text{conversion rate} \\
+\text{acceptable AI cost per conversation} &amp;= \text{value per conversation} \times \text{target share} \\
+\text{AI cost per conversation} &amp;= \frac{\text{option monthly}}{\text{conversations per month}} \\
+\text{sales per month} &amp;= \text{conversations per month} \times \text{conversion rate} \\
+\text{AI cost per sale} &amp;= \frac{\text{option monthly}}{\text{sales per month}} \\
+\text{AI cost as a share of ticket} &amp;= \frac{\text{AI cost per sale}}{\text{ticket}} \\
+\text{break-even extra sales} &amp;= \text{round up}\left(\frac{\text{option monthly}}{\text{gross profit per sale}}\right) \\
+\text{break-even uplift (points)} &amp;= \frac{\text{break-even extra sales}}{\text{conversations per month}} \times 100 \\
+\text{support savings} &amp;= \text{conversations} \times \text{human share} \times \text{deflection} \\
+&amp;\quad \times \text{human cost per conversation} \times \text{cash share} \\
+\text{ROI} &amp;= \frac{\text{extra sales} \times \text{gross profit per sale} + \text{support savings} - \text{option monthly}}{\text{option monthly}} \\
+\text{payback months} &amp;= \frac{\text{one-time}}{\text{net monthly benefit}} \quad \text{(never, if the benefit is 0 or less)}
+\end{aligned}</annotation></semantics></math></div>
+<p><strong>Time freed vs money saved.</strong> Staff time freed (support savings here, agents and internal tools below) becomes money saved only through fewer hires, less overtime or fewer contractors, or time sold as paid work. The cash share (&quot;Share of time freed that becomes money saved&quot;, default 100%, an estimate) sets how much of it counts; the rest is shown as extra capacity. Error costs (agents) are real costs and always count in full.</p>
+<p>The human share is the share of conversations that reach a person today (default 20%, set per industry preset). Without it, every chatbot conversation would count as a saved human conversation, which overstates savings for high-volume chat.</p>
+<p><strong>LTV line (repeat buyers).</strong> The second figure uses the value a new customer brings over 12 months:</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>customer value over 12 months</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>gross profit per sale</mtext><mo>×</mo><mtext>purchases per year</mtext><mspace width="1em"/><mtext>(or the value you enter)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>new customers needed</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>round up</mtext><mrow><mo fence="true">(</mo><mfrac><mtext>option monthly</mtext><mtext>customer value over 12 months</mtext></mfrac><mo fence="true">)</mo></mrow></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{customer value over 12 months} &amp;= \text{gross profit per sale} \times \text{purchases per year} \quad \text{(or the value you enter)} \\
+\text{new customers needed} &amp;= \text{round up}\left(\frac{\text{option monthly}}{\text{customer value over 12 months}}\right)
+\end{aligned}</annotation></semantics></math></div>
+<p>It is shown as &quot;~17 new customers/month, value realised over 12 months&quot;.</p>
+<p><strong>Sensitivity tables</strong></p>
+<ul>
+<li>ROI and payback at conversion uplifts of 0, 0.5, 1, 2 and 5 percentage points.</li>
+<li>Deflection rates of 20, 40, 60 and 80%. Deflection changes both support savings and the per-resolution SaaS cost.</li>
+</ul>
+<p><strong>Business profile.</strong> Thresholds are in USD-equivalent so they behave the same in every currency:</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Profile</th><th scope="col">Rule</th></tr></thead>
+<tbody>
+<tr><td><code>high_ticket</code></td><td>ticket ≥ USD 10,000</td></tr>
+<tr><td><code>low_ticket_high_volume</code></td><td>ticket &lt; USD 100 and conversations &gt; 10,000/month</td></tr>
+<tr><td><code>mid_ticket</code></td><td>everything else</td></tr>
+</tbody></table></div>
+<h2 id="method-10b">10b. Workflow agents <span class="code-ref"><code>engine/agents.js</code>, <code>agentValue</code> in <code>engine/value.js</code></span></h2>
+<p>Six agent workflows are modelled: invoice processing, lead qualification, report generation, ticket triage, stock data → report, and an end-to-end content engine. They are priced <strong>per task</strong> and valued on <strong>time saved</strong>, not on sales.</p>
+<p><strong>Tokens per task.</strong> A task runs <em>s</em> LLM steps. Each step re-reads the base prompt plus everything produced so far:</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mtext>input</mtext><mo stretchy="false">(</mo><mtext>step </mtext><mi>i</mi><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>base</mtext><mo>+</mo><mo stretchy="false">(</mo><mi>i</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>×</mo><mtext>growth</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>average input per call</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>base</mtext><mo>+</mo><mtext>growth</mtext><mo>×</mo><mfrac><mrow><mi>s</mi><mo>−</mo><mn>1</mn></mrow><mn>2</mn></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>LLM calls per month</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>tasks</mtext><mo>×</mo><mi>s</mi><mspace width="1em"/><mo stretchy="false">(</mo><mo>+</mo><mtext> replies, for the content engine</mtext><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{input}(\text{step } i) &amp;= \text{base} + (i - 1) \times \text{growth} \\
+\text{average input per call} &amp;= \text{base} + \text{growth} \times \frac{s - 1}{2} \\
+\text{LLM calls per month} &amp;= \text{tasks} \times s \quad (+\ \text{replies, for the content engine})
+\end{aligned}</annotation></semantics></math></div>
+<p>So cost grows faster than the number of steps: that is why long agents are expensive.</p>
+<p><strong>Batch prices.</strong> Work that can wait (invoices, leads, reports) uses the provider's published batch prices (about 50% lower) for the API and hybrid options. The workflow-SaaS option uses standard prices, because the tool calls your API key directly.</p>
+<p><strong>Costs every option pays</strong> (they do not depend on where the LLM runs):</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Workflow</th><th scope="col">Extra cost lines</th></tr></thead>
+<tbody>
+<tr><td>Invoice processing</td><td>OCR: pages × price per page (your assumption)</td></tr>
+<tr><td>Lead qualification</td><td>External API fee per task, e.g. enrichment lookups (your assumption)</td></tr>
+<tr><td>Stock data → report</td><td>Market data feed per month (sample: business licences cost more; get a quote)</td></tr>
+<tr><td>Content engine</td><td>AI video (seconds × price per second), AI images, X API (posts and replies × price per request, plus owned reads)</td></tr>
+</tbody></table></div>
+<p><strong>Content engine scope.</strong> Only replies to comments on <strong>your own</strong> posts are modelled, through official APIs. Automated comments on other accounts' posts break Instagram, X and TikTok rules.</p>
+<p><strong>Workflow SaaS (option A).</strong> A workflow tool priced by task tiers (each step is one tool task) plus your own LLM API key at standard prices. The smallest tier that fits <code>tasks × tool steps per task</code> is used; annual or monthly billing follows the billing input.</p>
+<p><strong>Value.</strong></p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>hours saved</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mrow><mtext>tasks</mtext><mo>×</mo><mtext>success rate</mtext><mo>×</mo><mtext>minutes per task</mtext></mrow><mn>60</mn></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>review hours</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mrow><mtext>tasks</mtext><mo>×</mo><mtext>review share</mtext><mo>×</mo><mtext>review minutes</mtext></mrow><mn>60</mn></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>net hours</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>hours saved</mtext><mo>−</mo><mtext>review hours</mtext><mspace width="2em"/><mtext>FTE</mtext><mo>=</mo><mfrac><mtext>net hours</mtext><mtext>hours per FTE</mtext></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>time value</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>net hours</mtext><mo>×</mo><mtext>staff hourly</mtext><mspace width="1em"/><mtext>(capacity freed)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>benefit</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>time value</mtext><mo>×</mo><mtext>cash share</mtext><mo>−</mo><mtext>tasks</mtext><mo>×</mo><mtext>error rate</mtext><mo>×</mo><mtext>cost per error</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>net</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>benefit</mtext><mo>−</mo><mtext>AI monthly cost</mtext><mspace width="2em"/><mtext>payback</mtext><mo>=</mo><mfrac><mtext>build cost</mtext><mtext>net</mtext></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>break-even success rate</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mrow><mtext>AI cost</mtext><mo>+</mo><mtext>review cost</mtext><mo>×</mo><mtext>cash share</mtext><mo>+</mo><mtext>error cost</mtext></mrow><mrow><mtext>tasks</mtext><mo>×</mo><mfrac><mtext>minutes per task</mtext><mn>60</mn></mfrac><mo>×</mo><mtext>staff hourly</mtext><mo>×</mo><mtext>cash share</mtext></mrow></mfrac><mo>×</mo><mn>100</mn></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{hours saved} &amp;= \frac{\text{tasks} \times \text{success rate} \times \text{minutes per task}}{60} \\
+\text{review hours} &amp;= \frac{\text{tasks} \times \text{review share} \times \text{review minutes}}{60} \\
+\text{net hours} &amp;= \text{hours saved} - \text{review hours} \qquad \text{FTE} = \frac{\text{net hours}}{\text{hours per FTE}} \\
+\text{time value} &amp;= \text{net hours} \times \text{staff hourly} \quad \text{(capacity freed)} \\
+\text{benefit} &amp;= \text{time value} \times \text{cash share} - \text{tasks} \times \text{error rate} \times \text{cost per error} \\
+\text{net} &amp;= \text{benefit} - \text{AI monthly cost} \qquad \text{payback} = \frac{\text{build cost}}{\text{net}} \\
+\text{break-even success rate} &amp;= \frac{\text{AI cost} + \text{review cost} \times \text{cash share} + \text{error cost}}{\text{tasks} \times \frac{\text{minutes per task}}{60} \times \text{staff hourly} \times \text{cash share}} \times 100
+\end{aligned}</annotation></semantics></math></div>
+<p>Staff hourly cost and hours per FTE (160, or 192 in India) come from the region and are sample assumptions. A sensitivity table shows the result at 50%, 70% and 90% completion. Agent use cases use the profile <code>automation</code>, with a cost weight of 50%.</p>
+<h2 id="method-10c">10c. Internal tools (data assistant, internal copilot)</h2>
+<p>Internal tools don't make sales, so they are valued on <strong>staff time saved</strong>:</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>hours saved</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mrow><mtext>requests</mtext><mo>×</mo><mtext>minutes saved per request</mtext></mrow><mn>60</mn></mfrac><mspace width="1em"/><mtext>(default 3 minutes, editable)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>benefit</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>hours saved</mtext><mo>×</mo><mtext>staff hourly</mtext><mo>×</mo><mtext>cash share</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>break-even minutes per request</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mtext>AI monthly cost</mtext><mrow><mo stretchy="false">(</mo><mtext>requests</mtext><mo>÷</mo><mn>60</mn><mo stretchy="false">)</mo><mo>×</mo><mtext>staff hourly</mtext><mo>×</mo><mtext>cash share</mtext></mrow></mfrac></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{hours saved} &amp;= \frac{\text{requests} \times \text{minutes saved per request}}{60} \quad \text{(default 3 minutes, editable)} \\
+\text{benefit} &amp;= \text{hours saved} \times \text{staff hourly} \times \text{cash share} \\
+\text{break-even minutes per request} &amp;= \frac{\text{AI monthly cost}}{(\text{requests} \div 60) \times \text{staff hourly} \times \text{cash share}}
+\end{aligned}</annotation></semantics></math></div>
+<p>Per-seat SaaS for internal tools charges a seat for every daily user (<code>max(seats, users per day)</code>). A sensitivity table shows the result at half and double the minutes saved.</p>
+<h2 id="method-10d">10d. Several workloads: one stack or a mix <span class="code-ref"><code>engine/portfolio.js</code></span></h2>
+<p>Any number of workloads, up to one per use case (11), are compared together, for example a chatbot, a data assistant and an invoice agent. Country, data rules, team, tax and growth are shared; use case, volume, quality and value are per workload.</p>
+<p><strong>Up to 5 workloads, every combination</strong> of options and workloads is evaluated (4ⁿ, at most 1,024; options a workload can't use are skipped). <strong>From 6 workloads</strong> (4¹¹ ≈ 4 million combinations), a local search starts from each single stack and from each workload's own best option, then moves one workload at a time to another option while the score improves; the report says how many combinations it checked. On five workloads it finds the same answer as the full search (tested). Workloads on the same stack share its fixed costs:</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>stack monthly</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mstyle scriptlevel="0" displaystyle="false"><mo>∑</mo><mtext>workload usage costs (LLM, voice, media, OCR, per-task fees, SaaS plans)</mtext></mstyle></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mo>+</mo><mtext>shared infrastructure, once (databases, hosting, vector DB, storage, monitoring)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mo>+</mo><mtext>pooled GPUs (C, D): every workload’s loads added on the largest model’s GPUs</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mspace width="1em"/><mo>+</mo><mtext>maintenance hours</mtext><mo>×</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mn>1</mn><mo>+</mo><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>×</mo><mi>e</mi><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo><mo>×</mo><mtext>engineer hourly</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>build cost</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>build hours</mtext><mo>×</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mn>1</mn><mo>+</mo><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>×</mo><mi>e</mi><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo><mo>×</mo><mtext>engineer hourly</mtext><mspace width="1em"/><mtext>(per stack)</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{stack monthly} &amp;= \textstyle\sum \text{workload usage costs (LLM, voice, media, OCR, per-task fees, SaaS plans)} \\
+&amp;\quad + \text{shared infrastructure, once (databases, hosting, vector DB, storage, monitoring)} \\
+&amp;\quad + \text{pooled GPUs (C, D): every workload&#x27;s loads added on the largest model&#x27;s GPUs} \\
+&amp;\quad + \text{maintenance hours} \times \big(1 + (n - 1) \times e\big) \times \text{engineer hourly} \\
+\text{build cost} &amp;= \text{build hours} \times \big(1 + (n - 1) \times e\big) \times \text{engineer hourly} \quad \text{(per stack)}
+\end{aligned}</annotation></semantics></math></div>
+<p>Here <em>n</em> is the number of workloads on the stack and <em>e</em> the extra effort for each one beyond the first (50% by default). Mixing stacks therefore pays each stack's base build and maintenance effort, which is the real cost of running two vendors and two skill sets.</p>
+<p><strong>Score per combination:</strong> cost score (lowest 36-month TCO ÷ this one) and the average non-cost score of each workload on its option, weighted as for a single workload. The report names the recommended combination, the best single stack, the best mix, the cheapest, and the gap between single and mix.</p>
+<p><strong>Per-workload value:</strong> each stack's cost is split across its workloads in proportion to their own usage costs (equally if none), then valued with that workload's own model (sales, time saved or support savings).</p>
+<p><strong>Pooling:</strong> the report says from which month one self-hosted stack for everything becomes cheaper than one API stack, and whether any workload would get there on its own.</p>
+<h2 id="method-10e">10e. &quot;Not sure?&quot; ranges <span class="code-ref"><code>engine/ranges.js</code></span></h2>
+<p>Any of these inputs can be marked <strong>not sure</strong>. The analysis then runs twice more, with every uncertain input at the low end of its band and then at the high end, and the summary shows the spread of each result (monthly cost, 36-month cost, time saved, net benefit, payback, break-even sales, support savings) and whether the recommendation changes.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Input</th><th scope="col">Low end</th><th scope="col">High end</th></tr></thead>
+<tbody>
+<tr><td>Users per day, tasks per month</td><td>× 0.6</td><td>× 1.5</td></tr>
+<tr><td>Monthly growth</td><td>0%</td><td>× 2 (at least 5%)</td></tr>
+<tr><td>Tasks done without a person</td><td>− 20 points</td><td>+ 10 points</td></tr>
+<tr><td>Minutes per task today</td><td>× 0.7</td><td>× 1.3</td></tr>
+<tr><td>Minutes saved per request</td><td>× 0.5</td><td>× 1.5</td></tr>
+<tr><td>Conversion rate</td><td>× 0.7</td><td>× 1.3</td></tr>
+<tr><td>Share the AI handles</td><td>− 20 points</td><td>+ 15 points</td></tr>
+<tr><td>Conversations reaching a person</td><td>× 0.5</td><td>× 1.5</td></tr>
+</tbody></table></div>
+<p>Percentages are kept between 0 and 100. With several workloads, a marked input moves in every workload. Moving all uncertain inputs together gives the outer bounds, not a probability range.</p>
+<h2 id="method-11">11. Non-cost scoring <span class="code-ref"><code>engine/scoring.js</code></span></h2>
+<p>Each option gets a score from 0 to 5 per criterion <em>k</em>, with weight <em>w</em>. The default weights are privacy 25%, time to launch 20%, team fit 20%, quality 15%, lock-in 10% and scalability 10%; all are adjustable.</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>non-cost score</mtext><mo>=</mo><mfrac><mrow><munder><mo>∑</mo><mi>k</mi></munder><msub><mi>w</mi><mi>k</mi></msub><mo>×</mo><msub><mtext>score</mtext><mi>k</mi></msub></mrow><mrow><mn>5</mn><mo>×</mo><munder><mo>∑</mo><mi>k</mi></munder><msub><mi>w</mi><mi>k</mi></msub></mrow></mfrac><mspace width="1em"/><mo>∈</mo><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">\text{non-cost score} = \frac{\sum_k w_k \times \text{score}_k}{5 \times \sum_k w_k} \quad \in [0, 1]</annotation></semantics></math></div>
+<p>The tables below are <strong>generated from the code</strong> (<code>node scripts/scoring-table.mjs --write</code>), and a test fails if they drift out of sync.</p>
+<h3 id="method-base-scores-0-5-before-rules">Base scores (0–5, before rules)</h3>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Criterion</th><th scope="col">Option</th><th scope="col">Score</th><th scope="col">Reason</th></tr></thead>
+<tbody>
+<tr><td>Data privacy &amp; compliance fit</td><td>A</td><td>2</td><td>Data sits with a third-party vendor under its standard terms.</td></tr>
+<tr><td>Data privacy &amp; compliance fit</td><td>B</td><td>3</td><td>Data goes to an API provider, but you control storage and prompts.</td></tr>
+<tr><td>Data privacy &amp; compliance fit</td><td>C</td><td>5</td><td>Data never leaves infrastructure you control.</td></tr>
+<tr><td>Data privacy &amp; compliance fit</td><td>D</td><td>4</td><td>Most traffic stays in-house; complex requests go to an API.</td></tr>
+<tr><td>Data privacy &amp; compliance fit</td><td>E</td><td>3</td><td>Data goes to an inference provider, as with an API build.</td></tr>
+<tr><td>Time to launch</td><td>A</td><td>5</td><td>Configure and launch in days.</td></tr>
+<tr><td>Time to launch</td><td>B</td><td>4</td><td>A few weeks of integration work.</td></tr>
+<tr><td>Time to launch</td><td>C</td><td>2</td><td>GPU setup, model serving and evaluation take months.</td></tr>
+<tr><td>Time to launch</td><td>D</td><td>1</td><td>Needs both the API build and the self-hosted stack, plus routing.</td></tr>
+<tr><td>Time to launch</td><td>E</td><td>4</td><td>Same integration work as an API build; no GPUs to set up.</td></tr>
+<tr><td>Team capability fit</td><td>A</td><td>5</td><td>Needs almost no engineering.</td></tr>
+<tr><td>Team capability fit</td><td>B</td><td>4</td><td>Needs at least one developer.</td></tr>
+<tr><td>Team capability fit</td><td>C</td><td>3</td><td>Needs DevOps/MLOps skills to run GPUs.</td></tr>
+<tr><td>Team capability fit</td><td>D</td><td>3</td><td>Needs DevOps/MLOps skills plus API integration.</td></tr>
+<tr><td>Team capability fit</td><td>E</td><td>4</td><td>Needs at least one developer; the provider runs the GPUs.</td></tr>
+<tr><td>Quality fit</td><td>A</td><td>4</td><td>Good vendor models, limited customisation.</td></tr>
+<tr><td>Quality fit</td><td>B</td><td>5</td><td>Direct access to frontier models.</td></tr>
+<tr><td>Quality fit</td><td>C</td><td>4</td><td>Open models are good for routine tasks.</td></tr>
+<tr><td>Quality fit</td><td>D</td><td>4</td><td>Frontier models for hard requests, open models for routine ones.</td></tr>
+<tr><td>Quality fit</td><td>E</td><td>4</td><td>Open models are good for routine tasks.</td></tr>
+<tr><td>Vendor lock-in (higher = less lock-in)</td><td>A</td><td>1</td><td>Workflows, data and pricing tied to one vendor.</td></tr>
+<tr><td>Vendor lock-in (higher = less lock-in)</td><td>B</td><td>3</td><td>Prompts are portable, but the code targets one provider's API.</td></tr>
+<tr><td>Vendor lock-in (higher = less lock-in)</td><td>C</td><td>5</td><td>Open weights; you can move providers any time.</td></tr>
+<tr><td>Vendor lock-in (higher = less lock-in)</td><td>D</td><td>4</td><td>Mostly portable; the API part can be swapped.</td></tr>
+<tr><td>Vendor lock-in (higher = less lock-in)</td><td>E</td><td>4</td><td>Open weights served by many providers, or later on your own GPUs.</td></tr>
+<tr><td>Scalability</td><td>A</td><td>3</td><td>Scales, but cost rises with volume and plan limits.</td></tr>
+<tr><td>Scalability</td><td>B</td><td>5</td><td>Provider scales automatically.</td></tr>
+<tr><td>Scalability</td><td>C</td><td>3</td><td>You add GPUs yourself as traffic grows.</td></tr>
+<tr><td>Scalability</td><td>D</td><td>4</td><td>API absorbs peaks above self-hosted capacity.</td></tr>
+<tr><td>Scalability</td><td>E</td><td>5</td><td>Provider scales automatically.</td></tr>
+</tbody></table></div>
+<h3 id="method-rules">Rules</h3>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Rule</th><th scope="col">Effect</th><th scope="col">Reason</th></tr></thead>
+<tbody>
+<tr><td><code>data_must_stay</code></td><td>exclude A, B, E; note D</td><td>SaaS and API send data outside the company, which the requirement forbids.</td></tr>
+<tr><td><code>no_training_only</code></td><td>privacy: A-1, B-1, E-1; note A, B, E</td><td>Only paid tiers with no-training terms are allowed, which narrows vendor choice.</td></tr>
+<tr><td><code>personal_data_external</code></td><td>privacy: A-1, B-1, E-1; note B, E</td><td>Personal data at an external provider adds compliance work.</td></tr>
+<tr><td><code>residency_required</code></td><td>privacy: A-1, B-1, E-1; note A, B, E</td><td>External vendors may not offer processing in the required region.</td></tr>
+<tr><td><code>no_engineers</code></td><td>teamFit: B=1, C=0, D=0, E=1; warn E, B, C, D</td><td>Custom builds need engineers the company does not have.</td></tr>
+<tr><td><code>small_team</code></td><td>teamFit: B=5, E=5</td><td>A small team handles an API build comfortably.</td></tr>
+<tr><td><code>no_devops</code></td><td>teamFit: C=1, D=1; warn C, D</td><td>Running GPUs without DevOps/MLOps skills is high-risk.</td></tr>
+<tr><td><code>strong_devops</code></td><td>teamFit: C=5, D=4</td><td>Strong DevOps makes self-hosting a good team fit.</td></tr>
+<tr><td><code>best_quality</code></td><td>quality: C=2, D=3, E=2; note C, E</td><td>Open models may trail frontier models when the best quality is needed.</td></tr>
+<tr><td><code>open_model_gap</code></td><td>note C, E</td><td>Open models may trail frontier models; worth testing before committing.</td></tr>
+<tr><td><code>basic_quality</code></td><td>quality: C=5, D=5, E=5</td><td>Open models are fully adequate for basic quality needs.</td></tr>
+<tr><td><code>realtime_voice</code></td><td>scalability: C-1; note C</td><td>Real-time voice on a small GPU pool risks latency at peak.</td></tr>
+<tr><td><code>ha_without_devops</code></td><td>scalability: C-1, D-1; note C</td><td>High availability needs on-call operations.</td></tr>
+</tbody></table></div>
+<h2 id="method-12">12. Recommendation <span class="code-ref"><code>engine/recommend.js</code></span></h2>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>decision cost</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><msub><mtext>PV</mtext><mn>36</mn></msub><mo>+</mo><mtext>PV of the value given up through lower answer quality</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>cost score</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mtext>lowest decision cost among viable options</mtext><mtext>this option’s decision cost</mtext></mfrac><mspace width="1em"/><mo>∈</mo><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>final score</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><msub><mi>w</mi><mtext>cost</mtext></msub><mo>×</mo><mtext>cost score</mtext><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><msub><mi>w</mi><mtext>cost</mtext></msub><mo stretchy="false">)</mo><mo>×</mo><mtext>non-cost score</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><msub><mi>w</mi><mtext>cost</mtext></msub></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mn>50</mn><mi mathvariant="normal">%</mi><mo separator="true">,</mo><mtext> or </mtext><mn>25</mn><mi mathvariant="normal">%</mi><mtext> for high-ticket profiles (adjustable)</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{decision cost} &amp;= \text{PV}_{36} + \text{PV of the value given up through lower answer quality} \\
+\text{cost score} &amp;= \frac{\text{lowest decision cost among viable options}}{\text{this option&#x27;s decision cost}} \quad \in [0, 1] \\
+\text{final score} &amp;= w_{\text{cost}} \times \text{cost score} + (1 - w_{\text{cost}}) \times \text{non-cost score} \\
+w_{\text{cost}} &amp;= 50\%, \text{ or } 25\% \text{ for high-ticket profiles (adjustable)}
+\end{aligned}</annotation></semantics></math></div>
+<p><strong>Quality-adjusted cost.</strong> Open-weight models may complete fewer tasks than frontier API models. The <strong>open-model quality gap</strong> (default 10 percentage points, an assumption you should replace with your own evaluation) lowers, for self-hosted and the hosted open model (and for the hybrid's self-hosted share): the completion rate of agents, the minutes saved by internal tools, and the deflection rate (support savings) of chat. The benefit an option loses compared with the best option, grown with volume and discounted like costs, is added to its decision cost. The comparison table shows this as &quot;Decision cost&quot;. Several workloads (<a href="#method-10d">section 10d</a>) are ranked on present value; the quality gap is not yet applied there.</p>
+<p><strong>Your own test results.</strong> If you run the same set of real examples through an API model and an open model and enter both results (% of tasks each got right), they replace the assumed gap:</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>gap</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mi>max</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mtext> API result</mtext><mo>−</mo><mtext>open result</mtext><mo stretchy="false">)</mo><mspace width="1em"/><mtext>(percentage points)</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>agents: completion rate</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>API result</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{gap} &amp;= \max(0,\ \text{API result} - \text{open result}) \quad \text{(percentage points)} \\
+\text{agents: completion rate} &amp;= \text{API result}
+\end{aligned}</annotation></semantics></math></div>
+<p><strong>Cost per successful task.</strong> When there is a success rate to go on (agents, or any use case with test results), the comparison table adds:</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>cost per success</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mfrac><mtext>month-1 cost</mtext><mrow><mtext>units</mtext><mo>×</mo><mtext>success rate</mtext></mrow></mfrac><mspace width="2em"/><mtext>units</mtext><mo>=</mo><mtext>tasks (agents) or requests</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>success rate</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mrow><mo fence="true">{</mo><mtable rowspacing="0.36em" columnalign="left left" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>API result</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>options A, B</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>API result</mtext><mo>−</mo><mtext>gap</mtext></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>options C, E</mtext></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mtext>API result</mtext><mo>−</mo><mtext>gap</mtext><mo>×</mo><mi>s</mi></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mtext>option D</mtext></mstyle></mtd></mtr></mtable></mrow></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{cost per success} &amp;= \frac{\text{month-1 cost}}{\text{units} \times \text{success rate}} \qquad \text{units} = \text{tasks (agents) or requests} \\
+\text{success rate} &amp;= \begin{cases} \text{API result} &amp; \text{options A, B} \\ \text{API result} - \text{gap} &amp; \text{options C, E} \\ \text{API result} - \text{gap} \times s &amp; \text{option D} \end{cases}
+\end{aligned}</annotation></semantics></math></div>
+<p><strong>Switch point</strong> (<code>switchPoint</code>). With growth, another option can become cheaper later. The report names the first month from which another option costs less per month than the recommended one for every remaining month, and the volume then. Options already cheaper in month 1 are left out, because they lost on other criteria. Without a switch, an API-based recommendation shows the break-even volume from <a href="#method-9">section 9</a>.</p>
+<p>Excluded options get no score. The explanation is built from fixed sentence templates; no AI-generated text is used.</p>
+<p><strong>Robustness check.</strong> Each criterion weight, and the cost weight, is moved 10 percentage points up and down, one at a time. If the top option never changes, the report says <strong>&quot;Robust&quot;</strong>. Otherwise it says <strong>&quot;Close call, decided by X&quot;</strong> and names the weight that flips it.</p>
+<h2 id="method-12b">12b. How sure is this? Simulation and tornado <span class="code-ref"><code>engine/simulate.js</code></span></h2>
+<p><strong>Simulation.</strong> The analysis is re-run 300 times. Each run draws every uncertain quantity from a triangular distribution (low, typical, high):</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Quantity</th><th scope="col">Low</th><th scope="col">Typical</th><th scope="col">High</th></tr></thead>
+<tbody>
+<tr><td>LLM API prices</td><td>× 0.8</td><td>× 1</td><td>× 1.25</td></tr>
+<tr><td>GPU rental prices</td><td>× 0.75</td><td>× 1</td><td>× 1.3</td></tr>
+<tr><td>GPU throughput (assumption)</td><td>× 0.7</td><td>× 1</td><td>× 1.3</td></tr>
+<tr><td>Engineer hourly cost</td><td>× 0.75</td><td>× 1</td><td>× 1.3</td></tr>
+<tr><td>Build and maintenance hours</td><td>× 0.7</td><td>× 1</td><td>× 1.5</td></tr>
+<tr><td>Staff hourly cost (time-valued use cases)</td><td>× 0.75</td><td>× 1</td><td>× 1.3</td></tr>
+<tr><td>Open-model quality gap</td><td>0 points</td><td>your value (or your test result)</td><td>max(20, your value)</td></tr>
+<tr><td>Share of time freed that becomes money saved</td><td>min(50%, your value)</td><td>your value</td><td>100%</td></tr>
+<tr><td>Yearly change in AI prices</td><td>min(−60%, your value)</td><td>your value</td><td>max(+10%, your value)</td></tr>
+<tr><td>Yearly change in GPU prices</td><td>min(−35%, your value)</td><td>your value</td><td>max(+5%, your value)</td></tr>
+<tr><td>Inputs you marked &quot;Not sure&quot;</td><td>band from <a href="#method-10e">section 10e</a></td><td>your value</td><td>band from <a href="#method-10e">section 10e</a></td></tr>
+</tbody></table></div>
+<p>The report shows how often each option is recommended (&quot;Robust&quot; at 90% or more, otherwise &quot;Close call&quot;), and the 10th, 50th and 90th percentiles of the recommended option's monthly cost, net monthly benefit and 36-month present value. Net benefit is time saved (agents, internal tools) or support savings with no sales uplift (chat), minus AI cost. Runs are seeded, so the same inputs always give the same result. Related quantities move together: each correlated pair shares a normal draw (a Gaussian copula), giving a correlation of about 0.5 between AI API and GPU rental prices (one hardware market), 0.6 between their yearly trends, and 0.7 between engineer and staff pay (one labour market). These correlations are judgements; everything else is drawn independently. With test results entered, the quality gap is varied by moving the open model's result.</p>
+<p><strong>Tornado.</strong> Each quantity, including every applicable input whether marked or not, is moved alone to its low and its high end. Bars show the net monthly benefit at each end, sorted by swing; ⚑ marks a quantity that changes the recommendation. The longest bars are the assumptions worth checking first.</p>
+<h2 id="method-12c">12c. Assumption register, labour costs and token counts</h2>
+<p><strong>Assumption register</strong> (<code>engine/register.js</code>, <code>data/assumptions.json</code>). Every number a result rests on is listed with its value, source, last-reviewed date and a confidence level:</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Confidence</th><th scope="col">Meaning</th><th scope="col">Examples</th></tr></thead>
+<tbody>
+<tr><td>verified</td><td>Taken from an official or primary source</td><td>Vendor price pages, tax authorities, ECB exchange rates, caching minimum</td></tr>
+<tr><td>benchmark</td><td>An official statistic used as a proxy</td><td>Average labour cost per hour from national statistics offices</td></tr>
+<tr><td>estimate</td><td>A reasoned judgement or sample value</td><td>Build hours, completion rates, GPU throughput, the open-model quality gap</td></tr>
+</tbody></table></div>
+<p>Inputs show the confidence of their default value (hover for the source). The report lists every figure behind the result, estimates first, with counts per level. The confidence card names the assumptions that move the result most (from the tornado) and are still estimates: <strong>check these first</strong>.</p>
+<p><strong>Staff hourly costs</strong> (<code>data/labour.json</code>) come from official statistics, fully loaded with employer on-costs:</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Region</th><th scope="col">Statistic</th><th scope="col">Period</th><th scope="col">On-costs</th></tr></thead>
+<tbody>
+<tr><td>United States</td><td>BLS ECEC, office and administrative support, total compensation per hour</td><td>June 2026</td><td>included</td></tr>
+<tr><td>Eurozone (8 countries)</td><td>Eurostat average hourly labour cost, whole economy (<code>lc_lci_lev</code>)</td><td>2025 (Belgium 2024)</td><td>included</td></tr>
+<tr><td>United Kingdom</td><td>ONS ASHE median hourly earnings, full time</td><td>April 2025</td><td>employer NI 15% above £5,000 + 3% pension (verified): × 1.156</td></tr>
+<tr><td>Canada</td><td>Statistics Canada LFS average hourly wage</td><td>September 2026</td><td>× 1.10 (estimate)</td></tr>
+<tr><td>Australia</td><td>ABS full-time adult ordinary time earnings ÷ 38 hours</td><td>May 2026</td><td>12% super guarantee (verified): × 1.12</td></tr>
+<tr><td>Switzerland</td><td>FSO median gross monthly wage ÷ 173.2 hours</td><td>2024</td><td>× 1.15 (estimate)</td></tr>
+<tr><td>India</td><td>PLFS 2025 regular wage/salaried monthly earnings (mean of men's and women's figures) ÷ 192 hours</td><td>2025</td><td>× 1.13 EPF (estimate)</td></tr>
+<tr><td>UAE</td><td>No official statistic found</td><td>—</td><td>sample value (estimate)</td></tr>
+</tbody></table></div>
+<p>These are whole-economy or occupation-group averages, a proxy for the person doing the work today; your own payroll figure is better. The US engineer cost uses BLS &quot;professional and related&quot; total compensation ($74.42/hour); other regions' engineer costs are still estimates. A test checks that <code>labour.json</code> and the region defaults agree.</p>
+<p><strong>Keeping the data current</strong> (<code>.github/workflows/data-refresh.yml</code>). Every Monday a workflow:</p>
+<ul>
+<li>cross-checks each AI model price (<code>scripts/update-prices.mjs</code>) against OpenRouter's price for that provider's own endpoint and LiteLLM's model price file. Prices match within 0.5% rounding (an introductory price counts while it runs). When both sources agree on a different price, and the change is under 80%, the price is updated; batch and cached prices that neither source reports are scaled by the same ratio. Anything else (the sources disagree, only one reports it, a large change, an introductory period) is listed and never changed;</li>
+<li>refreshes labour costs (<code>scripts/update-labour.mjs</code>) from the Eurostat <code>lc_lci_lev</code> API (eight euro-area countries) and the BLS ECEC API (US staff, series <code>CMU1010000220000D</code>, and engineers, <code>CMU1010000120000D</code>). Changes over 25% are listed, not applied. USD figures are recalculated when the exchange rate has moved more than 2% since they were computed. The other countries' statistics have no open API and are listed for a manual check;</li>
+<li>runs the tests on the result and opens a pull request whose description lists every change with links to the official price pages. Nothing reaches the site until a person merges it. When nothing changed but something needs a look, it updates an issue instead.</li>
+</ul>
+<p><strong>Token counts</strong> (<code>scripts/count-tokens.mjs</code>, <code>data/samples</code>, <code>data/token-measurements.json</code>). Four representative sample texts (a chatbot request with knowledge-base excerpts, a two-page invoice, a support ticket, a report step with a month of data) are counted. Without an API key the script estimates (characters ÷ 4); with <code>GEMINI_API_KEY</code> set it measures with Google's free <code>countTokens</code> endpoint, and the register marks the counts verified. By the estimate, the samples come out at 0.3–0.6 × the current defaults; the defaults are kept (higher token counts are the conservative direction for API cost) until measured counts are available.</p>
+<h2 id="method-13">13. Tax <span class="code-ref"><code>engine/tax.js</code>, <code>data/taxes.json</code></span></h2>
+<p>Vendor prices exclude indirect tax. Each country has one or more tax variants (for example Canadian provinces, or US states that do or do not tax SaaS). Each variant lists its components with a rate, whether it is reclaimable, and an official source.</p>
+<div class="formula math"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.25em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mtext>counted</mtext><mo stretchy="false">(</mo><mtext>component</mtext><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>not reclaimable, or the business is not registered or is exempt</mtext></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mtext>non-reclaimable rate</mtext></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mstyle scriptlevel="0" displaystyle="false"><mo>∑</mo><mtext>rates of the counted components</mtext></mstyle></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mtext>tax line</mtext><mo stretchy="false">(</mo><mtext>option</mtext><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mo stretchy="false">(</mo><mtext>option monthly</mtext><mo>−</mo><mtext>labour</mtext><mo stretchy="false">)</mo><mo>×</mo><mtext>non-reclaimable rate</mtext></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\text{counted}(\text{component}) &amp;= \text{not reclaimable, or the business is not registered or is exempt} \\
+\text{non-reclaimable rate} &amp;= \textstyle\sum \text{rates of the counted components} \\
+\text{tax line}(\text{option}) &amp;= (\text{option monthly} - \text{labour}) \times \text{non-reclaimable rate}
+\end{aligned}</annotation></semantics></math></div>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Country</th><th scope="col">Tax on cloud / SaaS purchases</th><th scope="col">Reclaimable by a registered business?</th></tr></thead>
+<tbody>
+<tr><td>India</td><td>GST 18% (IT / OIDAR services)</td><td>Yes (input tax credit)</td></tr>
+<tr><td>United States</td><td>State + local sales tax, where the state taxes SaaS (you enter the rate)</td><td>No</td></tr>
+<tr><td>Canada</td><td>GST 5% or HST 13–15% by province; plus QST 9.975% (Quebec) or PST/RST 6–7% (BC, Saskatchewan, Manitoba)</td><td>GST/HST/QST yes; PST/RST no</td></tr>
+<tr><td>Australia</td><td>GST 10%</td><td>Yes</td></tr>
+<tr><td>UAE</td><td>VAT 5%</td><td>Yes</td></tr>
+<tr><td>United Kingdom</td><td>VAT 20%</td><td>Yes</td></tr>
+<tr><td>Switzerland</td><td>VAT 8.1%</td><td>Yes</td></tr>
+<tr><td>Eurozone</td><td>VAT: DE 19%, NL 21%, IE 23%, FR 20%, BE 21%, AT 20%, FI 25.5%, LU 17%</td><td>Yes</td></tr>
+</tbody></table></div>
+<p>Labour (build and maintenance hours) is treated as in-house staff and carries no tax. Healthcare and education presets default to &quot;not reclaimable&quot; because those sectors are often VAT/GST-exempt. Rates that could not be checked against an official page are flagged as samples and listed by the weekly price check. This is not tax advice.</p>
+<p>The API vs self-hosting break-even applies the same tax to external spend on both sides.</p>
+<h2 id="method-14">14. Exchange rates</h2>
+<p><code>data/fx.json</code> holds units of each currency per 1 USD, derived from the ECB euro reference rates (<code>rate_X_per_USD = EUR_X / EUR_USD</code>). The ECB does not publish AED, so AED uses its fixed peg of 3.6725 per USD. A weekly workflow updates the file through a pull request and refuses any rate that moved more than 15% since the last update.</p>
+</section>
+<!-- /GEN:method -->
+
+    <!-- GEN:data (scripts/build-about.mjs) -->
+<section class="method" aria-labelledby="data">
+<h2 id="data">Reference data: every assumption and price</h2>
+<p>These tables are built from the data files the advisor loads (<a href="https://github.com/KaunteyAcharya/ai-stack-advisor/tree/main/data" rel="noopener">data/</a>), so they show exactly the numbers it uses. <strong>verified</strong> means taken from an official vendor or government page; <strong>benchmark</strong> means an official statistic used as a proxy; <strong>estimate</strong> means a reasoned judgement or sample value that you should replace with your own figure. Every estimate can be changed in the advisor's form.</p>
+<h3 id="data-register">Assumption register</h3>
+<p>Assumption register: every number the engine relies on that is not a vendor price, tax rate or exchange rate (those are registered from prices.json, taxes.json and fx.json automatically). Confidence: verified = taken from an official or primary source; benchmark = from an official statistic or published reference used as a proxy; estimate = a reasoned judgement, to be replaced with your own figure or a measurement.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Assumption</th><th scope="col">Value</th><th scope="col">Confidence</th><th scope="col">Source</th><th scope="col">Reviewed</th></tr></thead>
+<tbody>
+<tr><td>Month length</td><td>30 days, 730 hours</td><td><span class="conf conf-verified">verified</span></td><td>Calendar: 365 ÷ 12 ≈ 30 days; 8,760 hours ÷ 12 = 730</td><td>16 Oct 2026</td></tr>
+<tr><td>Tokens per request or step (use-case defaults)</td><td>Chat 1,500 in / 400 out; invoice step 2,500; ticket step 1,200; report step 6,000; …</td><td><span class="conf conf-estimate">estimate</span></td><td>Typical prompt sizes; compared with sample texts in data/samples (see token measurements)</td><td>16 Oct 2026</td></tr>
+<tr><td>Share of input served from cache</td><td>10–50% by use case</td><td><span class="conf conf-estimate">estimate</span></td><td>Share of a prompt that repeats (system prompt, instructions, earlier steps), judged per use case</td><td>16 Oct 2026</td></tr>
+<tr><td>Minimum prompt size for caching</td><td>512 to 4,096 tokens, by provider and model</td><td><span class="conf conf-verified">verified</span></td><td>Each provider's caching documentation, stored per model in data/prices.json (cache_min_tokens)</td><td>3 Nov 2026</td></tr>
+<tr><td>Busiest-hour share of daily traffic</td><td>15% (8% for batch agents)</td><td><span class="conf conf-estimate">estimate</span></td><td>Typical daytime traffic peak for business chat</td><td>16 Oct 2026</td></tr>
+<tr><td>GPU capacity headroom</td><td>× 1.3</td><td><span class="conf conf-estimate">estimate</span></td><td>Capacity-planning margin so peak traffic does not saturate GPUs</td><td>16 Oct 2026</td></tr>
+<tr><td>Extra GPU capacity for real-time voice</td><td>× 1.3</td><td><span class="conf conf-estimate">estimate</span></td><td>Margin for low-latency streaming</td><td>16 Oct 2026</td></tr>
+<tr><td>Open-model memory needs</td><td>8B 16-bit 22 GB (16 GB weights); 32B 4-bit 40 GB (18 GB); 70B 4-bit 64 GB (40 GB). KV cache 128 / 256 / 320 KB per token</td><td><span class="conf conf-estimate">estimate</span></td><td>Weights at the stated precision; KV cache from the reference models' published layouts (layers × KV heads × head size × 2 × 2 bytes); data/selfhost.json</td><td>3 Nov 2026</td></tr>
+<tr><td>GPU prompt-reading speed and answer streaming</td><td>Prefill ≈ 3,800 / 2,800 / 1,100 tokens/sec (L4 8B, L40S 32B, A100 70B); 30 output tokens/sec per answer; 90% of VRAM usable</td><td><span class="conf conf-estimate">estimate</span></td><td>Dense FP16 TFLOPS from NVIDIA datasheets × 50% assumed utilisation ÷ (2 × parameters); per-answer speed and usable memory are judgements. Benchmark your own model and serving engine (<a href="https://www.nvidia.com/en-us/data-center/l40s/" rel="noopener">link</a>)</td><td>3 Nov 2026</td></tr>
+<tr><td>Open-model quality gap</td><td>10 percentage points</td><td><span class="conf conf-estimate">estimate</span></td><td>Judgement; varies widely by task. Applies to self-hosted and hosted open models alike. Replaced by your own test results when you enter both</td><td>3 Nov 2026</td></tr>
+<tr><td>Yearly change in AI and GPU prices</td><td>AI per-token prices −30% a year; GPU rental −15% a year</td><td><span class="conf conf-estimate">estimate</span></td><td>Judgement from 2026 successor models at the same tier: Anthropic Sonnet 4.6 → 5.5 and Opus 4.6 → 5.5 cost 20–33% less, OpenAI's budget tier fell about 50%, while Google raised Gemini Flash and Pro prices for its newer models. GPU rental judged to fall more slowly. Set 0 to plan at today's prices</td><td>3 Nov 2026</td></tr>
+<tr><td>Which model each provider uses per quality level</td><td>Basic = budget model, good = mid model, best = premium model in each provider's line-up</td><td><span class="conf conf-estimate">estimate</span></td><td>Role in each provider's published line-up (data/prices.json); quality is not equal across providers at the same tier, so test on your own task</td><td>3 Nov 2026</td></tr>
+<tr><td>Build hours per option</td><td>SaaS 20, API 120, self-hosted 240, hybrid 300, hosted open model 120</td><td><span class="conf conf-estimate">estimate</span></td><td>Typical small-team effort</td><td>16 Oct 2026</td></tr>
+<tr><td>Maintenance hours per month</td><td>SaaS 4, API 10, self-hosted 30, hybrid 35, hosted open model 10</td><td><span class="conf conf-estimate">estimate</span></td><td>Typical small-team effort</td><td>16 Oct 2026</td></tr>
+<tr><td>Evaluation hours before launch</td><td>SaaS 8, API 16, self-hosted 32, hybrid 32, hosted open model 32</td><td><span class="conf conf-estimate">estimate</span></td><td>Time to build a test set and compare outputs</td><td>16 Oct 2026</td></tr>
+<tr><td>Extra effort per additional workload on a stack</td><td>50% of the base hours</td><td><span class="conf conf-estimate">estimate</span></td><td>Shared setup reused; each workload still needs its own integration and testing</td><td>16 Oct 2026</td></tr>
+<tr><td>Discount rate for present value</td><td>10% a year</td><td><span class="conf conf-estimate">estimate</span></td><td>A common hurdle rate for small businesses; use your own cost of capital</td><td>16 Oct 2026</td></tr>
+<tr><td>Working hours per FTE per month</td><td>160 (192 in India)</td><td><span class="conf conf-estimate">estimate</span></td><td>40-hour week after holidays and leave; 48-hour week in India</td><td>16 Oct 2026</td></tr>
+<tr><td>Agent completion, review and error rates</td><td>By workflow, e.g. invoices 80% completed, 20% reviewed, 1% errors</td><td><span class="conf conf-estimate">estimate</span></td><td>Judgement per workflow; measure on a pilot</td><td>16 Oct 2026</td></tr>
+<tr><td>Minutes a person spends per task today</td><td>By workflow, e.g. invoice 6, ticket 2, report 120</td><td><span class="conf conf-estimate">estimate</span></td><td>Judgement per workflow; time a sample of tasks</td><td>16 Oct 2026</td></tr>
+<tr><td>Staff minutes saved per request (internal tools)</td><td>3 minutes</td><td><span class="conf conf-estimate">estimate</span></td><td>Judgement; time a sample of questions before and after</td><td>16 Oct 2026</td></tr>
+<tr><td>Share of time freed that becomes money saved</td><td>100% (all of it)</td><td><span class="conf conf-estimate">estimate</span></td><td>Judgement. Time freed becomes cash only through fewer hires, less overtime or contractors, or paid work; lower it if staff simply gain capacity</td><td>3 Nov 2026</td></tr>
+<tr><td>Chat conversion, deflection and human share (industry presets)</td><td>By industry, e.g. D2C 3% conversion, 60% deflection, 15% reach a person</td><td><span class="conf conf-estimate">estimate</span></td><td>Illustrative industry defaults (data/presets.json)</td><td>16 Oct 2026</td></tr>
+<tr><td>Spoken characters per minute</td><td>750</td><td><span class="conf conf-estimate">estimate</span></td><td>About 150 words a minute of speech</td><td>16 Oct 2026</td></tr>
+<tr><td>Monthly growth and how long it lasts</td><td>5% for 12 months</td><td><span class="conf conf-estimate">estimate</span></td><td>Placeholder; use your own forecast</td><td>16 Oct 2026</td></tr>
+<tr><td>Ranges for “not sure” inputs and simulations</td><td>See METHODOLOGY 10e and 12b; AI and GPU prices drawn with correlation 0.5, their trends 0.6, engineer and staff pay 0.7</td><td><span class="conf conf-estimate">estimate</span></td><td>Plausible bands chosen for illustration</td><td>3 Nov 2026</td></tr>
+<tr><td>Non-cost scores, weights and profile thresholds</td><td>0–5 scores per option; weights 25/20/20/15/10/10; high ticket ≥ USD 10,000</td><td><span class="conf conf-estimate">estimate</span></td><td>Judgement, written down with a reason per score (METHODOLOGY section 11)</td><td>16 Oct 2026</td></tr>
+</tbody></table></div>
+<h3 id="data-llm-prices">AI model prices (USD per million tokens)</h3>
+<p>The quality need picks the tier: basic → budget, good → mid, best available → premium. By default the cheapest provider for your request size is used (section 2). Batch prices apply to work that can wait; cached input applies to the share of each prompt that repeats, above the provider's minimum prompt size.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Model</th><th scope="col">Provider</th><th scope="col">Tier</th><th scope="col" class="num">Input</th><th scope="col" class="num">Output</th><th scope="col" class="num">Cached input</th><th scope="col" class="num">Batch in / out</th><th scope="col">Cache minimum</th><th scope="col">Source</th><th scope="col">Checked</th></tr></thead>
+<tbody>
+<tr><td>Google Gemini 3.5 Flash-Lite</td><td>Google Gemini</td><td>budget</td><td class="num">$0.30</td><td class="num">$2.50</td><td class="num">$0.030</td><td class="num">$0.150 / $1.25</td><td>4,096 tokens</td><td><a href="https://ai.google.dev/gemini-api/docs/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+<tr><td>Google Gemini 3.8 Flash<br><span class="muted">Introductory $0.75 / $3.75 until 31 Dec 2026; the later price is used</span></td><td>Google Gemini</td><td>mid</td><td class="num">$1.50</td><td class="num">$7.50</td><td class="num">$0.150</td><td class="num">$0.750 / $3.75</td><td>4,096 tokens</td><td><a href="https://ai.google.dev/gemini-api/docs/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+<tr><td>Google Gemini 4 Argon<br><span class="muted">Introductory $2 / $10 until 30 Nov 2026; the later price is used</span></td><td>Google Gemini</td><td>premium</td><td class="num">$4.00</td><td class="num">$20.00</td><td class="num">$0.200</td><td class="num">$2.000 / $10.00</td><td>4,096 tokens</td><td><a href="https://ai.google.dev/gemini-api/docs/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+<tr><td>OpenAI GPT-6 Luna</td><td>OpenAI</td><td>budget</td><td class="num">$0.10</td><td class="num">$0.50</td><td class="num">$0.010</td><td class="num">$0.050 / $0.25</td><td>1,024 tokens</td><td><a href="https://developers.openai.com/api/docs/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+<tr><td>OpenAI GPT-6.1 Terra</td><td>OpenAI</td><td>mid</td><td class="num">$1.00</td><td class="num">$5.00</td><td class="num">$0.050</td><td class="num">$0.500 / $2.50</td><td>1,024 tokens</td><td><a href="https://developers.openai.com/api/docs/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+<tr><td>OpenAI GPT-6.1 Sol</td><td>OpenAI</td><td>premium</td><td class="num">$2.00</td><td class="num">$10.00</td><td class="num">$0.100</td><td class="num">$1.000 / $5.00</td><td>1,024 tokens</td><td><a href="https://developers.openai.com/api/docs/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+<tr><td>Anthropic Claude Haiku 5.5</td><td>Anthropic Claude</td><td>budget</td><td class="num">$0.10</td><td class="num">$0.50</td><td class="num">$0.010</td><td class="num">$0.050 / $0.25</td><td>512 tokens</td><td><a href="https://platform.claude.com/docs/en/about-claude/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+<tr><td>Anthropic Claude Sonnet 5.5</td><td>Anthropic Claude</td><td>mid</td><td class="num">$2.00</td><td class="num">$10.00</td><td class="num">$0.100</td><td class="num">$1.000 / $5.00</td><td>512 tokens</td><td><a href="https://platform.claude.com/docs/en/about-claude/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+<tr><td>Anthropic Claude Opus 5.5</td><td>Anthropic Claude</td><td>premium</td><td class="num">$4.00</td><td class="num">$20.00</td><td class="num">$0.200</td><td class="num">$2.000 / $10.00</td><td>512 tokens</td><td><a href="https://platform.claude.com/docs/en/about-claude/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+<tr><td>Mistral Small 4</td><td>Mistral</td><td>budget</td><td class="num">$0.15</td><td class="num">$0.60</td><td class="num">$0.015</td><td class="num">—</td><td>none listed</td><td><a href="https://docs.mistral.ai/inference/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+<tr><td>Mistral Large 4</td><td>Mistral</td><td>mid</td><td class="num">$0.70</td><td class="num">$2.10</td><td class="num">$0.070</td><td class="num">—</td><td>none listed</td><td><a href="https://docs.mistral.ai/inference/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+</tbody></table></div>
+<h3 id="data-open-prices">Hosted open-model prices (option E, USD per million tokens)</h3>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Model</th><th scope="col">Size class</th><th scope="col" class="num">Input</th><th scope="col" class="num">Output</th><th scope="col">Source</th><th scope="col">Checked</th></tr></thead>
+<tbody>
+<tr><td>Qwen3.5 9B on DeepInfra</td><td>small</td><td class="num">$0.10</td><td class="num">$0.15</td><td><a href="https://deepinfra.com/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+<tr><td>Gemma 4 31B on DeepInfra</td><td>medium</td><td class="num">$0.20</td><td class="num">$0.40</td><td><a href="https://deepinfra.com/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+<tr><td>Llama 3.3 70B on DeepInfra</td><td>large</td><td class="num">$0.10</td><td class="num">$0.32</td><td><a href="https://deepinfra.com/pricing" rel="noopener">price page</a></td><td>3 Nov 2026</td></tr>
+</tbody></table></div>
+<h3 id="data-selfhost">Self-hosting: model sizes and GPU memory</h3>
+<p>ASSUMPTIONS for self-hosting. Chain: quality need → model size class → VRAM needed → cheapest GPU class with enough VRAM (prices.json) → throughput (prices.json gpu_throughput). Open-weight models may trail frontier API models; test on your own task.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Quality need</th><th scope="col">Model class</th><th scope="col">Parameters</th><th scope="col">VRAM needed</th><th scope="col">Weights</th><th scope="col">KV cache per token</th><th scope="col">Why</th></tr></thead>
+<tbody>
+<tr><td>basic</td><td>Small open model (~8B parameters, 16-bit)</td><td>8B</td><td>22 GB</td><td>16 GB</td><td>128 KB</td><td>~16 GB weights + KV cache for batched requests. Llama 3.1 8B layout: 32 layers × 8 KV heads × 128 dims × 2 (K and V) × 2 bytes = 128 KB per token</td></tr>
+<tr><td>good</td><td>Medium open model (~32B parameters, 4-bit quantised)</td><td>32B</td><td>40 GB</td><td>18 GB</td><td>256 KB</td><td>~18 GB weights + KV cache and activation headroom. Qwen 2.5 32B layout: 64 layers × 8 KV heads × 128 dims × 2 × 2 bytes = 256 KB per token</td></tr>
+<tr><td>best available</td><td>Large open model (~70B parameters, 4-bit quantised)</td><td>70B</td><td>64 GB</td><td>40 GB</td><td>320 KB</td><td>~40 GB weights + KV cache for batched requests. Llama 3.3 70B layout: 80 layers × 8 KV heads × 128 dims × 2 × 2 bytes = 320 KB per token</td></tr>
+</tbody></table></div>
+<p>Other self-hosting assumptions: 90% of VRAM is usable; one answer streams at about 30 tokens/second while batched; GPU counts carry 30% headroom; real-time voice adds 30% overhead. Open-weight models may trail frontier models on some tasks; evaluate on your own data before committing.</p>
+<h3 id="data-other-prices">GPU, infrastructure, voice, SaaS and media prices</h3>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Item</th><th scope="col">Type</th><th scope="col">Price (USD, excl. tax)</th><th scope="col">Status</th><th scope="col">Source</th><th scope="col">Checked</th></tr></thead>
+<tbody>
+<tr><td>NVIDIA L4 24 GB (RunPod pod)</td><td>GPU rental</td><td>$0.59/hour, 24 GB VRAM</td><td><span class="conf conf-estimate">estimate</span> sample</td><td><a href="https://www.runpod.io/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>NVIDIA L40S 48 GB (RunPod pod)</td><td>GPU rental</td><td>$1.09/hour, 48 GB VRAM</td><td><span class="conf conf-estimate">estimate</span> sample</td><td><a href="https://www.runpod.io/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>NVIDIA A100 80 GB (RunPod pod)</td><td>GPU rental</td><td>$1.79/hour, 80 GB VRAM</td><td><span class="conf conf-estimate">estimate</span> sample</td><td><a href="https://www.runpod.io/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>L4 throughput assumption (~8B open model, batched serving)</td><td>GPU speed (assumption)</td><td>400 output tokens/s; prompt reading 3,800 tokens/s</td><td><span class="conf conf-estimate">estimate</span></td><td>—</td><td>14 Oct 2026</td></tr>
+<tr><td>L40S throughput assumption (~32B 4-bit open model, batched serving)</td><td>GPU speed (assumption)</td><td>500 output tokens/s; prompt reading 2,800 tokens/s</td><td><span class="conf conf-estimate">estimate</span></td><td>—</td><td>14 Oct 2026</td></tr>
+<tr><td>A100 80 GB throughput assumption (~70B 4-bit open model, batched serving)</td><td>GPU speed (assumption)</td><td>600 output tokens/s; prompt reading 1,100 tokens/s</td><td><span class="conf conf-estimate">estimate</span></td><td>—</td><td>14 Oct 2026</td></tr>
+<tr><td>Managed Postgres (Supabase Pro)</td><td>Managed database</td><td>$25/month</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://supabase.com/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Self-managed Postgres server (DigitalOcean Basic Droplet 2 vCPU / 4 GiB)</td><td>Self-managed database</td><td>$24/month</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.digitalocean.com/pricing/droplets" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Vector database (Pinecone Standard, minimum usage)</td><td>Vector database</td><td>$50/month</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.pinecone.io/pricing/" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>App hosting (DigitalOcean Basic Droplet 1 vCPU / 2 GiB)</td><td>App hosting</td><td>$12/month</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.digitalocean.com/pricing/droplets" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Model and data storage (self-hosted)</td><td>Storage</td><td>$20/month</td><td><span class="conf conf-estimate">estimate</span></td><td>—</td><td>14 Oct 2026</td></tr>
+<tr><td>Monitoring and logging (self-hosted)</td><td>Monitoring</td><td>$30/month</td><td><span class="conf conf-estimate">estimate</span></td><td>—</td><td>14 Oct 2026</td></tr>
+<tr><td>Speech-to-text (Deepgram Nova-3 streaming, monolingual)</td><td>Speech-to-text</td><td>$0.0048/minute</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://deepgram.com/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Text-to-speech (Deepgram Aura-2)</td><td>Text-to-speech</td><td>$0.0300 per 1,000 characters</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://deepgram.com/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Telephony, inbound local (Twilio US)</td><td>Telephony</td><td>$0.0085/minute</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.twilio.com/en-us/voice/pricing/us" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Telephony, inbound local (Twilio UK)</td><td>Telephony</td><td>$0.0100/minute</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.twilio.com/en-us/voice/pricing/gb" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Telephony, inbound (India)</td><td>Telephony</td><td>$0.0100/minute</td><td><span class="conf conf-estimate">estimate</span></td><td>—</td><td>14 Oct 2026</td></tr>
+<tr><td>Telephony, inbound (UAE)</td><td>Telephony</td><td>$0.0200/minute</td><td><span class="conf conf-estimate">estimate</span></td><td>—</td><td>14 Oct 2026</td></tr>
+<tr><td>Telephony, inbound (other regions)</td><td>Telephony</td><td>$0.0100/minute</td><td><span class="conf conf-estimate">estimate</span></td><td>—</td><td>14 Oct 2026</td></tr>
+<tr><td>Per-seat AI assistant (Claude Team, standard seat)</td><td>SaaS plan</td><td>$25/seat/month ($20 billed annually); 2–150 seats</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://claude.com/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Per-conversation AI chatbot (Tidio Lyro, 50 conversations)</td><td>SaaS plan</td><td>$32.50/month for 50 conversations</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.tidio.com/pricing/" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Per-conversation AI chatbot (Tidio Lyro, 1,000 conversations)</td><td>SaaS plan</td><td>$400/month for 1,000 conversations</td><td><span class="conf conf-estimate">estimate</span> sample</td><td><a href="https://www.tidio.com/pricing/" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Per-resolution AI agent (Intercom Fin + Essential seats)</td><td>SaaS plan</td><td>$0.99 per resolution + $29/seat/month, min 1 seat</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.intercom.com/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Per-resolution AI agent (Zendesk automated resolutions + Suite Team seats)</td><td>SaaS plan</td><td>$2 per resolution + $69/seat/month ($55 annual), min 1 seat</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.zendesk.com/pricing/" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>AI video generation (Veo 3.1 Lite, 720p, with audio)</td><td>AI video</td><td>$0.0500/second</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://ai.google.dev/gemini-api/docs/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>AI video generation (Veo 3.1 Fast, 720p, with audio)</td><td>AI video</td><td>$0.10/second</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://ai.google.dev/gemini-api/docs/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>AI video generation (Veo 3.1 Standard, 720p, with audio)</td><td>AI video</td><td>$0.40/second</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://ai.google.dev/gemini-api/docs/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>AI image generation (Gemini 3.1 Flash Image, 1K)</td><td>AI images</td><td>$0.0670/image</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://ai.google.dev/gemini-api/docs/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>X API pay-per-use (post create, owned reads)</td><td>Social API</td><td>$0.015 per post, $0.001 per owned read</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://docs.x.com/x-api/getting-started/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Stock market data feed</td><td>Market data</td><td>$199/month</td><td><span class="conf conf-estimate">estimate</span> sample</td><td><a href="https://massive.com/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+<tr><td>Workflow automation (Zapier Professional) + your own LLM API key</td><td>SaaS plan</td><td>18 task tiers: $19.99/month (annual) for 750 tasks up to $3,389 for 2,000,000; monthly billing $29.99–$5,099</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://zapier.com/pricing" rel="noopener">price page</a></td><td>14 Oct 2026</td></tr>
+</tbody></table></div>
+<p>Notes recorded with each price (what is included, what was assumed):</p>
+<ul class="price-notes">
+<li><strong>Google Gemini 3.5 Flash-Lite</strong>: Paid tier, standard text pricing. Batch $0.15 in / $1.25 out. Cached input $0.03 (implicit caching; the caching page lists no minimum for Flash-Lite, so the 4,096 tokens stated for Gemini 3.x Flash is assumed). Cache storage per hour not modelled.</li>
+<li><strong>Google Gemini 3.8 Flash</strong>: Paid tier from 1 January 2027 (introductory $0.75 in / $3.75 out through 31 December 2026; the later price is used because it applies to almost all of a 36-month plan). Batch $0.75 in / $3.75 out. Cached input $0.15; minimum 4,096 input tokens. Cache storage per hour not modelled.</li>
+<li><strong>Google Gemini 4 Argon</strong>: Paid tier from 1 December 2026 (introductory $2 in / $10 out through 30 November 2026; the later price is used). Output includes thinking tokens. Batch $2 in / $10 out. Cached input $0.20 (implicit caching only); minimum 4,096 input tokens.</li>
+<li><strong>OpenAI GPT-6 Luna</strong>: Standard, short-context prices. Batch $0.05 in / $0.25 out. Cached input $0.01; minimum cacheable prompt 1,024 tokens. Cache writes cost 1.25× input for 30 minutes, not modelled.</li>
+<li><strong>OpenAI GPT-6.1 Terra</strong>: Standard, short-context prices. Batch $0.50 in / $2.50 out. Cached input $0.05 (0.05× input); minimum cacheable prompt 1,024 tokens. Cache writes cost 1.25× input, not modelled.</li>
+<li><strong>OpenAI GPT-6.1 Sol</strong>: Standard, short-context prices (GPT-6 Astra is a higher tier at $10 / $50). Batch $1 in / $5 out. Cached input $0.10; minimum cacheable prompt 1,024 tokens. Cache writes cost 1.25× input, not modelled.</li>
+<li><strong>Anthropic Claude Haiku 5.5</strong>: Prompts up to 100,000 tokens (longer prompts cost $0.50 in / $2.50 out). Batch $0.05 in / $0.25 out. Cache hits $0.01; minimum cacheable prompt 512 tokens. Cache writes cost 1.25× input, not modelled.</li>
+<li><strong>Anthropic Claude Sonnet 5.5</strong>: Batch $1 in / $5 out. Cache hits $0.10 (0.05× input); minimum cacheable prompt 512 tokens. Cache writes cost 1.25× input, not modelled.</li>
+<li><strong>Anthropic Claude Opus 5.5</strong>: Claude Fable 5.1 is a higher tier at $10 / $50. Batch $2 in / $10 out. Cache hits $0.20 (0.05× input); minimum cacheable prompt 512 tokens. Cache writes cost 1.25× input, not modelled.</li>
+<li><strong>Mistral Small 4</strong>: Standard prices. Cached input $0.015; no minimum prompt size is stated. Batch prices are not listed on the static page, so standard prices are used for batch work.</li>
+<li><strong>Mistral Large 4</strong>: Mistral's top generalist model (Medium 3.5 is deprecated in its favour). Mistral has no model in the premium role, so it is not a candidate at the best quality level. Cached input $0.07; no minimum prompt size is stated. Batch prices not listed; standard prices are used.</li>
+<li><strong>Qwen3.5 9B on DeepInfra</strong>: Open-weight ~9B model, bf16, served per token. Same size class as the self-hosted small model. No cached or batch price listed.</li>
+<li><strong>Gemma 4 31B on DeepInfra</strong>: Open-weight 31B model (gemma-4-31B-it, fp8), served per token. Same size class as the self-hosted medium model. No cached or batch price listed.</li>
+<li><strong>Llama 3.3 70B on DeepInfra</strong>: Open-weight 70B model (Llama-3.3-70B-Instruct-Turbo, fp8), served per token. Same size class as the self-hosted large model; newer, larger open models cost more (e.g. Qwen3.5-397B-A17B at $0.45 / $3.00). No cached or batch price listed.</li>
+<li><strong>NVIDIA L4 24 GB (RunPod pod)</strong>: Visible table shows $0.59/hr; page's structured data shows $0.44 community / $0.49 secure. Flagged as sample until confirmed in the RunPod console.</li>
+<li><strong>NVIDIA L40S 48 GB (RunPod pod)</strong>: Visible table shows $1.09/hr; structured data shows $0.79 community / $1.09 secure. Flagged as sample until confirmed.</li>
+<li><strong>NVIDIA A100 80 GB (RunPod pod)</strong>: Visible table shows $1.79/hr; structured data shows $1.19-$1.59. Flagged as sample until confirmed.</li>
+<li><strong>L4 throughput assumption (~8B open model, batched serving)</strong>: ASSUMPTION, not a vendor price. Aggregate output tokens/sec with batching; benchmark on your own model. Prompt reading (prefill): L4 121 dense FP16 TFLOPS × 50% ÷ (2 × 8B parameters) ≈ 3,800 prompt tokens/sec; NVIDIA datasheet figures, utilisation assumed. Output tokens/sec is decode only.</li>
+<li><strong>L40S throughput assumption (~32B 4-bit open model, batched serving)</strong>: ASSUMPTION, not a vendor price. Benchmark on your own model. Prompt reading (prefill): L40S 362 dense FP16 TFLOPS × 50% ÷ (2 × 32B parameters) ≈ 2,800 prompt tokens/sec (4-bit weights are computed at 16 bits); NVIDIA datasheet figures, utilisation assumed. Output tokens/sec is decode only.</li>
+<li><strong>A100 80 GB throughput assumption (~70B 4-bit open model, batched serving)</strong>: ASSUMPTION, not a vendor price. Benchmark on your own model. Prompt reading (prefill): A100 312 dense FP16 TFLOPS × 50% ÷ (2 × 70B parameters) ≈ 1,100 prompt tokens/sec; NVIDIA datasheet figures, utilisation assumed. Output tokens/sec is decode only.</li>
+<li><strong>Managed Postgres (Supabase Pro)</strong>: From $25/month; includes 8 GB disk and $10 compute credits.</li>
+<li><strong>Self-managed Postgres server (DigitalOcean Basic Droplet 2 vCPU / 4 GiB)</strong>: Server cost only; administration labour is counted in maintenance hours.</li>
+<li><strong>Vector database (Pinecone Standard, minimum usage)</strong>: $50/month minimum usage; small RAG workloads stay at the minimum.</li>
+<li><strong>App hosting (DigitalOcean Basic Droplet 1 vCPU / 2 GiB)</strong>: Light web/API hosting.</li>
+<li><strong>Model and data storage (self-hosted)</strong>: SAMPLE placeholder. Verify against your storage provider.</li>
+<li><strong>Monitoring and logging (self-hosted)</strong>: SAMPLE placeholder. Verify against your monitoring provider.</li>
+<li><strong>Speech-to-text (Deepgram Nova-3 streaming, monolingual)</strong>: Pay-as-you-go. Page labels streaming rates as limited-time promotional.</li>
+<li><strong>Text-to-speech (Deepgram Aura-2)</strong>: Converted to per-minute using the use case's characters-per-minute assumption.</li>
+<li><strong>Telephony, inbound local (Twilio US)</strong>: Receive calls on local numbers; number rental ($1.15/mo) not included.</li>
+<li><strong>Telephony, inbound local (Twilio UK)</strong>: Receive calls on local numbers; number rental ($3.50/mo) not included.</li>
+<li><strong>Telephony, inbound (India)</strong>: SAMPLE placeholder. Verify with an Indian telephony provider.</li>
+<li><strong>Telephony, inbound (UAE)</strong>: SAMPLE placeholder. Verify with a UAE telephony provider.</li>
+<li><strong>Telephony, inbound (other regions)</strong>: SAMPLE placeholder for regions without a verified rate.</li>
+<li><strong>Per-seat AI assistant (Claude Team, standard seat)</strong>: $25/seat/month billed monthly; $20/seat/month billed annually; 2 to 150 seats. List price; volume customers usually negotiate.</li>
+<li><strong>Per-conversation AI chatbot (Tidio Lyro, 50 conversations)</strong>: Starting price $32.50/mo for 50 Lyro AI conversations; no base plan required. List price; volume customers usually negotiate. No separate annual price shown; the same price is used for both billing periods.</li>
+<li><strong>Per-conversation AI chatbot (Tidio Lyro, 1,000 conversations)</strong>: SAMPLE placeholder: the pricing page offers 1,000 conversations but does not show the price. Above 1,000/month the vendor says contact sales. List price; volume customers usually negotiate. No separate annual price shown; the same price is used for both billing periods.</li>
+<li><strong>Per-resolution AI agent (Intercom Fin + Essential seats)</strong>: Fin $0.99 per outcome plus required Essential seats at $29/seat/month. The page shows one seat price without saying monthly or annual, so the same price is used for both. List price; volume customers usually negotiate.</li>
+<li><strong>Per-resolution AI agent (Zendesk automated resolutions + Suite Team seats)</strong>: Pay-as-you-go automated resolutions $2.00 plus Suite Team at $69/agent/month billed monthly or $55 billed annually. List price; volume customers usually negotiate.</li>
+<li><strong>AI video generation (Veo 3.1 Lite, 720p, with audio)</strong>: Per second of generated video, 720p, with audio.</li>
+<li><strong>AI video generation (Veo 3.1 Fast, 720p, with audio)</strong>: Per second of generated video, 720p, with audio.</li>
+<li><strong>AI video generation (Veo 3.1 Standard, 720p, with audio)</strong>: Per second of generated video, 720p, with audio.</li>
+<li><strong>AI image generation (Gemini 3.1 Flash Image, 1K)</strong>: $0.067 per 1K image.</li>
+<li><strong>X API pay-per-use (post create, owned reads)</strong>: Post create $0.015 per request; owned reads (your posts and mentions) $0.001 per resource. Instagram Graph API and YouTube Data API have no per-call fee (quota limits apply).</li>
+<li><strong>Stock market data feed</strong>: SAMPLE: $199/month is the Stocks Advanced plan, which is marked individual use only. Business use and redistribution in reports need a business licence; pricing is not published. Get a quote.</li>
+<li><strong>Workflow automation (Zapier Professional) + your own LLM API key</strong>: Each action step is a Zapier task. AI steps call your own LLM API key, billed separately at standard (non-batch) prices. Above 2M tasks/month: sales. List price; volume customers usually negotiate.</li>
+</ul>
+<h3 id="data-labour">Labour costs by country</h3>
+<p>Staff cost is the hourly cost of the person doing the work today, fully loaded with employer on-costs; engineer cost is used for build and maintenance hours. Hourly labour costs from official statistics. Loaded cost = value × employer on-cost multiplier (1 when the statistic already includes employer costs). These are whole-economy or occupation-group averages, a proxy for the person doing the work today; replace with your own payroll figures where you have them.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Country</th><th scope="col">Staff cost / hour</th><th scope="col">Statistic</th><th scope="col">Period</th><th scope="col">On-costs</th><th scope="col">Engineer / hour (USD)</th><th scope="col">Hours per FTE / month</th></tr></thead>
+<tbody>
+<tr><td>India</td><td>125.27 INR ($1.31)</td><td>PLFS Annual Report 2025: average monthly earnings of regular wage/salaried employees (₹24,217 men, ₹18,353 women; simple mean ₹21,285, as no combined figure is published) ÷ 192 hours (48-hour week) (<a href="https://www.pib.gov.in/PressReleasePage.aspx?PRID=2246009" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>2025</td><td>× 1.13 Employer EPF 12% plus about 1% for EDLI and administration charges, approximated (not verified against current EPFO rules). <span class="conf conf-estimate">estimate</span></td><td>$15 <span class="conf conf-estimate">estimate</span></td><td>192</td></tr>
+<tr><td>United States</td><td>38.27 USD ($38.27)</td><td>BLS Employer Costs for Employee Compensation: civilian workers, office and administrative support, total compensation per hour worked (<a href="https://www.bls.gov/news.release/ecec.t02.htm" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>June 2026</td><td>× 1 Total compensation already includes benefits (wages are 70.0% of private-industry compensation, June 2026). <span class="conf conf-verified">verified</span></td><td>$74.42 <span class="conf conf-benchmark">benchmark</span></td><td>160</td></tr>
+<tr><td>Canada</td><td>41.4 CAD ($29.07)</td><td>Statistics Canada Labour Force Survey: average hourly wages of employees (<a href="https://www150.statcan.gc.ca/n1/daily-quotidien/261009/dq261009a-eng.htm" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>September 2026</td><td>× 1.1 Employer CPP, EI and other payroll costs, approximated at 10% (not verified against current CRA rates). <span class="conf conf-estimate">estimate</span></td><td>$80 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+<tr><td>Australia</td><td>61.41 AUD ($42.86)</td><td>ABS Average Weekly Earnings: full-time adult ordinary time earnings, seasonally adjusted (A$2,083.70 a week ÷ 38-hour week) (<a href="https://www.abs.gov.au/statistics/labour/earnings-and-working-conditions/average-weekly-earnings-australia/latest-release" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>May 2026</td><td>× 1.12 Superannuation guarantee 12% of ordinary time earnings from 1 July 2025 (payroll tax and workers' compensation not included). <span class="conf conf-verified">verified</span></td><td>$80 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+<tr><td>United Arab Emirates</td><td>20 USD ($20)</td><td>No official whole-economy wage statistic found; sample value <span class="conf conf-estimate">estimate</span></td><td>—</td><td>× 1 Included in the sample value. <span class="conf conf-estimate">estimate</span></td><td>$60 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+<tr><td>United Kingdom</td><td>22.75 GBP ($30.13)</td><td>ONS Annual Survey of Hours and Earnings: median hourly earnings excluding overtime, full-time employees (<a href="https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/bulletins/annualsurveyofhoursandearnings/2025" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>April 2025 (provisional)</td><td>× 1.1564895944128921 Employer National Insurance 15% above £5,000 a year (13.1% of median full-time pay of £766.60/week) plus minimum employer pension 3% of earnings between £6,240 and £50,270 (2.5%). <span class="conf conf-verified">verified</span></td><td>$75 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+<tr><td>Switzerland</td><td>46.64 CHF ($56.03)</td><td>FSO Swiss Earnings Structure Survey: median gross monthly wage, full-time (CHF 7,024 ÷ 173.2 hours: 40-hour week × 4.33) (<a href="https://www.bfs.admin.ch/bfs/en/home/statistics/work-income/wages-income-employment-labour-costs/earnings-structure.html" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>2024</td><td>× 1.15 Employer social insurance (AHV/IV/EO, unemployment, occupational pension, accident), approximated at 15% (not verified). <span class="conf conf-estimate">estimate</span></td><td>$110 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+<tr><td>Germany</td><td>45 EUR ($50.35)</td><td>Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded. (<a href="https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>2025</td><td>× 1 Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025). <span class="conf conf-verified">verified</span></td><td>$75 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+<tr><td>Netherlands</td><td>47.9 EUR ($53.59)</td><td>Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded. (<a href="https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>2025</td><td>× 1 Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025). <span class="conf conf-verified">verified</span></td><td>$75 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+<tr><td>Ireland</td><td>44.2 EUR ($49.45)</td><td>Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded. (<a href="https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>2025</td><td>× 1 Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025). <span class="conf conf-verified">verified</span></td><td>$75 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+<tr><td>France</td><td>44.3 EUR ($49.56)</td><td>Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded. (<a href="https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>2025</td><td>× 1 Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025). <span class="conf conf-verified">verified</span></td><td>$70 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+<tr><td>Belgium</td><td>48.2 EUR ($53.93)</td><td>Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded. (<a href="https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>2024 (2025 not yet released for Belgium)</td><td>× 1 Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025). <span class="conf conf-verified">verified</span></td><td>$70 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+<tr><td>Austria</td><td>46.3 EUR ($51.80)</td><td>Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded. (<a href="https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>2025</td><td>× 1 Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025). <span class="conf conf-verified">verified</span></td><td>$70 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+<tr><td>Finland</td><td>39.4 EUR ($44.08)</td><td>Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded. (<a href="https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>2025</td><td>× 1 Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025). <span class="conf conf-verified">verified</span></td><td>$70 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+<tr><td>Luxembourg</td><td>56.8 EUR ($63.55)</td><td>Eurostat average hourly labour cost (wages plus employer social contributions and other non-wage costs), whole economy excluding agriculture and public administration, enterprises with 10+ employees. Already fully loaded. (<a href="https://ec.europa.eu/eurostat/databrowser/view/lc_lci_lev/default/table" rel="noopener">source</a>) <span class="conf conf-benchmark">benchmark</span></td><td>2025</td><td>× 1 Labour cost already includes employer non-wage costs (24.8% of labour costs in the EU in 2025). <span class="conf conf-verified">verified</span></td><td>$80 <span class="conf conf-estimate">estimate</span></td><td>160</td></tr>
+</tbody></table></div>
+<h3 id="data-usecases">Default volumes and token counts by use case</h3>
+<p>Illustrative token and usage defaults per use case. All values are editable assumptions. Agent use cases (kind: agent) are priced per task: steps × tokens, with context growing each step. Internal tools (data assistant, internal copilot) default to 50 daily users; per-seat SaaS charges a seat for each. Internal tools are valued on staff time saved: minutes_saved_per_request. cached_share_pct = share of each request's input that repeats across requests (system prompt, instructions, earlier agent steps) and can be served from the provider's cache.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Use case</th><th scope="col" class="num">Input tokens</th><th scope="col" class="num">Output tokens</th><th scope="col" class="num">Cached share</th><th scope="col">Retrieval (RAG)</th><th scope="col">Other defaults</th></tr></thead>
+<tbody>
+<tr><td>Chatbot</td><td class="num">1,500</td><td class="num">400</td><td class="num">40%</td><td>yes</td><td>—</td></tr>
+<tr><td>Voice AI agent</td><td class="num">1,200</td><td class="num">150</td><td class="num">40%</td><td>yes</td><td>4 minutes per call, 750 spoken characters/minute</td></tr>
+<tr><td>Document AI</td><td class="num">3,000</td><td class="num">500</td><td class="num">10%</td><td>no</td><td>2,000 documents/month × 5 pages × 600 tokens/page, 800 output tokens per document</td></tr>
+<tr><td>Data assistant</td><td class="num">3,000</td><td class="num">600</td><td class="num">30%</td><td>yes</td><td>50 users/day × 6 requests; 3 minutes saved per request</td></tr>
+<tr><td>Team copilot</td><td class="num">2,500</td><td class="num">700</td><td class="num">30%</td><td>yes</td><td>50 users/day × 10 requests; 3 minutes saved per request</td></tr>
+</tbody></table></div>
+<p>Workflow agents (priced per task; section 10b):</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Agent</th><th scope="col" class="num">Tasks / month</th><th scope="col" class="num">Steps</th><th scope="col" class="num">Input / step</th><th scope="col" class="num">Context growth / step</th><th scope="col" class="num">Output / step</th><th scope="col">Batch</th><th scope="col" class="num">Minutes per task today</th><th scope="col">Completion</th><th scope="col">Review</th><th scope="col">Errors × cost</th></tr></thead>
+<tbody>
+<tr><td>Invoice processing agent</td><td class="num">2,000</td><td class="num">4</td><td class="num">2,500</td><td class="num">400</td><td class="num">300</td><td>yes</td><td class="num">6</td><td>80%</td><td>20% × 2 min</td><td>1% × $20</td></tr>
+<tr><td>Lead qualification agent</td><td class="num">3,000</td><td class="num">5</td><td class="num">2,000</td><td class="num">600</td><td class="num">300</td><td>yes</td><td class="num">10</td><td>85%</td><td>15% × 3 min</td><td>2% × $30</td></tr>
+<tr><td>Report generation agent</td><td class="num">200</td><td class="num">8</td><td class="num">6,000</td><td class="num">1,500</td><td class="num">1,200</td><td>yes</td><td class="num">120</td><td>70%</td><td>100% × 15 min</td><td>0.5% × $200</td></tr>
+<tr><td>Ticket triage agent</td><td class="num">20,000</td><td class="num">2</td><td class="num">1,200</td><td class="num">200</td><td class="num">100</td><td>no</td><td class="num">2</td><td>90%</td><td>10% × 1 min</td><td>2% × $5</td></tr>
+<tr><td>Market data report agent</td><td class="num">100</td><td class="num">6</td><td class="num">5,000</td><td class="num">1,500</td><td class="num">1,000</td><td>yes</td><td class="num">90</td><td>70%</td><td>100% × 15 min</td><td>0.5% × $200</td></tr>
+<tr><td>AI content engine</td><td class="num">60</td><td class="num">6</td><td class="num">3,000</td><td class="num">800</td><td class="num">800</td><td>no</td><td class="num">180</td><td>60%</td><td>100% × 20 min</td><td>0.5% × $100</td></tr>
+</tbody></table></div>
+<h3 id="data-presets">Industry presets</h3>
+<p>Illustrative defaults only. Money values are USD; the &quot;india&quot; variant holds exact INR anchor values used when the display currency is INR. human_share_pct = share of conversations that reach a human today. tax_reclaimable = false where the sector is often VAT/GST-exempt (healthcare, education), so tax on AI spend becomes a real cost.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Industry</th><th scope="col">Use case</th><th scope="col" class="num">Users / day</th><th scope="col" class="num">Ticket size</th><th scope="col" class="num">Margin</th><th scope="col" class="num">Conversion</th><th scope="col">Purchases / year</th><th scope="col" class="num">Human cost / conversation</th><th scope="col" class="num">Reaching a person</th><th scope="col" class="num">AI handles</th><th scope="col">Tax reclaimable</th></tr></thead>
+<tbody>
+<tr><td>D2C e-commerce</td><td>Chatbot</td><td class="num">1,667</td><td class="num">$24</td><td class="num">40%</td><td class="num">3%</td><td>3</td><td class="num">$0.60</td><td class="num">15%</td><td class="num">60%</td><td>yes</td></tr>
+<tr><td>SaaS (B2B)</td><td>Chatbot</td><td class="num">300</td><td class="num">$6,000</td><td class="num">80%</td><td class="num">2%</td><td>1</td><td class="num">$8</td><td class="num">30%</td><td class="num">50%</td><td>yes</td></tr>
+<tr><td>Real estate</td><td>Chatbot</td><td class="num">100</td><td class="num">$70,000</td><td class="num">20%</td><td class="num">1%</td><td>one-time</td><td class="num">$10</td><td class="num">40%</td><td class="num">30%</td><td>yes</td></tr>
+<tr><td>Healthcare clinic</td><td>Chatbot</td><td class="num">500</td><td class="num">$120</td><td class="num">50%</td><td class="num">10%</td><td>2</td><td class="num">$5</td><td class="num">40%</td><td class="num">40%</td><td>no</td></tr>
+<tr><td>Education / ed-tech</td><td>Chatbot</td><td class="num">1,000</td><td class="num">$500</td><td class="num">60%</td><td class="num">2%</td><td>one-time</td><td class="num">$3</td><td class="num">25%</td><td class="num">60%</td><td>no</td></tr>
+<tr><td>Professional services</td><td>Team copilot</td><td class="num">100</td><td class="num">$5,000</td><td class="num">50%</td><td class="num">3%</td><td>one-time</td><td class="num">$20</td><td class="num">50%</td><td class="num">30%</td><td>yes</td></tr>
+</tbody></table></div>
+<h3 id="data-tax">Tax rates by country and region</h3>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Country</th><th scope="col">Variant</th><th scope="col">Tax</th><th scope="col" class="num">Rate</th><th scope="col">Reclaimable</th><th scope="col">Status and notes</th><th scope="col">Source</th></tr></thead>
+<tbody>
+<tr><td>India</td><td>GST 18% (IT and online information services)</td><td>GST 18%</td><td class="num">18%</td><td>yes</td><td><span class="conf conf-estimate">estimate</span> sample SAMPLE until verified: 18% is the standard GST rate for IT and OIDAR services. Check the CBIC rate notification for your service code.</td><td><a href="https://taxinformation.cbic.gov.in/" rel="noopener">tax authority</a></td></tr>
+<tr><td>United States</td><td>My state taxes SaaS / cloud services (enter rate)</td><td>State + local sales tax</td><td class="num">you enter</td><td>no</td><td><span class="conf conf-verified">verified</span> Enter your combined state and local rate. Sales tax is not reclaimable.</td><td>—</td></tr>
+<tr><td>Canada</td><td>Alberta: GST 5%</td><td>GST 5%</td><td class="num">5%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>British Columbia: GST 5% + PST 7%</td><td>GST 5%</td><td class="num">5%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>British Columbia: GST 5% + PST 7%</td><td>PST 7% (software)</td><td class="num">7%</td><td>no</td><td><span class="conf conf-estimate">estimate</span> sample SAMPLE until verified. BC PST applies to software, including some cloud software; not reclaimable.</td><td><a href="https://www2.gov.bc.ca/gov/content/taxes/sales-taxes/pst/software" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Manitoba: GST 5% + RST 7%</td><td>GST 5%</td><td class="num">5%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Manitoba: GST 5% + RST 7%</td><td>RST 7%</td><td class="num">7%</td><td>no</td><td><span class="conf conf-estimate">estimate</span> sample SAMPLE until verified. Check whether your service is taxable; not reclaimable.</td><td><a href="https://www.gov.mb.ca/finance/taxation/taxes/retail.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>New Brunswick: HST 15%</td><td>HST 15%</td><td class="num">15%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Newfoundland and Labrador: HST 15%</td><td>HST 15%</td><td class="num">15%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Northwest Territories: GST 5%</td><td>GST 5%</td><td class="num">5%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Nova Scotia: HST 14%</td><td>HST 14%</td><td class="num">14%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Nunavut: GST 5%</td><td>GST 5%</td><td class="num">5%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Ontario: HST 13%</td><td>HST 13%</td><td class="num">13%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Prince Edward Island: HST 15%</td><td>HST 15%</td><td class="num">15%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Quebec: GST 5% + QST 9.975%</td><td>GST 5%</td><td class="num">5%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Quebec: GST 5% + QST 9.975%</td><td>QST 9.975%</td><td class="num">9.975%</td><td>yes</td><td><span class="conf conf-estimate">estimate</span> sample SAMPLE until verified. Registered businesses claim QST back as input tax refunds.</td><td><a href="https://www.revenuquebec.ca/en/businesses/consumption-taxes/gsthst-and-qst/" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Saskatchewan: GST 5% + PST 6%</td><td>GST 5%</td><td class="num">5%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Saskatchewan: GST 5% + PST 6%</td><td>PST 6%</td><td class="num">6%</td><td>no</td><td><span class="conf conf-estimate">estimate</span> sample SAMPLE until verified. Saskatchewan PST applies to many software and computer services; not reclaimable.</td><td><a href="https://www.saskatchewan.ca/business/taxes-licensing-and-reporting/provincial-taxes-policies-and-bulletins/provincial-sales-tax" rel="noopener">tax authority</a></td></tr>
+<tr><td>Canada</td><td>Yukon: GST 5%</td><td>GST 5%</td><td class="num">5%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/gst-hst-businesses/charge-collect-which-rate/calculator.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Australia</td><td>GST 10%</td><td>GST 10%</td><td class="num">10%</td><td>yes</td><td><span class="conf conf-estimate">estimate</span> sample SAMPLE until verified (the ATO page could not be fetched automatically).</td><td><a href="https://www.ato.gov.au/businesses-and-organisations/gst-excise-and-indirect-taxes/gst" rel="noopener">tax authority</a></td></tr>
+<tr><td>United Arab Emirates</td><td>VAT 5%</td><td>VAT 5%</td><td class="num">5%</td><td>yes</td><td><span class="conf conf-verified">verified</span> Rate as shown by the Federal Tax Authority VAT calculator.</td><td><a href="https://tax.gov.ae/en/taxes/Vat/vat.topics.aspx" rel="noopener">tax authority</a></td></tr>
+<tr><td>United Kingdom</td><td>VAT 20%</td><td>VAT 20%</td><td class="num">20%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.gov.uk/vat-rates" rel="noopener">tax authority</a></td></tr>
+<tr><td>Switzerland</td><td>VAT 8.1%</td><td>VAT 8.1%</td><td class="num">8.1%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://www.estv.admin.ch/estv/en/home/value-added-tax/vat-rates-switzerland.html" rel="noopener">tax authority</a></td></tr>
+<tr><td>Germany</td><td>VAT 19%</td><td>VAT 19%</td><td class="num">19%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm" rel="noopener">tax authority</a></td></tr>
+<tr><td>Netherlands</td><td>VAT 21%</td><td>VAT 21%</td><td class="num">21%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm" rel="noopener">tax authority</a></td></tr>
+<tr><td>Ireland</td><td>VAT 23%</td><td>VAT 23%</td><td class="num">23%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm" rel="noopener">tax authority</a></td></tr>
+<tr><td>France</td><td>VAT 20%</td><td>VAT 20%</td><td class="num">20%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm" rel="noopener">tax authority</a></td></tr>
+<tr><td>Belgium</td><td>VAT 21%</td><td>VAT 21%</td><td class="num">21%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm" rel="noopener">tax authority</a></td></tr>
+<tr><td>Austria</td><td>VAT 20%</td><td>VAT 20%</td><td class="num">20%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm" rel="noopener">tax authority</a></td></tr>
+<tr><td>Finland</td><td>VAT 25.5%</td><td>VAT 25.5%</td><td class="num">25.5%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm" rel="noopener">tax authority</a></td></tr>
+<tr><td>Luxembourg</td><td>VAT 17%</td><td>VAT 17%</td><td class="num">17%</td><td>yes</td><td><span class="conf conf-verified">verified</span></td><td><a href="https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_en.htm" rel="noopener">tax authority</a></td></tr>
+</tbody></table></div>
+<h3 id="data-fx">Exchange rates</h3>
+<p>Reference rates for planning only. Converted from EUR base (rate_X_per_USD = EUR_X / EUR_USD). AED derived from its fixed USD peg (3.6725). Rates as of 13 October 2026, from the <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html" rel="noopener">European Central Bank euro foreign exchange reference rates</a>.</p>
+<div class="table-wrap"><table class="data">
+<thead><tr><th scope="col">Currency</th><th scope="col" class="num">Units per 1 USD</th></tr></thead>
+<tbody>
+<tr><td>USD</td><td class="num">1</td></tr>
+<tr><td>INR</td><td class="num">95.2807</td></tr>
+<tr><td>EUR</td><td class="num">0.8938</td></tr>
+<tr><td>GBP</td><td class="num">0.7549</td></tr>
+<tr><td>CHF</td><td class="num">0.8323</td></tr>
+<tr><td>CAD</td><td class="num">1.4241</td></tr>
+<tr><td>AUD</td><td class="num">1.4331</td></tr>
+<tr><td>AED</td><td class="num">3.6725</td></tr>
+</tbody></table></div>
+</section>
+<!-- /GEN:data -->
+
+    <section aria-labelledby="data-currency">
+      <h2 id="data-currency">Keeping prices current</h2>
+      <p>Every price comes from an official vendor pricing page and records its source link and the date it was last checked. Values that could not be verified are marked as samples, and the advisor shows a banner whenever a sample value affects a result. A weekly automated check opens an issue for prices older than 30 days, and a second weekly job compares every AI model price with two public price lists (OpenRouter and LiteLLM) and labour costs with Eurostat and the US Bureau of Labor Statistics, proposing any change as a pull request that a person reviews before it reaches this site (<a href="#method-12c">section 12c</a>).</p>
       <p>Results can be shown in INR, USD, EUR, GBP, CHF, CAD, AUD and AED. Everything is calculated in USD and converted using the European Central Bank's reference rates, refreshed weekly through a reviewed pull request. AED uses its fixed peg of 3.6725 per USD.</p>
     </section>
 
-    <section>
-      <h2>Limitations</h2>
+    <section aria-labelledby="limits">
+      <h2 id="limits">Limitations</h2>
       <ul>
-        <li>These are estimates for planning, not quotes. Vendor prices change often.</li>
-        <li>GPU throughput figures are assumptions. Benchmark your own model before committing.</li>
-        <li>Open-weight models may trail frontier models on some tasks. Test quality on your own data.</li>
-        <li>Engineer hourly costs and build or maintenance hours are editable assumptions.</li>
+        <li>These are estimates for planning, not quotes. Vendor prices change often, and volume customers usually negotiate.</li>
+        <li>GPU speeds (prompt reading and answer writing) and model memory are assumptions. Serving engines and quantisation change them a lot; benchmark your own model before committing.</li>
+        <li>Self-hosting is costed on rented GPUs running all month; cold starts, autoscaling, data transfer fees and compliance audits are not included.</li>
+        <li>Open-weight models may trail frontier models on some tasks. Test quality on your own data and enter the results; models at the same tier differ between providers too.</li>
+        <li>Future price changes are an assumption: most providers have cut prices for the same quality, but some have raised them.</li>
+        <li>Time freed counts as money saved only in the share you set; engineer hourly costs and build or maintenance hours are editable assumptions.</li>
         <li>Data-protection notes name the relevant law to review with a legal advisor; they are not legal advice.</li>
         <li>Tax treatment is simplified and is not tax advice.</li>
       </ul>
     </section>
 
-    <section>
-      <h2>Privacy</h2>
+    <section aria-labelledby="privacy">
+      <h2 id="privacy">Privacy</h2>
       <p>Everything runs in your browser; nothing is sent anywhere. There is no server, no analytics, no tracking and no cookies. A shareable link stores your inputs in the link itself. Your last inputs may be remembered in this browser's local storage; you can clear them with “Reset to defaults”.</p>
     </section>
 
-    <section>
-      <h2>Creator</h2>
-      <p>Built by <strong>Kauntey Acharya</strong> as a portfolio project demonstrating AI consulting judgment: build vs buy, total cost of ownership and ROI. It is not a commercial service.</p>
+    <section aria-labelledby="creator">
+      <h2 id="creator">Creator</h2>
+      <p>Built by <strong>Kauntey Acharya</strong> as a portfolio project demonstrating AI consulting judgment: build vs buy, total cost of ownership and ROI. It is not a commercial service. The source code, tests and data files are open on GitHub under the MIT licence.</p>
       <p>
-        <a href="https://kaunteyacharya.github.io" rel="noopener">Portfolio</a> ·
+        <a href="https://kaunteyacharya.com/">Portfolio</a> ·
+        <a href="https://kaunteyacharya.com/notes/ai-stack-advisor/">Project write-up</a> ·
         <a href="https://github.com/KaunteyAcharya" rel="noopener">GitHub</a> ·
         <a href="https://www.linkedin.com/in/kauntey-acharya" rel="noopener">LinkedIn</a> ·
         <a href="https://github.com/KaunteyAcharya/ai-stack-advisor" rel="noopener">Source code</a>
       </p>
     </section>
 
-    <p class="disclaimer">Estimates for planning and educational purposes only. Prices change frequently; verify current vendor pricing before making decisions. Not financial or legal advice.</p>
+    <section aria-labelledby="contribute">
+      <h2 id="contribute">Contribute</h2>
+      <p>AI Stack Advisor is open source under the MIT licence, and contributions are welcome: a price that has changed, a better source for a tax rate or labour cost, a bug, or a better assumption. Open an <a href="https://github.com/KaunteyAcharya/ai-stack-advisor/issues" rel="noopener">issue</a> or a pull request on GitHub, following the <a href="https://github.com/KaunteyAcharya/ai-stack-advisor/blob/main/CONTRIBUTING.md" rel="noopener">contributing guide</a>. Every change is reviewed and tested before it reaches this site.</p>
+    </section>
+
+    <p class="disclaimer">Estimates for planning and educational purposes only. Prices change frequently; verify current vendor pricing before making decisions. Not financial, legal or tax advice.</p>
   </main>
 
   <footer class="site-footer">
     <div class="wrap footer-inner">
       <p>Built by <strong>Kauntey Acharya</strong> ·
-        <a href="https://kaunteyacharya.github.io" rel="noopener">Portfolio</a> ·
+        <a href="https://kaunteyacharya.com/">Portfolio</a> ·
         <a href="https://github.com/KaunteyAcharya" rel="noopener">GitHub</a> ·
         <a href="https://www.linkedin.com/in/kauntey-acharya" rel="noopener">LinkedIn</a> ·
         <a href="https://github.com/KaunteyAcharya/ai-stack-advisor" rel="noopener">Source code</a>

@@ -31,12 +31,13 @@ jobs:
             echo "No change in rates."
             exit 0
           fi
+          node scripts/build-about.mjs --write # the about page lists the rates
           AS_OF=$(node -p "require('./data/fx.json').as_of")
           BRANCH="fx-update/${AS_OF}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          git add data/fx.json
+          git add data/fx.json about.html
           git commit -m "Update ECB reference rates to ${AS_OF}"
           git push --force origin "$BRANCH"
           if gh pr list --head "$BRANCH" --state open --json number --jq 'length' | grep -q '^0$'; then

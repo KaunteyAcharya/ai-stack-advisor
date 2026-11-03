@@ -30,10 +30,10 @@ test("effort: base plus 50% for each extra workload on the same stack", () => {
   assert.equal(effortFactor(3, 50), 2);
 });
 
-test("every allowed combination is evaluated: 4^n when nothing is excluded", () => {
+test("every allowed combination is evaluated: 5^n when nothing is excluded", () => {
   const p = analyzePortfolio(two, TEST_PRICES, { usecases });
-  // data assistant has no SaaS plan in the fixture prices → 4 × 3 combinations
-  assert.equal(p.combos.length, 12);
+  // data assistant has no SaaS plan in the fixture prices → 5 × 4 combinations
+  assert.equal(p.combos.length, 20);
   assert.ok(p.combos.every((c) => c.combo[1] !== "A"));
   assert.ok(p.excludedReasons[1].some((x) => x.option === "A"));
 });
@@ -57,7 +57,7 @@ test("self-hosted GPUs are pooled across workloads", () => {
   assert.equal(single, selfhostMonthly(w1, TEST_PRICES).gpus, "pooling one workload matches the single-workload sizing");
 });
 
-test("data that must stay in-house rules out SaaS and API for every workload", () => {
+test("data that must stay in-house rules out SaaS, API and hosted open models for every workload", () => {
   const p = analyzePortfolio({ ...three, externalAllowed: "no" }, TEST_PRICES, { usecases });
   assert.ok(p.combos.length > 0);
   assert.ok(p.combos.every((c) => c.combo.every((o) => o === "C" || o === "D")));

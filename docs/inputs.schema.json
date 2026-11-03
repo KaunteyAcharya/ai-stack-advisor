@@ -356,6 +356,28 @@
         "best_available"
       ]
     },
+    "llmProvider": {
+      "enum": [
+        "cheapest",
+        "google",
+        "openai",
+        "anthropic",
+        "mistral"
+      ],
+      "description": "LLM provider for the API build (option B) and the hybrid: a provider id from data/prices.json, or \"cheapest\" for the lowest cost at this quality level and request size"
+    },
+    "llmPriceChangePct": {
+      "type": "number",
+      "exclusiveMinimum": -100,
+      "maximum": 200,
+      "description": "Yearly change in per-token AI prices in % (negative = cheaper), compounded monthly from month 1"
+    },
+    "gpuPriceChangePct": {
+      "type": "number",
+      "exclusiveMinimum": -100,
+      "maximum": 200,
+      "description": "Yearly change in GPU rental prices in %, compounded monthly from month 1"
+    },
     "engineers": {
       "enum": [
         "none",
@@ -456,6 +478,12 @@
       "maximum": 100,
       "description": "Max share of conversation value spent on AI (0–100)"
     },
+    "cashSavingsPct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Share of staff time freed (agents, internal tools, support savings) that becomes money saved: fewer hires, less overtime or contractors, or paid work (0–100, default 100)"
+    },
     "shareSelfPct": {
       "type": [
         "number",
@@ -472,7 +500,8 @@
         "A",
         "B",
         "C",
-        "D"
+        "D",
+        "E"
       ],
       "properties": {
         "A": {
@@ -488,6 +517,10 @@
           "minimum": 0
         },
         "D": {
+          "type": "number",
+          "minimum": 0
+        },
+        "E": {
           "type": "number",
           "minimum": 0
         }
@@ -500,7 +533,8 @@
         "A",
         "B",
         "C",
-        "D"
+        "D",
+        "E"
       ],
       "properties": {
         "A": {
@@ -516,6 +550,10 @@
           "minimum": 0
         },
         "D": {
+          "type": "number",
+          "minimum": 0
+        },
+        "E": {
           "type": "number",
           "minimum": 0
         }
@@ -529,7 +567,8 @@
         "A",
         "B",
         "C",
-        "D"
+        "D",
+        "E"
       ],
       "properties": {
         "A": {
@@ -545,6 +584,10 @@
           "minimum": 0
         },
         "D": {
+          "type": "number",
+          "minimum": 0
+        },
+        "E": {
           "type": "number",
           "minimum": 0
         }
@@ -605,7 +648,25 @@
       "type": "number",
       "minimum": 0,
       "maximum": 100,
-      "description": "Percentage points fewer tasks completed by self-hosted open models (assumption; hybrid applies it to its self-hosted share)"
+      "description": "Percentage points fewer tasks completed by open models, self-hosted (option C) or hosted per token (option E) (assumption; hybrid applies it to its self-hosted share)"
+    },
+    "evalApiSuccessPct": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Your own test: % of tasks an API model gets right. With evalOpenSuccessPct, replaces openModelGapPct (gap = API − open) and, for agents, successPct"
+    },
+    "evalOpenSuccessPct": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Your own test: % of tasks an open model gets right (see evalApiSuccessPct)"
     },
     "workloadName": {
       "type": "string",
@@ -850,6 +911,24 @@
             "type": "number",
             "minimum": 0,
             "description": "Internal tools: staff minutes saved per request"
+          },
+          "evalApiSuccessPct": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Your own test: % of tasks an API model gets right. With evalOpenSuccessPct, replaces openModelGapPct (gap = API − open) and, for agents, successPct"
+          },
+          "evalOpenSuccessPct": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Your own test: % of tasks an open model gets right (see evalApiSuccessPct)"
           },
           "usersPerDay": {
             "type": "number",

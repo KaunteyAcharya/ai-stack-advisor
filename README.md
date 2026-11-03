@@ -1,13 +1,12 @@
 # AI Stack Advisor
 
-**Build or buy your AI solution?** A free, browser-only consulting tool that compares SaaS, API-based, self-hosted and hybrid AI stacks on monthly cost, 36-month total cost of ownership, break-even volume and ROI, then writes a consultant-style recommendation.
+**Build or buy your AI solution?** A free, browser-only consulting tool that compares five ways to run AI (SaaS, an API build on Gemini, OpenAI, Claude or Mistral, a self-hosted open model, a hybrid, and a hosted open model) on monthly cost, 36-month total cost of ownership, break-even volume and ROI, then writes a consultant-style recommendation.
 
 **Write-up:** A quick note about [this project](https://kaunteyacharya.com/notes/ai-stack-advisor/) · more notes at [kaunteyacharya.com](https://kaunteyacharya.com)
 
 [![Test and deploy](https://github.com/KaunteyAcharya/ai-stack-advisor/actions/workflows/test-and-deploy.yml/badge.svg)](https://github.com/KaunteyAcharya/ai-stack-advisor/actions/workflows/test-and-deploy.yml)
 
 ![Screenshot of AI Stack Advisor](docs/screenshot.png)
-<!-- Screenshot placeholder: add docs/screenshot.png -->
 
 ## The problem it solves
 
@@ -17,7 +16,9 @@ AI Stack Advisor turns those inputs into numbers and a clear recommendation, lis
 
 ## Features
 
-- **Four options compared:** SaaS (per seat, per conversation or per resolution), API-based build, self-hosted open model on rented GPUs, and hybrid.
+- **Five options compared:** SaaS (per seat, per conversation or per resolution), API-based build, self-hosted open model on rented GPUs, hybrid, and a hosted open model paid per token (no GPUs to run).
+- **Four AI providers:** Google Gemini, OpenAI, Anthropic Claude and Mistral, each with a budget and a mid model, and a premium model from all but Mistral. By default the advisor picks the cheapest model for your workload's mix of input, output, cached and batch tokens; you can also choose a provider, and a table compares every provider's cost for the same workload.
+- **Prices that fall over time:** AI prices (default −30% a year) and GPU rental prices (default −15% a year) change month by month in the 12- and 36-month totals; the report also shows the 36-month cost at today's prices.
 - **Monthly cost and TCO:** 12- and 36-month totals with monthly volume growth; GPU count steps up as traffic grows.
 - **Break-even:** the request volume where self-hosting becomes cheaper than APIs, plus a cost-vs-volume chart (log scale) with crossover markers.
 - **Value and ROI:** value per conversation, AI cost as a share of ticket size, "pays for itself with N extra sales a month", support savings, and ROI and payback tables by conversion uplift and deflection rate.
@@ -31,9 +32,13 @@ AI Stack Advisor turns those inputs into numbers and a clear recommendation, lis
 - **Workflow agents:** invoice processing, lead qualification, report generation, ticket triage, stock data → report, and an end-to-end content engine (AI video, images, posting and replies on your own posts). Priced per task with growing context per step and batch API prices, and valued on time saved in hours or FTEs, after review time and errors.
 - **Assumption register:** every number behind a result has a source, a last-reviewed date and a confidence level (verified / benchmark / estimate), shown next to inputs and listed in the report, with the high-impact estimates flagged as "check these first".
 - **Labour costs from official statistics:** BLS, Eurostat, ONS, Statistics Canada, ABS, the Swiss FSO and India's PLFS, loaded with documented employer on-costs.
-- **How sure is this?** 300 seeded simulations vary prices, GPU throughput, labour, the open-model quality gap and your uncertain inputs, then report how often each option wins and the 10th–90th percentile of costs and net benefit. A tornado chart shows which assumptions move the answer most.
+- **How sure is this?** 300 seeded simulations vary prices, GPU throughput, labour, the open-model quality gap and your uncertain inputs (AI and GPU prices, and engineer and staff pay, move together), then report how often each option wins and the 10th–90th percentile of costs and net benefit. A tornado chart shows which assumptions move the answer most, and the summary names the biggest one.
 - **Rigorous cost model:** prompt caching at published cached-input prices (only above the provider's minimum prompt size), evaluation hours before launch, present value of 36-month costs, and a quality-adjusted "decision cost" that counts the value open models give up by completing fewer tasks.
-- **Executive or analyst view:** a short report (summary, costs, value, one chart) or the full analysis (both charts, decision matrix, sensitivity tables, workings, assumptions), with a section strip that stays at the top. The PDF prints the current view.
+- **Realistic GPU sizing:** self-hosting is sized for reading prompts and writing answers (they share GPU time) and for the memory long prompts need while in flight, whichever is larger, using NVIDIA datasheet compute and each model's KV-cache size. The report says which limit sets the GPU count.
+- **Your own test results:** enter how many tasks an API model and an open model got right on your own examples; they replace the assumed quality gap, and the comparison adds the cost per successful task.
+- **Time freed vs money saved:** set how much of the staff time freed becomes real savings (fewer hires, less overtime); the rest is shown as extra capacity.
+- **Switch point:** with growth, the summary names the month another option becomes cheaper per month (for example "self-hosting from month 16").
+- **Executive or analyst view:** a short report (summary with switch point and biggest uncertainty, costs, value, one chart, limits of the estimate) or the full analysis (both charts, decision matrix, sensitivity tables, workings, assumptions), with a section strip that stays at the top. The PDF prints the current view.
 - **"Not sure?" ranges:** mark uncertain inputs (volume, growth, completion rate, minutes saved, conversion…) and the summary shows results at the low and high end, for example "saves 64–250 hours/month, payback 0.3–1.3 months", and whether the recommendation changes.
 - **Start from goals:** "What do you want AI to do?" cards (answer customers, process invoices, find answers in company data…). Each card you pick becomes a workload.
 - **Plain language as you type:** live hints translate inputs ("≈ 2,00,040 requests a month", "≈ 1,100 words", "1,600 of 2,000 invoices done without a person"), and ⓘ buttons explain jargon such as tokens, TCO, RAG, batch and FTE.
@@ -76,13 +81,14 @@ The engine (`engine/`) has no DOM access, so the same code runs in the browser a
 ## How the method works
 
 1. **Volume** comes from users per day × requests per user × 30, or from documents × pages for document processing, and grows monthly.
-2. **API cost** = tokens × published per-token price, plus database, hosting, vector database, voice and maintenance.
+2. **API cost** = tokens × published per-token price (the cheapest provider for the workload, or the one you choose), plus database, hosting, vector database, voice and maintenance. A **hosted open model** is costed the same way at an open-weight model's per-token price.
 3. **Self-hosting** chooses a model size for the quality need, then the cheapest GPU with enough memory, and sizes the GPU count for peak traffic (30% headroom, 2 minimum for high availability). GPUs run 730 hours a month.
 4. **SaaS** uses the cheapest plan whose limits fit the volume, including required seats.
-5. **Value** uses gross profit on the first sale for the headline break-even (conservative), plus a 12-month figure for repeat buyers.
-6. **Recommendation** = 50% cost score + 50% weighted non-cost score (cost weighs 25% for high-ticket businesses). The explanation is built from fixed templates.
+5. **Prices change over time:** each month's AI and GPU prices are today's price × (1 + yearly change)^(months / 12).
+6. **Value** uses gross profit on the first sale for the headline break-even (conservative), plus a 12-month figure for repeat buyers.
+7. **Recommendation** = 50% cost score + 50% weighted non-cost score (cost weighs 25% for high-ticket businesses). The explanation is built from fixed templates.
 
-Every formula is written out in **[docs/METHODOLOGY.md](docs/METHODOLOGY.md)**. The inputs object is documented in [docs/inputs.schema.json](docs/inputs.schema.json).
+Every formula is written out in **[docs/METHODOLOGY.md](docs/METHODOLOGY.md)**, and the live **[How it works](https://kaunteyacharya.com/ai-stack-advisor/about.html)** page shows the same method plus every assumption, price, labour cost, tax rate and exchange rate the advisor uses, each with its source. That page is generated from the methodology and the data files (`npm run docs:about`), and a test fails if it falls out of date. The inputs object is documented in [docs/inputs.schema.json](docs/inputs.schema.json).
 
 ## Privacy
 
@@ -94,6 +100,7 @@ Everything runs in your browser. There is no backend, no API key, no LLM call, n
 - Values that could not be verified are marked `is_sample: true`, and the app shows a banner whenever one affects a result.
 - GPU throughput figures are labelled **assumptions**, not prices.
 - A weekly workflow ([price-check.yml](.github/workflows/price-check.yml)) opens or updates an issue, "Price data needs verification", listing entries older than 30 days or marked as samples.
+- A second weekly workflow ([data-refresh.yml](.github/workflows/data-refresh.yml)) cross-checks every AI model price against two independent lists, [OpenRouter](https://openrouter.ai/docs/api-reference/list-endpoints-for-a-model) (the provider's own endpoint) and [LiteLLM's price file](https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json). When both agree on a new price, it opens a **pull request** with the change, the test results and a link to each official price page to confirm before merging. Disagreements, single-source differences and changes over 80% are never applied; they go to an issue for a person to check. The same workflow refreshes labour costs from the Eurostat and BLS APIs (changes over 25% are listed, not applied) and lists the countries whose statistics have no open API.
 
 ## Multi-currency support
 
@@ -122,15 +129,19 @@ Then open http://localhost:8000. Any static server works; opening `index.html` d
 npm test                 # unit + end-to-end scenario tests (Node's built-in test runner, no dependencies)
 npm run check-prices     # list prices older than 30 days or marked as samples
 npm run fx-update        # fetch the latest ECB rates into data/fx.json
+npm run data:check       # cross-check AI prices and labour costs against their sources (changes nothing)
+npm run data:refresh     # the same, writing agreed changes into data/
 npm run docs:scoring     # regenerate the scoring tables in docs/METHODOLOGY.md
+npm run docs:about       # rebuild the method and data sections of about.html
 npm run count-tokens     # count tokens in data/samples (set GEMINI_API_KEY to measure with Google instead of estimating)
 ```
 
 ## Limitations
 
 - Estimates for planning only; vendor prices change often, and volume customers negotiate.
-- GPU throughput, model memory needs, engineer costs and build or maintenance hours are assumptions; edit them to match your situation.
+- GPU speeds, model memory needs, engineer costs and build or maintenance hours are assumptions; edit them to match your situation. Cold starts, autoscaling, data transfer fees and compliance audits are not costed.
 - Open-weight model quality varies by task and may trail frontier models; test on your own data.
+- The yearly price changes are estimates based on recent trends; prices can also rise, and the simulation varies them.
 - Data-protection notes name laws to review with a legal advisor; they are not legal advice. Tax treatment is simplified (no withholding tax, partial exemption or place-of-supply edge cases); review with a tax advisor.
 
 ## Creator
@@ -140,6 +151,10 @@ Built by **Kauntey Acharya** as a portfolio project demonstrating AI consulting 
 - Portfolio: https://kaunteyacharya.github.io
 - GitHub: https://github.com/KaunteyAcharya
 - LinkedIn: https://www.linkedin.com/in/kauntey-acharya
+
+## Contributing
+
+Corrections to prices, tax rates and labour statistics are especially welcome, with an official source. See [CONTRIBUTING.md](CONTRIBUTING.md); every pull request is reviewed and tested before it reaches the site.
 
 ## License
 

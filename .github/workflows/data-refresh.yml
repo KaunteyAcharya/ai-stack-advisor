@@ -1,0 +1,77 @@
+name: Cross-check prices and labour costs
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # Mondays 08:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Cross-check AI model prices against OpenRouter and LiteLLM
+        id: prices
+        run: node scripts/update-prices.mjs --out prices-report.md
+
+      - name: Refresh labour costs from Eurostat and BLS
+        id: labour
+        run: node scripts/update-labour.mjs --out labour-report.md
+
+      # Pull requests opened with the workflow token do not start other workflows, so the tests run here.
+      - name: Build the report and test the updated data
+        id: report
+        run: |
+          { cat prices-report.md; echo; cat labour-report.md; } > report.md
+          if git diff --quiet -- data/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          node scripts/build-about.mjs --write
+          if npm test > test-output.txt 2>&1; then
+            printf '\n---\n\nAll tests pass with the updated data.\n' >> report.md
+          else
+            { printf '\n---\n\n**Tests fail with the updated data:**\n\n```\n'; tail -n 40 test-output.txt; printf '```\n'; } >> report.md
+          fi
+
+      - name: Open a pull request with the changes
+        if: steps.report.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          DATE=$(date -u +%F)
+          BRANCH="data-refresh/${DATE}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add data/ about.html
+          git commit -m "Refresh prices and labour costs (${DATE})"
+          git push --force origin "$BRANCH"
+          if gh pr list --head "$BRANCH" --state open --json number --jq 'length' | grep -q '^0$'; then
+            gh pr create --base main --head "$BRANCH" --title "Price and labour-cost refresh ${DATE}" --body-file report.md
+          else
+            gh pr edit "$BRANCH" --body-file report.md
+          fi
+
+      - name: Open or update the tracking issue when something needs a look
+        if: steps.report.outputs.changed == 'false' && (steps.prices.outputs.review != '0' || steps.labour.outputs.review != '0')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="Price and labour cross-check needs a look"
+          NUMBER=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number,title --jq ".[] | select(.title == \"$TITLE\") | .number" | head -n1)
+          if [ -n "$NUMBER" ]; then
+            gh issue edit "$NUMBER" --body-file report.md
+          else
+            gh issue create --title "$TITLE" --body-file report.md
+          fi

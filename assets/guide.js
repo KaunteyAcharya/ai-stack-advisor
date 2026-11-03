@@ -27,6 +27,9 @@ export const GLOSSARY = {
   batch: "Batch processing: the provider runs requests within a few hours instead of instantly, for about half the price.",
   fte: "Full-time equivalent: the work of one person working full time (here, the working hours per month you set).",
   hybrid: "Hybrid: routine requests run on your own rented GPUs; harder ones go to a hosted AI API.",
+  hostedopen: "A hosted open model: an open-weight model (such as Llama, Qwen or Gemma) that an inference provider runs for you and charges per token. No GPUs to manage, but your data goes to that provider.",
+  provider: "Each provider sells a budget, a mid and a premium model. The quality need picks the role; “cheapest” compares every provider's model in that role for your request size. Quality is not equal across providers, so test before committing.",
+  pricetrend: "How much per-token AI prices and GPU rental prices change each year. The change is applied a little each month from month 1, so it lowers (or raises) the 36-month total but not the first month.",
   peak: "Share of a day's traffic that arrives in the busiest hour. Self-hosted GPUs must be sized for that hour.",
   conversion: "The share of conversations or leads that end in a sale.",
   devops: "DevOps / MLOps: the skills to run servers and AI models yourself: deployment, monitoring, updates and on-call support.",
@@ -39,6 +42,8 @@ export const GLOSSARY = {
   breakeven: "The volume at which two options cost the same. Above it, the option with the lower cost per request is cheaper.",
   register: "Every number behind the result, with its source and how far to trust it: verified (official or primary source), benchmark (an official statistic used as a proxy) or estimate (a judgement to replace with your own figure).",
   gap: "How much worse an open-weight model does on your task than a frontier API model, in percentage points of tasks completed. It varies a lot by task, so test it on your own data.",
+  eval: "Your own test: run the same set of real examples (say 100 tickets or invoices) through an API model and an open model and count how many each gets right. Measured results replace the assumed quality gap.",
+  cashsavings: "Time freed is not always money saved. It becomes cash only if you hire fewer people, pay less overtime or fewer contractors, or sell the time as paid work. Otherwise it is extra capacity.",
   pv: "Present value: future costs discounted to today's money, because spending later is cheaper than spending now.",
   caching: "Prompt caching: when the start of a prompt repeats (system prompt, instructions, earlier steps), the provider can reuse it and charges far less for those tokens.",
   simulation: "The analysis is re-run hundreds of times with prices, labour, GPU speed, the quality gap and your 'not sure' inputs drawn from realistic ranges. The result shows how often each option wins.",
@@ -59,6 +64,12 @@ export const FIELD_TERMS = {
   rag: "rag",
   cachedSharePct: "caching",
   openModelGapPct: "gap",
+  evalApiSuccessPct: "eval",
+  evalOpenSuccessPct: "eval",
+  cashSavingsPct: "cashsavings",
+  llmProvider: "provider",
+  llmPriceChangePct: "pricetrend",
+  gpuPriceChangePct: "pricetrend",
   discountRatePct: "pv",
   deflectionPct: "deflection",
   useBatch: "batch",
@@ -114,7 +125,13 @@ export const HINTS = {
   cachedSharePct: (s, c) => {
     if (!(s.cachedSharePct > 0) || !c.cacheMin) return null;
     const avg = Math.round(c.vol.avgInTokens);
-    return avg >= c.cacheMin ? `Applies: prompts average ${c.n(avg)} tokens (minimum ${c.n(c.cacheMin)})` : `Not applied: prompts average ${c.n(avg)} tokens, below the ${c.n(c.cacheMin)}-token minimum`;
+    return avg >= c.cacheMin ? `Applies: prompts average ${c.n(avg)} tokens (minimum ${c.n(c.cacheMin)} for ${c.model})` : `Not applied: prompts average ${c.n(avg)} tokens, below the ${c.n(c.cacheMin)}-token minimum for ${c.model}`;
   },
+  llmProvider: (s, c) => (c.model ? `Uses ${c.model.replace(/, batch$/, "")}${/, batch$/.test(c.model) ? " (batch prices)" : ""}` : null),
+  llmPriceChangePct: (s, c) => (s.llmPriceChangePct ? `A ${c.money(100)} AI bill today ≈ ${c.money(100 * Math.pow(1 + s.llmPriceChangePct / 100, 35 / 12))} in month 36` : "Today's prices for all 36 months"),
+  gpuPriceChangePct: (s, c) => (s.gpuPriceChangePct ? `A ${c.money(100)} GPU bill today ≈ ${c.money(100 * Math.pow(1 + s.gpuPriceChangePct / 100, 35 / 12))} in month 36` : "Today's prices for all 36 months"),
+  openModelGapPct: (s) => (s.evalApiSuccessPct != null && s.evalOpenSuccessPct != null ? "Not used: your test results below replace it" : null),
+  evalOpenSuccessPct: (s) => (s.evalApiSuccessPct != null && s.evalOpenSuccessPct != null ? `Quality gap from your test: ${Math.max(0, +(s.evalApiSuccessPct - s.evalOpenSuccessPct).toFixed(1))} points` : null),
+  cashSavingsPct: (s) => (s.cashSavingsPct < 100 ? `${100 - s.cashSavingsPct}% of the time freed is shown as extra capacity, not savings` : "All time freed is counted as money saved"),
   seats: (s) => (["data_assistant", "internal_copilot"].includes(s.useCase) ? "Per-seat plans charge at least one seat for each daily user" : null),
 };

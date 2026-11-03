@@ -1,9 +1,9 @@
 // UI wiring only: builds the form, reads inputs, calls the engine, hands results to render.js.
 
-import { withDefaults, DEFAULT_INPUTS, regionDefaults, useCaseDefaults, presetValues, regionFromLocales, WORKLOAD_KEYS, MAX_WORKLOADS, newWorkload, pickWorkload, workloadsOf } from "../engine/inputs.js";
+import { withDefaults, DEFAULT_INPUTS, regionDefaults, useCaseDefaults, presetValues, regionFromLocales, WORKLOAD_KEYS, MAX_WORKLOADS, newWorkload, pickWorkload, workloadsOf, OPTION_IDS } from "../engine/inputs.js";
 import { analyzePortfolio, describeCombo, workloadLabel } from "../engine/portfolio.js";
 import { indexPrices } from "../engine/prices.js";
-import { volume } from "../engine/costs.js";
+import { volume, llmModelFor } from "../engine/costs.js";
 import { isAgent, isInternal, valuedOnTime } from "../engine/agents.js";
 import { validateInputs } from "../engine/validate.js";
 import { analyze } from "../engine/recommend.js";
@@ -134,8 +134,15 @@ const SECTIONS = [
     fields: [
       { key: "latency", type: "select", label: "Acceptable response latency", options: () => [["relaxed", "Relaxed"], ["standard", "Standard"], ["realtime", "Real-time"]] },
       { key: "uptime", type: "select", label: "Uptime requirement", options: () => [["best_effort", "Best effort"], ["business_hours", "Business hours"], ["high_availability", "High availability"]] },
-      { key: "quality", type: "select", label: "Quality need", help: "Chooses the API model tier and the self-hosted model size.", options: () => [["basic", "Basic"], ["good", "Good"], ["best_available", "Best available"]] },
+      { key: "quality", type: "select", label: "Quality need", help: "Chooses each provider's model tier and the open-model size.", options: () => [["basic", "Basic"], ["good", "Good"], ["best_available", "Best available"]] },
+      {
+        key: "llmProvider", type: "select", label: "AI provider for the API build",
+        help: "Used by the API build and the hybrid. “Cheapest” picks the provider that costs least for your request size; quality differs between providers, so test on your own task.",
+        options: () => [["cheapest", "Cheapest for this workload"], ...prices.llmProviders.map((p) => [p.id, p.label])],
+      },
       { key: "openModelGapPct", type: "percent", label: "Open-model quality gap", tag: "assumption", help: "Percentage points fewer tasks an open model completes than a frontier API model on your task. The value lost is counted as a cost. Measure it with an evaluation." },
+      { key: "evalApiSuccessPct", type: "percent", optional: true, step: "any", label: "Your test: tasks an API model got right", help: "From a test on your own examples (for example 100 real tickets or invoices). Fill in both results to use them instead of the assumed gap; for agents the API result also becomes the completion rate." },
+      { key: "evalOpenSuccessPct", type: "percent", optional: true, step: "any", label: "Your test: tasks an open model got right", help: "The same test run on the open model you would self-host or rent per token." },
     ],
   },
   {
@@ -171,6 +178,7 @@ const SECTIONS = [
       { key: "costPerErrorUsd", type: "money", label: "Cost of one error", help: "Rework, refunds, a wrong report sent to a client…", show: (s) => isAgent(s) },
       { key: "staffHourlyUsd", type: "money", label: "Hourly cost of the person doing it today", tag: "assumption", help: "Loaded cost (salary plus overheads). Default comes from the region and is a sample value.", show: (s) => valuedOnTime(s) },
       { key: "fteHoursPerMonth", type: "number", label: "Working hours per FTE per month", unit: "hours", show: (s) => valuedOnTime(s) },
+      { key: "cashSavingsPct", type: "percent", label: "Share of time freed that becomes money saved", tag: "assumption", help: "Time saved only saves money if you hire fewer people, cut overtime or contractors, or use the time for paid work. 100% counts all of it; lower it if people will simply have more time for other work." },
       { key: "valueUnit", type: "select", label: "Show time saved as", options: () => [["hours", "Hours per month"], ["fte", "FTEs (full-time equivalents)"]], show: (s) => valuedOnTime(s) },
       { key: "ticketUsd", type: "money", label: "Average ticket size", help: "Price a customer pays per purchase." },
       { key: "marginPct", type: "percent", label: "Gross margin" },
@@ -189,10 +197,12 @@ const SECTIONS = [
     title: "Advanced: cost model",
     fields: [
       { key: "shareSelfPct", type: "percent", optional: true, label: "Hybrid: share of requests self-hosted", help: "Leave blank to use the cheapest split (searched from 10% to 90%)." },
-      ...["A", "B", "C", "D"].map((o) => ({ key: `buildHours.${o}`, type: "number", label: `Build hours, option ${o}`, unit: "hours", tag: "assumption" })),
-      ...["A", "B", "C", "D"].map((o) => ({ key: `maintenanceHours.${o}`, type: "number", label: `Maintenance hours/month, option ${o}`, unit: "hours", tag: "assumption" })),
-      ...["A", "B", "C", "D"].map((o) => ({ key: `evalHours.${o}`, type: "number", label: `Evaluation hours before launch, option ${o}`, unit: "hours", tag: "assumption" })),
+      ...OPTION_IDS.map((o) => ({ key: `buildHours.${o}`, type: "number", label: `Build hours, option ${o}`, unit: "hours", tag: "assumption" })),
+      ...OPTION_IDS.map((o) => ({ key: `maintenanceHours.${o}`, type: "number", label: `Maintenance hours/month, option ${o}`, unit: "hours", tag: "assumption" })),
+      ...OPTION_IDS.map((o) => ({ key: `evalHours.${o}`, type: "number", label: `Evaluation hours before launch, option ${o}`, unit: "hours", tag: "assumption" })),
       { key: "discountRatePct", type: "percent", label: "Discount rate (per year)", step: "any", help: "Used for the present value of 36-month costs: money spent later counts for less. 8–12% is common for small businesses." },
+      { key: "llmPriceChangePct", type: "percent", min: "-99", max: "200", label: "AI price change per year", tag: "assumption", step: "any", help: "Per-token prices for the same quality have mostly fallen; some providers have raised them. Negative = cheaper. 0 plans at today's prices." },
+      { key: "gpuPriceChangePct", type: "percent", min: "-99", max: "200", label: "GPU rental price change per year", tag: "assumption", step: "any", help: "Rental prices for the same GPU tend to fall as newer GPUs arrive. Negative = cheaper." },
     ],
   },
 ];
@@ -317,8 +327,8 @@ function buildField(f) {
     control = el("input", { id, name: f.key, type: "text", maxlength: f.key === "company" ? "80" : "40", autocomplete: f.key === "company" ? "organization" : "off", "aria-describedby": helpId });
   } else {
     control = el("input", {
-      id, name: f.key, type: "number", inputmode: "decimal", min: "0",
-      max: f.type === "percent" ? "100" : null,
+      id, name: f.key, type: "number", inputmode: "decimal", min: f.min ?? "0",
+      max: f.max ?? (f.type === "percent" ? "100" : null),
       step: f.step || (f.type === "money" ? "any" : f.type === "percent" ? "any" : "1"),
       placeholder: f.optional ? "auto" : null,
       "aria-describedby": helpId,
@@ -398,7 +408,7 @@ function updateHints() {
   }
   const fmt = formatter();
   const unit = data.usecases.usecases[s.useCase]?.task_unit || "tasks";
-  const c = { n: (x, d = 0) => (Number.isFinite(x) ? fmt.number(x, d) : "—"), money: (usd) => (Number.isFinite(usd) ? fmt.money(usd) : "—"), vol, unit, cacheMin: prices.llm[s.quality]?.cache_min_tokens };
+  const c = { n: (x, d = 0) => (Number.isFinite(x) ? fmt.number(x, d) : "—"), money: (usd) => (Number.isFinite(usd) ? fmt.money(usd) : "—"), vol, unit, cacheMin: llmModelFor(s, prices, { v: vol })?.cache_min_tokens, model: llmModelFor(s, prices, { v: vol })?.label };
   for (const [key, fn] of Object.entries(HINTS)) {
     const node = document.getElementById(`f-${key}-hint`);
     if (!node) continue;
@@ -698,6 +708,7 @@ const SECTIONS_NAV = [
   ["matrix-title", "Decision"],
   ["sim-title", "Confidence"],
   ["warn-title", "Risks"],
+  ["limits-title", "Limits"],
   ["assump-title", "Assumptions"],
 ];
 
@@ -829,7 +840,7 @@ function renderResultBar() {
   previousHeadline = { label, monthly };
 }
 
-const OPTION_SHORT = { A: "SaaS", B: "API", C: "Self-hosted", D: "Hybrid" };
+const OPTION_SHORT = { A: "SaaS", B: "API", C: "Self-hosted", D: "Hybrid", E: "Hosted open model" };
 
 /* ---------- workload tabs ---------- */
 

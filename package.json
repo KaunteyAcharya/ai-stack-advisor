@@ -9,7 +9,10 @@
     "check-prices": "node scripts/check-prices.mjs --max-age-days 30",
     "fx-update": "node scripts/update-fx.mjs",
     "docs:scoring": "node scripts/scoring-table.mjs --write",
-    "count-tokens": "node scripts/count-tokens.mjs"
+    "docs:about": "node scripts/build-about.mjs --write",
+    "count-tokens": "node scripts/count-tokens.mjs",
+    "data:check": "node scripts/update-prices.mjs --dry-run && node scripts/update-labour.mjs --dry-run",
+    "data:refresh": "node scripts/update-prices.mjs && node scripts/update-labour.mjs"
   },
   "author": "Kauntey Acharya",
   "license": "MIT"

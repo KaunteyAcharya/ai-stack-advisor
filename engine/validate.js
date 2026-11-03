@@ -2,8 +2,8 @@
 
 import { AGENT_USE_CASES } from "./agents.js";
 
-const PERCENT_FIELDS = ["peakSharePct", "growthPct", "marginPct", "conversionPct", "deflectionPct", "targetSharePct", "humanSharePct", "customTaxPct", "successPct", "reviewPct", "errorPct", "xRepliesSharePct", "cachedSharePct", "openModelGapPct", "discountRatePct"];
-const OPTIONAL_PERCENT_FIELDS = ["shareSelfPct", "costWeightPct"]; // null = automatic
+const PERCENT_FIELDS = ["peakSharePct", "growthPct", "marginPct", "conversionPct", "deflectionPct", "targetSharePct", "humanSharePct", "customTaxPct", "successPct", "reviewPct", "errorPct", "xRepliesSharePct", "cachedSharePct", "openModelGapPct", "discountRatePct", "cashSavingsPct"];
+const OPTIONAL_PERCENT_FIELDS = ["shareSelfPct", "costWeightPct", "evalApiSuccessPct", "evalOpenSuccessPct"]; // null = automatic / not given
 const NON_NEGATIVE_FIELDS = [
   "usersPerDay", "requestsPerUser", "seats", "inTokens", "outTokens", "voiceMinutesPerConversation",
   "docsPerMonth", "pagesPerDoc", "tokensPerPage", "docOutTokens", "ocrCostPerPageUsd",
@@ -71,6 +71,22 @@ export function validateInputs(inputs, ctx = {}) {
   if (inputs.conversionPct > 50) warnings.push({ field: "conversionPct", level: "warning", message: "Conversion rate above 50% is unusually high." });
   if (inputs.growthPct > 30) warnings.push({ field: "growthPct", level: "warning", message: "Growth above 30% per month compounds very fast over 36 months." });
   if (inputs.requestsPerUser > 100) warnings.push({ field: "requestsPerUser", level: "warning", message: "More than 100 requests per user per day is unusual." });
+
+  if ((inputs.evalApiSuccessPct == null) !== (inputs.evalOpenSuccessPct == null)) {
+    const missing = inputs.evalApiSuccessPct == null ? "evalApiSuccessPct" : "evalOpenSuccessPct";
+    warnings.push({ field: missing, level: "info", message: "Enter both test results to use them; until then the assumed open-model quality gap is used." });
+  }
+  if (inputs.evalApiSuccessPct != null && inputs.evalOpenSuccessPct > inputs.evalApiSuccessPct) {
+    warnings.push({ field: "evalOpenSuccessPct", level: "info", message: "The open model did better than the API model in your test, so no quality gap is counted." });
+  }
+
+  // Yearly price change: -99% to +200% is computable; beyond ±60% a year is a strong assumption.
+  for (const f of ["llmPriceChangePct", "gpuPriceChangePct"]) {
+    const v = inputs[f];
+    if (v == null) continue;
+    if (typeof v !== "number" || !Number.isFinite(v) || v <= -100 || v > 200) errors.push({ field: f, message: `${f} must be above -100% and at most 200% a year.` });
+    else if (Math.abs(v) > 60) warnings.push({ field: f, level: "warning", message: `A price change of ${v}% a year compounds to ${Math.round((Math.pow(1 + v / 100, 3) - 1) * 100)}% over three years.` });
+  }
 
   return { errors, warnings };
 }

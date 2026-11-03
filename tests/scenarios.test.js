@@ -58,9 +58,9 @@ test("scenario 3: real estate ₹65 lakh ticket → high_ticket, cost weight red
   for (const w of ["quality", "response speed", "human handoff"]) assert.ok(text.includes(w), w);
 });
 
-test("scenario 4: data must not leave → SaaS and API excluded; self-hosted or hybrid recommended", () => {
+test("scenario 4: data must not leave → SaaS, API and hosted open model excluded; self-hosted or hybrid recommended", () => {
   const r = analyze(withDefaults({ externalAllowed: "no", devops: "strong" }), TEST_PRICES, { curve: false });
-  assert.deepEqual(r.excluded.map((x) => x.id).sort(), ["A", "B"]);
+  assert.deepEqual(r.excluded.map((x) => x.id).sort(), ["A", "B", "E"]);
   for (const x of r.excluded) assert.match(x.reason, /may not leave/);
   assert.ok(["C", "D"].includes(r.recommended));
   const d = r.options.find((o) => o.id === "D");
@@ -165,7 +165,7 @@ test("region guessed from browser locale", async () => {
 });
 
 test("growth stops after growthMonths; TCO-36 at no growth is reported", () => {
-  const inputs = withDefaults({ growthPct: 10, growthMonths: 12 });
+  const inputs = withDefaults({ growthPct: 10, growthMonths: 12, llmPriceChangePct: 0, gpuPriceChangePct: 0 });
   const r = analyze(inputs, TEST_PRICES, { curve: false });
   const b = r.options.find((o) => o.id === "B");
   assert.ok(b.tco36NoGrowth < b.tco36);

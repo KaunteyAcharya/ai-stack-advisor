@@ -123,6 +123,8 @@ export function factorConfidence(factorId, register, usedPriceIds = []) {
       return worst((e) => e.priceId.startsWith("gpu_") && !e.priceId.startsWith("gpu_throughput"));
     case "gpuThroughput":
       return "estimate";
+    case "cashSavings":
+      return byId.cash_savings?.confidence ?? "estimate";
     case "engineerHourly":
       return byId.engineer_hourly?.confidence ?? "estimate";
     case "staffHourly":
@@ -131,6 +133,9 @@ export function factorConfidence(factorId, register, usedPriceIds = []) {
       return byId.maintenance_hours?.confidence ?? "estimate";
     case "openModelGap":
       return byId.open_model_gap?.confidence ?? "estimate";
+    case "llmPriceTrend":
+    case "gpuPriceTrend":
+      return byId.price_trend?.confidence ?? "estimate";
     default:
       return fields[factorId]?.confidence ?? "estimate";
   }

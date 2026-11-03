@@ -21,13 +21,23 @@ export function indexPrices(pricesData, fx, selfhost, taxes = null) {
   }
   const all = Object.values(byId);
   const one = (category) => all.find((e) => e.category === category);
+  // Quality need → each provider's model in that role (an entry may serve several tiers).
+  const byTier = (entries) => {
+    const at = (tier) => entries.find((e) => (e.tiers || [e.tier]).includes(tier));
+    return { basic: at("budget"), good: at("mid"), best_available: at("premium") };
+  };
+  const llmEntries = all.filter((e) => e.category === "llm_api");
+  const providerIds = [...new Set(llmEntries.map((e) => e.provider || "default"))];
+  const llmByProvider = Object.fromEntries(providerIds.map((p) => [p, byTier(llmEntries.filter((e) => (e.provider || "default") === p))]));
+  const defaultProvider = llmByProvider[pricesData.default_llm_provider] ? pricesData.default_llm_provider : providerIds[0];
+  const providerLabels = Object.fromEntries((pricesData.llm_providers || []).map((p) => [p.id, p.label]));
   return {
     byId,
-    llm: {
-      basic: all.find((e) => e.category === "llm_api" && e.tier === "budget"),
-      good: all.find((e) => e.category === "llm_api" && e.tier === "mid"),
-      best_available: all.find((e) => e.category === "llm_api" && e.tier === "premium"),
-    },
+    llm: llmByProvider[defaultProvider],
+    llmByProvider,
+    llmProviders: providerIds.map((id) => ({ id, label: providerLabels[id] || id })),
+    defaultLlmProvider: defaultProvider,
+    openLlm: byTier(all.filter((e) => e.category === "llm_open_hosted")),
     gpu: Object.fromEntries(all.filter((e) => e.category === "gpu_rental").map((e) => [e.gpu_class, e])),
     throughput: Object.fromEntries(all.filter((e) => e.category === "gpu_throughput").map((e) => [e.gpu_class, e])),
     managedDb: one("managed_db"),

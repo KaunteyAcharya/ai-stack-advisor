@@ -3,12 +3,13 @@
 // Monte Carlo: each run draws every uncertain quantity from a triangular distribution
 // (low, typical, high) and re-runs the analysis. Engine assumptions (prices, GPU throughput,
 // labour, the open-model quality gap) always vary; the user's own inputs vary only when marked
-// "not sure". Runs are seeded, so the same inputs always give the same result.
+// "not sure". Related quantities are drawn together (see CORRELATED). Runs are seeded, so the same
+// inputs always give the same result.
 //
 // Tornado: each factor alone is moved to its low and high end; factors are sorted by how much
 // they move the result.
 
-import { analyze } from "./recommend.js";
+import { analyze, measuredQuality } from "./recommend.js";
 import { RANGE_SPECS } from "./ranges.js";
 import { isAgent, isInternal, valuedOnTime } from "./agents.js";
 
@@ -29,11 +30,25 @@ const INPUT_APPLIES = {
 export const ENGINE_FACTORS = [
   { id: "llmPrice", label: "LLM API prices", low: 0.8, high: 1.25 },
   { id: "gpuPrice", label: "GPU rental prices", low: 0.75, high: 1.3 },
+  { id: "llmPriceTrend", label: "Yearly change in AI prices", absolute: true, input: "llmPriceChangePct", low: -60, high: 10 },
+  { id: "gpuPriceTrend", label: "Yearly change in GPU prices", absolute: true, input: "gpuPriceChangePct", low: -35, high: 5 },
   { id: "gpuThroughput", label: "GPU throughput (assumption)", low: 0.7, high: 1.3 },
   { id: "engineerHourly", label: "Engineer hourly cost", low: 0.75, high: 1.3 },
   { id: "maintenanceHours", label: "Build and maintenance hours", low: 0.7, high: 1.5 },
   { id: "staffHourly", label: "Staff hourly cost", low: 0.75, high: 1.3, applies: (i) => valuedOnTime(i) },
-  { id: "openModelGap", label: "Open-model quality gap", absolute: true, low: 0, high: 20 },
+  { id: "openModelGap", label: "Open-model quality gap", absolute: true, input: "openModelGapPct", low: 0, high: 20 },
+  { id: "cashSavings", label: "Share of time freed that becomes money saved", absolute: true, input: "cashSavingsPct", low: 50, high: 100 },
+];
+
+/**
+ * Quantities that tend to move together, drawn with a shared component so their pairwise correlation
+ * is about ρ (Gaussian copula): AI and GPU prices follow the same hardware market, and so do their
+ * yearly trends; engineer and staff pay follow the same labour market. ρ values are judgements.
+ */
+export const CORRELATED = [
+  { ids: ["llmPrice", "gpuPrice"], rho: 0.5 },
+  { ids: ["llmPriceTrend", "gpuPriceTrend"], rho: 0.6 },
+  { ids: ["engineerHourly", "staffHourly"], rho: 0.7 },
 ];
 
 /** Factors for these inputs: every applicable engine factor, plus input factors (all, or only `onlyKeys`). */
@@ -44,11 +59,13 @@ export function factorsFor(inputs, { onlyKeys = null } = {}) {
       const typical = inputs[k];
       return { id: k, label: RANGE_SPECS[k].label, kind: "input", low: RANGE_SPECS[k].low(typical), mode: typical, high: RANGE_SPECS[k].high(typical) };
     });
-  const engine = ENGINE_FACTORS.filter((f) => !f.applies || f.applies(inputs)).map((f) =>
-    f.absolute
-      ? { ...f, kind: "engine", mode: inputs.openModelGapPct ?? 0, high: Math.max(f.high, inputs.openModelGapPct ?? 0) }
-      : { ...f, kind: "engine", mode: 1 },
-  );
+  // Absolute factors vary an input around the value the user entered (the band widens to include it).
+  const engine = ENGINE_FACTORS.filter((f) => !f.applies || f.applies(inputs)).map((f) => {
+    if (!f.absolute) return { ...f, kind: "engine", mode: 1 };
+    // With your own test results, the gap they imply is the typical value.
+    const mode = (f.id === "openModelGap" ? measuredQuality(inputs).openModelGapPct : inputs[f.input]) ?? 0;
+    return { ...f, kind: "engine", mode, low: Math.min(f.low, mode), high: Math.max(f.high, mode) };
+  });
   return [...inputFactors, ...engine];
 }
 
@@ -67,8 +84,10 @@ function scalePrices(prices, { llm = 1, gpu = 1, thr = 1 }) {
   return {
     ...prices,
     llm: mapObj(prices.llm, scaleLlm),
+    ...(prices.llmByProvider ? { llmByProvider: mapObj(prices.llmByProvider, (tiers) => mapObj(tiers, scaleLlm)) } : {}),
+    ...(prices.openLlm ? { openLlm: mapObj(prices.openLlm, scaleLlm) } : {}),
     gpu: mapObj(prices.gpu, (g) => ({ ...g, price: g.price * gpu })),
-    throughput: mapObj(prices.throughput, (t) => ({ ...t, value: t.value * thr })),
+    throughput: mapObj(prices.throughput, (t) => ({ ...t, value: t.value * thr, ...(t.prefill_tokens_per_second ? { prefill_tokens_per_second: t.prefill_tokens_per_second * thr } : {}) })),
   };
 }
 
@@ -83,7 +102,13 @@ export function applyFactors(inputs, prices, values) {
     else if (id === "gpuThroughput") scale.thr = x;
     else if (id === "engineerHourly") i.engineerHourlyUsd = inputs.engineerHourlyUsd * x;
     else if (id === "staffHourly") i.staffHourlyUsd = inputs.staffHourlyUsd * x;
-    else if (id === "openModelGap") i.openModelGapPct = x;
+    else if (id === "openModelGap") {
+      // Measured results define the gap, so move the open-model result instead.
+      if (inputs.evalApiSuccessPct != null && inputs.evalOpenSuccessPct != null) i.evalOpenSuccessPct = Math.max(0, inputs.evalApiSuccessPct - x);
+      else i.openModelGapPct = x;
+    } else if (id === "cashSavings") i.cashSavingsPct = x;
+    else if (id === "llmPriceTrend") i.llmPriceChangePct = x;
+    else if (id === "gpuPriceTrend") i.gpuPriceChangePct = x;
     else if (id === "maintenanceHours") {
       for (const o of Object.keys(i.maintenanceHours)) i.maintenanceHours[o] = inputs.maintenanceHours[o] * x;
       for (const o of Object.keys(i.buildHours)) i.buildHours[o] = inputs.buildHours[o] * x;
@@ -111,6 +136,27 @@ export function triangular(u, a, c, b) {
   return u < f ? a + Math.sqrt(u * (b - a) * (c - a)) : b - Math.sqrt((1 - u) * (b - a) * (b - c));
 }
 
+/** Standard normal cumulative distribution (Abramowitz and Stegun 7.1.26, error below 1.5e-7). */
+export function normalCdf(z) {
+  const x = Math.abs(z) / Math.SQRT2;
+  const t = 1 / (1 + 0.3275911 * x);
+  const erf = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+  return z >= 0 ? (1 + erf) / 2 : (1 - erf) / 2;
+}
+
+/** One value per factor from the uniform source `u`; factors in a CORRELATED group share a normal draw. */
+export function drawFactors(factors, u) {
+  const normal = () => Math.sqrt(-2 * Math.log(1 - u())) * Math.cos(2 * Math.PI * u());
+  const shared = CORRELATED.map(() => normal());
+  const values = {};
+  for (const f of factors) {
+    const g = CORRELATED.findIndex((c) => c.ids.includes(f.id));
+    const p = g < 0 ? u() : normalCdf(Math.sqrt(CORRELATED[g].rho) * shared[g] + Math.sqrt(1 - CORRELATED[g].rho) * normal());
+    values[f.id] = triangular(p, f.low, f.mode, f.high);
+  }
+  return values;
+}
+
 /** The result each run records: the recommendation, its monthly cost and its net monthly benefit. */
 export function outcome(r) {
   const best = r.options.find((o) => o.id === r.recommended);
@@ -124,7 +170,7 @@ export function outcome(r) {
 /** One simulation run (deterministic for a given seed and index). */
 export function simulateRun(inputs, prices, factors, index, { seed = 1, hybridPct } = {}) {
   const u = rng(seed * 100_003 + index);
-  const values = Object.fromEntries(factors.map((f) => [f.id, triangular(u(), f.low, f.mode, f.high)]));
+  const values = drawFactors(factors, u);
   const applied = applyFactors(inputs, prices, values);
   return outcome(analyze(applied.inputs, applied.prices, { curve: false, light: true, hybridPct }));
 }

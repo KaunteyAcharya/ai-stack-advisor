@@ -1,7 +1,7 @@
 // Monthly cost of each option, in USD. Month index m = 0 is month 1.
 // Every function returns { total, lines, priceIds, ... } so the report can show its workings.
 
-import { gpusNeeded, selectGpu } from "./capacity.js";
+import { gpuSizing, kvRoomGb, selectGpu } from "./capacity.js";
 import { taxProfile, applyTax } from "./tax.js";
 import { isAgent, agentTokens, workflowExtraLines } from "./agents.js";
 
@@ -90,15 +90,68 @@ export function cachedShareFor(inputs, model, avgInTokens) {
 const cacheNote = (c) => (c > 0 ? `, ${Math.round(c * 100)}% of input cached` : "");
 
 /**
- * LLM pricing for the quality need. With `useBatch` on an agent workflow, the provider's
- * batch prices are used where listed (work runs asynchronously, typically within 24 hours).
+ * Price multiplier for month m when prices change `pctPerYear` a year (−30 = 30% cheaper
+ * each year), compounded monthly: (1 + pct/100)^(m/12). Month 1 (m = 0) is today's price.
  */
-export function llmModelFor(inputs, prices, { allowBatch = true } = {}) {
-  const model = prices.llm[inputs.quality] || prices.llm.good;
-  if (allowBatch && inputs.useBatch && isAgent(inputs) && model.batch_input_price != null) {
+export function priceChangeFactor(pctPerYear, m) {
+  if (!pctPerYear || !m) return 1;
+  return Math.pow(1 + Math.max(-99, pctPerYear) / 100, m / 12);
+}
+export const llmPriceFactor = (inputs, m) => priceChangeFactor(inputs.llmPriceChangePct, m);
+export const gpuPriceFactor = (inputs, m) => priceChangeFactor(inputs.gpuPriceChangePct, m);
+
+/** Batch prices for an agent workflow with `useBatch`, where the model lists them (work runs within ~24 hours). */
+function withBatch(inputs, model, allowBatch) {
+  if (model && allowBatch && inputs.useBatch && isAgent(inputs) && model.batch_input_price != null) {
     return { ...model, input_price: model.batch_input_price, output_price: model.batch_output_price, label: `${model.label}, batch`, batch: true };
   }
   return model;
+}
+
+/** Cost of one request at month-1 prices, with prompt caching where it applies. */
+export function requestCost(inputs, model, v) {
+  return llmCostPerRequest(v.avgInTokens, v.avgOutTokens, model, cachedShareFor(inputs, model, v.avgInTokens));
+}
+
+/**
+ * Every provider's model for the quality need, each priced for this workload's request mix
+ * (batch and caching included), cheapest first. Providers without a model in that role are left
+ * out (e.g. no premium model), unless none has one.
+ */
+export function llmCandidates(inputs, prices, { allowBatch = true, v = volume(inputs, 0) } = {}) {
+  const providers = Object.entries(prices.llmByProvider || { default: prices.llm });
+  const quality = providers.some(([, tiers]) => tiers[inputs.quality]) ? inputs.quality : "good";
+  return providers
+    .filter(([, tiers]) => tiers[quality])
+    .map(([provider, tiers]) => {
+      const model = withBatch(inputs, tiers[quality], allowBatch);
+      return { provider, model: { ...model, provider }, perRequest: requestCost(inputs, model, v) };
+    })
+    .sort((a, b) => a.perRequest - b.perRequest);
+}
+
+/**
+ * LLM pricing for the quality need: the chosen provider's model in that role, or with
+ * `llmProvider: "cheapest"` the provider that costs least for this workload's request mix.
+ * Batch prices apply to agent workflows with `useBatch` where the provider lists them.
+ */
+export function llmModelFor(inputs, prices, { allowBatch = true, v } = {}) {
+  const chosen = prices.llmByProvider?.[inputs.llmProvider];
+  if (chosen) {
+    // A provider without a model in that role falls back to its mid model.
+    const model = chosen[inputs.quality] || chosen.good;
+    return withBatch(inputs, { ...model, provider: inputs.llmProvider }, allowBatch);
+  }
+  if (inputs.llmProvider === "cheapest" && prices.llmByProvider) {
+    return llmCandidates(inputs, prices, { allowBatch, v: v || volume(inputs, 0) })[0].model;
+  }
+  return withBatch(inputs, prices.llm[inputs.quality] || prices.llm.good, allowBatch);
+}
+
+/** Open-weight model for the quality need, served per token by an inference provider (option E). */
+export function openModelFor(inputs, prices, { allowBatch = true } = {}) {
+  const model = prices.openLlm?.[inputs.quality] || prices.openLlm?.good;
+  return withBatch(inputs, model, allowBatch);
 }
 
 /** Voice add-on. Self-hosted STT/TTS is absorbed in GPU sizing, so only telephony applies. */
@@ -122,16 +175,19 @@ function extras(inputs, prices, v) {
   return workflowExtraLines(inputs, prices, v);
 }
 
-/** Option B — hosted LLM APIs + managed database + light hosting. */
-export function apiMonthly(inputs, prices, m = 0, scale = 1) {
+/**
+ * A build on a per-token model API + managed database + light hosting. Shared by option B
+ * (frontier models from the chosen provider) and option E (open models hosted per token).
+ * Per-token prices follow `llmPriceChangePct` from month 1.
+ */
+function tokenApiMonthly(inputs, prices, m, scale, model, option, prefix) {
   const v = volume(inputs, m, scale);
-  const model = llmModelFor(inputs, prices);
   const cached = cachedShareFor(inputs, model, v.avgInTokens);
-  const perReq = llmCostPerRequest(v.avgInTokens, v.avgOutTokens, model, cached);
+  const perReq = llmCostPerRequest(v.avgInTokens, v.avgOutTokens, model, cached) * llmPriceFactor(inputs, m);
   const lines = [
-    { label: `LLM API (${model.label}${cacheNote(cached)})`, usd: v.requestsPerMonth * perReq, basis: basis(v.requestsPerMonth, "requests", perReq) },
+    { label: `${prefix} (${model.label}${cacheNote(cached)})`, usd: v.requestsPerMonth * perReq, llm: true, basis: basis(v.requestsPerMonth, "requests", perReq) },
     ...sharedInfraLines(inputs, prices),
-    { label: "Maintenance labour", usd: inputs.maintenanceHours.B * inputs.engineerHourlyUsd, labour: true, basis: basis(inputs.maintenanceHours.B, "hours", inputs.engineerHourlyUsd) },
+    { label: "Maintenance labour", usd: inputs.maintenanceHours[option] * inputs.engineerHourlyUsd, labour: true, basis: basis(inputs.maintenanceHours[option], "hours", inputs.engineerHourlyUsd) },
   ];
   const ex = extras(inputs, prices, v);
   lines.push(...ex.lines);
@@ -142,25 +198,56 @@ export function apiMonthly(inputs, prices, m = 0, scale = 1) {
     lines,
     llmMonthly: lines[0].usd,
     llmCostPerRequest: perReq,
+    model,
     priceIds: [model.id, ...sharedInfraIds(inputs, prices), ...ex.priceIds, ...voice.priceIds],
   };
 }
 
+/** Option B — hosted frontier LLM APIs + managed database + light hosting. */
+export function apiMonthly(inputs, prices, m = 0, scale = 1) {
+  return tokenApiMonthly(inputs, prices, m, scale, llmModelFor(inputs, prices), "B", "LLM API");
+}
+
+/**
+ * Option E — an open-weight model of the same size class as self-hosting, run per token by an
+ * inference provider: no GPUs to manage, but data goes to that provider.
+ */
+export function hostedOpenMonthly(inputs, prices, m = 0, scale = 1) {
+  const model = openModelFor(inputs, prices);
+  if (!model) return { total: Infinity, lines: [], priceIds: [], flags: [], unavailable: "No hosted open-model price in the price data" };
+  return tokenApiMonthly(inputs, prices, m, scale, model, "E", "Hosted open model");
+}
+
 /** GPU sizing details for the self-hosted part (exported for the report). */
 export function gpuPlan(inputs, prices, v, share = 1) {
-  const sel = selectGpu(inputs.quality, prices.selfhost, prices.gpu);
+  const sel = selectGpu(inputs.quality, prices.selfhost, prices.gpu, v.avgInTokens + v.avgOutTokens);
   const gpu = prices.gpu[sel.gpuClass];
   const thr = prices.throughput[sel.gpuClass];
   const overhead = inputs.useCase === "voice_agent" && inputs.latency === "realtime" ? prices.selfhost.realtime_voice_overhead : 1;
-  const gpus = gpusNeeded({
+  const load = gpuLoadArgs(inputs, prices, v, sel, gpu, thr, overhead);
+  const sizing = gpuSizing({
+    ...load,
     peakRequestsPerSec: v.peakRequestsPerSec * share,
-    outTokens: v.avgOutTokens,
-    gpuTokensPerSec: thr.value,
     highAvailability: inputs.uptime === "high_availability",
     headroom: prices.selfhost.headroom,
-    overhead,
   });
-  return { ...sel, gpu, thr, gpus, overhead };
+  return { ...sel, gpu, thr, gpus: sizing.gpus, sizing, overhead };
+}
+
+/** Per-request figures for GPU sizing (engine/capacity.js gpuLoad), without the request rate. */
+export function gpuLoadArgs(inputs, prices, v, sel, gpu, thr, overhead) {
+  return {
+    inTokens: v.avgInTokens,
+    outTokens: v.avgOutTokens,
+    gpuTokensPerSec: thr.value,
+    prefillTokensPerSec: thr.prefill_tokens_per_second ?? 0,
+    // Self-hosted servers cache repeated prompt prefixes too (no provider minimum).
+    cachedShare: pct(inputs.cachedSharePct ?? 0),
+    overhead,
+    kvGbPerGpu: kvRoomGb(gpu, sel.model, prices.selfhost),
+    kvMbPerToken: sel.model.kv_mb_per_token ?? 0,
+    streamTokensPerSec: prices.selfhost.stream_tokens_per_sec ?? 0,
+  };
 }
 
 /**
@@ -170,8 +257,9 @@ export function gpuPlan(inputs, prices, v, share = 1) {
 export function selfhostMonthly(inputs, prices, m = 0, scale = 1, { share = 1, maintenanceHours = inputs.maintenanceHours.C, includeVoice = true, includeExtras = true } = {}) {
   const v = volume(inputs, m, scale);
   const plan = gpuPlan(inputs, prices, v, share);
+  const gpuRate = plan.gpu.price * gpuPriceFactor(inputs, m);
   const lines = [
-    { label: `GPU rental (${plan.gpus} × ${plan.gpu.label})`, usd: plan.gpus * plan.gpu.price * HOURS_PER_MONTH, gpu: true, basis: basis(plan.gpus * HOURS_PER_MONTH, "GPU-hours", plan.gpu.price) },
+    { label: `GPU rental (${plan.gpus} × ${plan.gpu.label})`, usd: plan.gpus * gpuRate * HOURS_PER_MONTH, gpu: true, basis: basis(plan.gpus * HOURS_PER_MONTH, "GPU-hours", gpuRate) },
     { label: prices.selfManagedDb.label, usd: prices.selfManagedDb.price, shared: true },
     { label: prices.storage.label, usd: prices.storage.price, shared: true },
     { label: prices.monitoring.label, usd: prices.monitoring.price, shared: true },
@@ -192,6 +280,8 @@ export function selfhostMonthly(inputs, prices, m = 0, scale = 1, { share = 1, m
     total: sum(lines),
     lines,
     gpus: plan.gpus,
+    sizing: { ...plan.sizing, contextFits: plan.contextFits },
+    flags: plan.contextFits ? [] : ["one request's context does not fit in a single GPU's memory; serving it needs larger GPUs or a model split across GPUs, which is not costed"],
     gpuClass: plan.gpuClass,
     modelClass: plan.modelClass,
     gpuMonthly: lines[0].usd,
@@ -256,7 +346,7 @@ export function saasPlanCost(plan, inputs, conversations, ctx = {}) {
 export function saasMonthly(inputs, prices, m = 0, scale = 1) {
   const v = volume(inputs, m, scale);
   const std = llmModelFor(inputs, prices, { allowBatch: false });
-  const perReq = llmCostPerRequest(v.avgInTokens, v.avgOutTokens, std, cachedShareFor(inputs, std, v.avgInTokens));
+  const perReq = requestCost(inputs, std, v) * llmPriceFactor(inputs, m);
   const ctx = { v, llm: { monthly: v.requestsPerMonth * perReq, perRequest: perReq, requests: v.requestsPerMonth } };
   const candidates = prices.saasTiers
     .map((plan) => ({ plan, r: saasPlanCost(plan, inputs, v.conversationsPerMonth, ctx) }))
@@ -292,10 +382,10 @@ export function hybridMonthly(inputs, prices, m = 0, scale = 1, shareSelf = shar
   const v = volume(inputs, m, scale);
   const self = selfhostMonthly(inputs, prices, m, scale, { share: shareSelf, maintenanceHours: inputs.maintenanceHours.D, includeVoice: false, includeExtras: false });
   const model = llmModelFor(inputs, prices);
-  const perReq = llmCostPerRequest(v.avgInTokens, v.avgOutTokens, model, cachedShareFor(inputs, model, v.avgInTokens));
+  const perReq = requestCost(inputs, model, v) * llmPriceFactor(inputs, m);
   const lines = [
     ...self.lines,
-    { label: `LLM API for ${Math.round((1 - shareSelf) * 100)}% of requests`, usd: v.requestsPerMonth * perReq * (1 - shareSelf), basis: basis(v.requestsPerMonth * (1 - shareSelf), "requests", perReq) },
+    { label: `LLM API for ${Math.round((1 - shareSelf) * 100)}% of requests (${model.label})`, usd: v.requestsPerMonth * perReq * (1 - shareSelf), llm: true, basis: basis(v.requestsPerMonth * (1 - shareSelf), "requests", perReq) },
     ...sharedInfraLines(inputs, prices),
   ];
   const ex = extras(inputs, prices, v);
@@ -321,6 +411,7 @@ export function monthlyCosts(inputs, prices, m = 0, scale = 1, { shareSelf } = {
     B: applyTax(apiMonthly(inputs, prices, m, scale), tax),
     C: applyTax(selfhostMonthly(inputs, prices, m, scale), tax),
     D: applyTax(hybridMonthly(inputs, prices, m, scale, shareSelf ?? shareSelfOf(inputs)), tax),
+    E: applyTax(hostedOpenMonthly(inputs, prices, m, scale), tax),
   };
 }
 

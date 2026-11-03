@@ -17,48 +17,70 @@ Volume depends on the use case.
 
 **Chatbot, voice agent, data assistant, internal copilot**
 
-```
-requests_per_month(m)      = users_per_day × requests_per_user × 30 × (1 + growth)^min(m, growth_months)
-conversations_per_month(m) = users_per_day × 30 × (1 + growth)^min(m, growth_months)   (or the value you enter)
+```math
+\begin{aligned}
+\text{requests per month}(m) &= \text{users per day} \times \text{requests per user} \times 30 \times (1 + g)^{\min(m,\ M)} \\
+\text{conversations per month}(m) &= \text{users per day} \times 30 \times (1 + g)^{\min(m,\ M)} \quad \text{(or the value you enter)}
+\end{aligned}
 ```
 
-**Growth stops** after `growth_months` (default 12); volume is flat afterwards. Without this, 5% a month for 36 months grows volume about 5.8×, and the 36-month total depends mostly on the growth guess. Every report also shows **TCO-36 with no growth** next to the grown figure.
+Here *m* is the month (*m* = 0 is month 1) and *g* the monthly growth. **Growth stops** after *M* months (`growth_months`, default 12); volume is flat afterwards. Without this, 5% a month for 36 months grows volume about 5.8×, and the 36-month total depends mostly on the growth guess. Every report also shows **TCO-36 with no growth** next to the grown figure.
 
 **Document processing.** One request per document. Users per day count only toward seat pricing unless "chat over documents" is on.
 
-```
-requests_per_month(m)  = documents_per_month × (1 + growth)^m
-input_tokens per doc   = pages_per_doc × tokens_per_page
-output_tokens per doc  = output tokens per document
+```math
+\begin{aligned}
+\text{requests per month}(m) &= \text{documents per month} \times (1 + g)^{m} \\
+\text{input tokens per document} &= \text{pages per document} \times \text{tokens per page} \\
+\text{output tokens per document} &= \text{the value you enter (default 800)}
+\end{aligned}
 ```
 
 With **chat over documents**, chat requests (`users_per_day × requests_per_user × 30`) are added, each with the chat token counts. Cost stays exact because the average tokens per request are weighted by request count, and LLM cost is linear in tokens. Nothing is counted twice.
 
 **Peak load** (sizes self-hosted GPUs):
 
-```
-peak_requests_per_sec = (requests_per_month / 30) × peak_share / 3600
+```math
+\text{peak requests per second} = \frac{(\text{requests per month} \div 30) \times \text{peak-hour share}}{3600}
 ```
 
 ## 2. Option B: API-based (`apiMonthly`)
 
-```
-llm_cost_per_request = (in_tokens × (1 − c) × in_price + in_tokens × c × cached_price + out_tokens × out_price) / 1,000,000
-llm_monthly          = requests_per_month × llm_cost_per_request
-api_monthly          = llm_monthly + managed_db + hosting + vector_db (if RAG)
-                       + voice (if voice agent) + OCR (if set) + maintenance_hours_B × engineer_hourly
+```math
+\begin{aligned}
+\text{LLM cost per request} &= \frac{\text{input} \times (1 - c) \times \text{input price} + \text{input} \times c \times \text{cached price} + \text{output} \times \text{output price}}{1{,}000{,}000} \\
+\text{LLM monthly} &= \text{requests per month} \times \text{LLM cost per request} \\
+\text{API monthly} &= \text{LLM monthly} + \text{managed DB} + \text{hosting} + \text{vector DB}_{\text{(if RAG)}} \\
+&\quad + \text{voice}_{\text{(voice agent)}} + \text{OCR}_{\text{(if set)}} + \text{maintenance hours}_B \times \text{engineer hourly}
+\end{aligned}
 ```
 
 The quality need picks the model tier: `basic` → budget tier, `good` → mid tier, `best_available` → premium tier (`data/prices.json`).
 
-**Prompt caching.** `c` is the share of each request's input that repeats across requests (system prompt, instructions, earlier agent steps) and is served from the provider's cache at the published cached-input price (Gemini 2.5: $0.01 / $0.03 / $0.125 per 1M tokens for Flash-Lite / Flash / Pro). Caching only applies when the average prompt is at least the provider's minimum (2,048 tokens), so short chatbot prompts get no discount. Defaults: 40% for chat and voice, 30% for internal tools, 10% for documents, 40–50% for agents. Storage fees for explicit caches are not modelled; self-hosted prefix caching is not modelled (conservative for options C and D).
+**Provider** (`llmCandidates`, `llmModelFor`). Prices are held for four providers (Google Gemini, OpenAI, Anthropic Claude, Mistral), each with a budget and a mid model and, except Mistral, a premium model. With the default setting, "Cheapest for this workload", every provider's model for the tier is priced on this workload's own request (input, output and cached tokens, at batch prices where batch is on) and the cheapest is used; providers with no model at that tier are left out. If you choose a provider, its model is used, falling back to its mid model when it has none at the tier. The analyst view lists every provider's cost per request and in month 1. Option D's API share uses the same model. Prices that change on a known date (an introductory price) are stored with that date; the later price is used, because it applies to almost all of a 36-month plan.
+
+**Prompt caching.** *c* is the share of each request's input that repeats across requests (system prompt, instructions, earlier agent steps) and is served from the provider's cache at the published cached-input price (about a tenth of the input price for most models). Caching only applies when the average prompt is at least the provider's minimum (4,096 tokens for Gemini, 1,024 for OpenAI, 512 for Anthropic, none listed for Mistral), so short prompts may get no discount from some providers. Defaults: 40% for chat and voice, 30% for internal tools, 10% for documents, 40–50% for agents. Storage fees for explicit caches are not modelled. Self-hosted servers cache repeated prefixes too, with no minimum: the same share *c* skips prompt reading on the GPU (section 4).
+
+## 2b. Option E: Hosted open model (`hostedOpenMonthly`)
+
+```math
+\begin{aligned}
+\text{open monthly} &= \text{requests per month} \times \text{LLM cost per request}_{\text{(open-weight model's price)}} \\
+&\quad + \text{managed DB} + \text{hosting} + \text{vector DB}_{\text{(if RAG)}} + \text{voice} + \text{OCR} \\
+&\quad + \text{maintenance hours}_E \times \text{engineer hourly}
+\end{aligned}
+```
+
+The same open-weight model size that self-hosting would run (`data/selfhost.json`: small, medium or large for the quality need), bought per token from an inference provider instead of on rented GPUs (`llm_open_hosted` in `data/prices.json`). There is no fixed GPU cost, so it scales from zero like option B, but it carries the full open-model quality gap like option C (section 12). Data is processed by the inference provider, so option E is excluded when data must stay in-house. If no open-model price is in the data, option E is shown as unavailable.
 
 ## 3. Voice add-on (`voiceMonthly`): voice agents only, every option
 
-```
-voice_minutes  = conversations_per_month × minutes_per_conversation
-tts_per_minute = tts_price_per_1k_chars × spoken_chars_per_minute / 1000     (assumption: 750 chars/min)
-voice_monthly  = voice_minutes × (stt_per_min + tts_per_min + telephony_per_min)
+```math
+\begin{aligned}
+\text{voice minutes} &= \text{conversations per month} \times \text{minutes per conversation} \\
+\text{TTS per minute} &= \text{TTS price per 1,000 characters} \times \frac{\text{spoken characters per minute (assumption: 750)}}{1000} \\
+\text{voice monthly} &= \text{voice minutes} \times (\text{STT per minute} + \text{TTS per minute} + \text{telephony per minute})
+\end{aligned}
 ```
 
 Self-hosted speech-to-text and text-to-speech run on the rented GPUs, so the self-hosted option pays **telephony only**. In the hybrid option, the self-hosted share pays telephony only and the API share pays all three.
@@ -73,19 +95,38 @@ The GPU choice is an explicit chain of **assumptions** in `data/selfhost.json`:
 | good | ~32B, 4-bit | 40 GB | L40S 48 GB |
 | best_available | ~70B, 4-bit | 64 GB | A100 80 GB |
 
-Throughput per GPU class (output tokens/second, batched serving) is also an assumption, stored in `prices.json` as `gpu_throughput`. Open-weight models may trail frontier models on some tasks, so test on your own data.
+A request uses the GPU twice: **reading the prompt** (prefill, limited by compute) and **writing the answer** (decode). Both share the same GPU time, so their loads add up. Requests in flight also keep their context in GPU memory (the KV cache), so long prompts can need more GPUs for memory than for compute. Speeds per GPU class are assumptions in `prices.json` (`gpu_throughput`): answer writing in output tokens/second with batching, and prompt reading from the NVIDIA datasheet:
 
+```math
+\begin{aligned}
+\text{prompt-reading speed (tokens/s)} &\approx \frac{\text{dense FP16 TFLOPS} \times 50\%\ \text{utilisation}}{2 \times \text{parameters}} \\[6pt]
+\text{L4, 8B model:} &\quad \frac{121 \times 0.5}{16\ \text{GFLOP per token}} \approx 3{,}800 \\
+\text{L40S, 32B model:} &\quad \frac{362 \times 0.5}{64} \approx 2{,}800 \\
+\text{A100, 70B model:} &\quad \frac{312 \times 0.5}{140} \approx 1{,}100
+\end{aligned}
 ```
-required_tok_per_sec = peak_requests_per_sec × output_tokens
-gpus = max(1, ceil(required_tok_per_sec × headroom(1.3) × overhead / gpu_tokens_per_sec))
-overhead = 1.3 for a voice agent with real-time latency, else 1
-if uptime == high_availability: gpus = max(gpus, 2)
 
-gpu_monthly      = gpus × gpu_hourly × 730            (always on)
-ops_monthly      = maintenance_hours_C × engineer_hourly
-selfhost_monthly = gpu_monthly + self_managed_db + storage + monitoring + ops_monthly
-                   + telephony (voice) + OCR (if set)
+Memory per GPU and per token (`data/selfhost.json`, assumptions): 90% of VRAM is usable; the weights take 16 / 18 / 40 GB; the KV cache takes 128 / 256 / 320 KB per token (from the layouts of Llama 3.1 8B, Qwen 2.5 32B and Llama 3.3 70B at 16 bits). One answer is written at about 30 tokens/second while batched.
+
+```math
+\begin{aligned}
+\text{prompt seconds} &= \frac{\text{input tokens} \times (1 - c)}{\text{prompt-reading tokens/s}} \quad \text{(cached share } c \text{ skips this)} \\
+\text{prefill load} &= \text{peak requests/s} \times \text{prompt seconds} \times \text{overhead} \quad \text{(GPUs busy reading prompts)} \\
+\text{decode load} &= \text{peak requests/s} \times \frac{\text{output tokens}}{\text{GPU output tokens/s}} \times \text{overhead} \\
+\text{concurrent} &= \text{peak requests/s} \times \left(\text{prompt seconds} + \frac{\text{output tokens}}{30}\right) \quad \text{(Little's law)} \\
+\text{KV room (GB)} &= \text{VRAM} \times 0.9 - \text{weights (GB)} \\
+\text{memory load} &= \frac{\text{concurrent} \times (\text{input tokens} + \text{output tokens} / 2) \times \text{KV MB per token}}{1024 \times \text{KV room (GB)}} \\
+\text{GPUs} &= \text{round up}\big(\max(\text{prefill load} + \text{decode load},\ \text{memory load}) \times 1.3\big) \\
+&\quad \text{(30\% headroom; at least 1 GPU, or 2 with high availability)} \\
+\text{overhead} &= 1.3 \text{ for a voice agent with real-time latency, otherwise } 1 \\[6pt]
+\text{GPU monthly} &= \text{GPUs} \times \text{GPU hourly price} \times 730 \quad \text{(always on)} \\
+\text{ops monthly} &= \text{maintenance hours}_C \times \text{engineer hourly} \\
+\text{self-host monthly} &= \text{GPU monthly} + \text{self-managed DB} + \text{storage} + \text{monitoring} + \text{ops monthly} \\
+&\quad + \text{telephony}_{\text{(voice)}} + \text{OCR}_{\text{(if set)}}
+\end{aligned}
 ```
+
+The report says which limit sets the GPU count (reading prompts, writing answers, or memory). The cheapest GPU class that holds the model is used, unless one request's full context does not fit in its KV cache; then the next GPU class that holds it is used, and if none does, a warning says larger GPUs or a model split across GPUs would be needed (not costed). With several workloads (section 10d), the three loads are added up on the largest model's GPUs. Serving engines, quantisation and batching change these speeds a lot: benchmark your own setup and replace the assumptions.
 
 ## 5. Option A: SaaS (`saasMonthly`)
 
@@ -103,13 +144,15 @@ The **cheapest plan whose limits fit** is used. If no plan fits the volume, the 
 
 ## 6. Option D: Hybrid (`hybridMonthly`)
 
-```
-hybrid_monthly = selfhost(sized for share_self of peak, ops = maintenance_hours_D)
-               + llm_monthly × (1 − share_self)
-               + managed_db + hosting + vector_db (if RAG) + voice + OCR
+```math
+\begin{aligned}
+\text{hybrid monthly} &= \text{self-host monthly}\big(\text{sized for } s \text{ of peak traffic},\ \text{ops} = \text{maintenance hours}_D\big) \\
+&\quad + \text{LLM monthly} \times (1 - s) \\
+&\quad + \text{managed DB} + \text{hosting} + \text{vector DB}_{\text{(if RAG)}} + \text{voice} + \text{OCR}
+\end{aligned}
 ```
 
-**Automatic split.** When you leave the share blank (the default), the engine computes option D's 36-month cost for `share_self` = 10%, 20% … 90% and uses the cheapest. You can also set the share yourself. If data may not leave the company, the hybrid is limited to its self-hosted share (`share_self = 100%`).
+**Automatic split.** When you leave the share blank (the default), the engine computes option D's 36-month cost for a self-hosted share *s* = 10%, 20% … 90% and uses the cheapest. You can also set the share yourself. If data may not leave the company, the hybrid is limited to its self-hosted share (*s* = 100%).
 
 ## 7. One-time and maintenance costs
 
@@ -119,60 +162,85 @@ hybrid_monthly = selfhost(sized for share_self of peak, ops = maintenance_hours_
 | B. API | 120 | 10 |
 | C. Self-hosted | 240 | 30 |
 | D. Hybrid | 300 | 35 |
+| E. Hosted open model | 120 | 10 |
 
-`one_time = (build_hours + evaluation_hours) × engineer_hourly`. Evaluation hours (A 8, B 16, C 32, D 32) cover testing quality on your own data before launch; open models need more testing. All of these are editable assumptions. The default engineer hourly cost comes from the region and is a sample value.
+
+```math
+\text{one-time} = (\text{build hours} + \text{evaluation hours}) \times \text{engineer hourly}
+```
+
+Evaluation hours (A 8, B 16, C 32, D 32, E 32) cover testing quality on your own data before launch; open models need more testing. All of these are editable assumptions. The default engineer hourly cost comes from the region and is a sample value.
 
 ## 8. Total cost of ownership (`engine/tco.js`)
 
-```
-TCO_12 = one_time + Σ monthly_cost(m), m = 0..11
-TCO_36 = one_time + Σ monthly_cost(m), m = 0..35
+```math
+\begin{aligned}
+\text{TCO}_{12} &= \text{one-time} + \sum_{m=0}^{11} \text{monthly cost}(m) \\
+\text{TCO}_{36} &= \text{one-time} + \sum_{m=0}^{35} \text{monthly cost}(m)
+\end{aligned}
 ```
 
 Monthly cost is recomputed every month with the grown volume, so the GPU count (and SaaS tier) can step up.
 
+**Prices that change over time.** AI token prices (options B, D, E, and the AI part of SaaS per-task plans) and GPU rental prices (options C and D) are multiplied each month by
+
+```math
+\text{price factor}(m) = (1 + \text{yearly change})^{m/12} \quad \text{(AI default } {-30\%} \text{ a year, GPUs } {-15\%}\text{; month 1 uses today's price)}
+```
+
+Labour, hosting, databases and SaaS seat prices are kept at today's price. The defaults are estimates from recent price cuts, not forecasts; set both to 0 for today's prices throughout. The report shows the 36-month cost both ways.
+
 **Present value.** Options are ranked on present value, not the plain total, because money spent in year 3 is worth less than money spent now:
 
-```
-PV_36 = one_time + Σ monthly_cost(m) / (1 + r)^((m + 1) / 12),  m = 0..35      (r = annual discount rate, default 10%)
+```math
+\text{PV}_{36} = \text{one-time} + \sum_{m=0}^{35} \frac{\text{monthly cost}(m)}{(1 + r)^{(m + 1)/12}} \quad (r = \text{annual discount rate, default } 10\%)
 ```
 
 ## 9. Break-even: API vs self-hosting (`engine/breakeven.js`)
 
-```
-fixed_selfhost_monthly = gpu_monthly(1 GPU, or 2 for high availability) + ops_monthly + self_managed_db
-api_cost_per_request   = llm_cost_per_request + per-request share of hosted voice (STT + TTS)
-breakeven_requests     = fixed_selfhost_monthly / api_cost_per_request
+```math
+\begin{aligned}
+\text{fixed self-host monthly} &= \text{GPU monthly}_{\text{(1 GPU, or 2 for high availability)}} + \text{ops monthly} + \text{self-managed DB} \\
+\text{API cost per request} &= \text{LLM cost per request} + \text{hosted voice (STT + TTS) per request} \\
+\text{break-even requests} &= \frac{\text{fixed self-host monthly}}{\text{API cost per request}}
+\end{aligned}
 ```
 
 The **cost-vs-volume curve** recomputes every option's month-1 cost at 41 log-spaced volumes from 1,000 to 10,000,000 requests/month. Crossovers are found where two curves change order, interpolated in log-volume.
 
 ## 10. Value and ROI (`engine/value.js`)
 
-Headline figures are **conservative**: they use the gross profit on a **first sale** only.
+Headline figures are **conservative**: they use the gross profit on a **first sale** only. Extra sales come from the conversion uplift you test (see the sensitivity tables below).
 
-```
-gross_profit_per_sale        = ticket × margin
-value_per_conversation       = gross_profit_per_sale × conversion_rate
-acceptable_ai_cost_per_conv  = value_per_conversation × target_share
-ai_cost_per_conversation     = option_monthly / conversations_per_month
-sales_per_month              = conversations_per_month × conversion_rate
-ai_cost_per_sale             = option_monthly / sales_per_month
-ai_cost_pct_of_ticket        = ai_cost_per_sale / ticket
-breakeven_extra_sales        = option_monthly / gross_profit_per_sale      (shown rounded UP)
-breakeven_uplift_pp          = breakeven_extra_sales / conversations_per_month × 100
-support_savings              = conversations_per_month × human_share × deflection × human_cost_per_conversation
-roi(uplift_pp)               = (extra_sales(uplift) × gross_profit_per_sale + support_savings − option_monthly) / option_monthly
-payback_months(uplift_pp)    = one_time / net_monthly_benefit      ("never" if benefit ≤ 0)
+```math
+\begin{aligned}
+\text{gross profit per sale} &= \text{ticket} \times \text{margin} \\
+\text{value per conversation} &= \text{gross profit per sale} \times \text{conversion rate} \\
+\text{acceptable AI cost per conversation} &= \text{value per conversation} \times \text{target share} \\
+\text{AI cost per conversation} &= \frac{\text{option monthly}}{\text{conversations per month}} \\
+\text{sales per month} &= \text{conversations per month} \times \text{conversion rate} \\
+\text{AI cost per sale} &= \frac{\text{option monthly}}{\text{sales per month}} \\
+\text{AI cost as a share of ticket} &= \frac{\text{AI cost per sale}}{\text{ticket}} \\
+\text{break-even extra sales} &= \text{round up}\left(\frac{\text{option monthly}}{\text{gross profit per sale}}\right) \\
+\text{break-even uplift (points)} &= \frac{\text{break-even extra sales}}{\text{conversations per month}} \times 100 \\
+\text{support savings} &= \text{conversations} \times \text{human share} \times \text{deflection} \\
+&\quad \times \text{human cost per conversation} \times \text{cash share} \\
+\text{ROI} &= \frac{\text{extra sales} \times \text{gross profit per sale} + \text{support savings} - \text{option monthly}}{\text{option monthly}} \\
+\text{payback months} &= \frac{\text{one-time}}{\text{net monthly benefit}} \quad \text{(never, if the benefit is 0 or less)}
+\end{aligned}
 ```
 
-`human_share` is the share of conversations that reach a person today (default 20%, set per industry preset). Without it, every chatbot conversation would count as a saved human conversation, which overstates savings for high-volume chat.
+**Time freed vs money saved.** Staff time freed (support savings here, agents and internal tools below) becomes money saved only through fewer hires, less overtime or fewer contractors, or time sold as paid work. The cash share ("Share of time freed that becomes money saved", default 100%, an estimate) sets how much of it counts; the rest is shown as extra capacity. Error costs (agents) are real costs and always count in full.
+
+The human share is the share of conversations that reach a person today (default 20%, set per industry preset). Without it, every chatbot conversation would count as a saved human conversation, which overstates savings for high-volume chat.
 
 **LTV line (repeat buyers).** The second figure uses the value a new customer brings over 12 months:
 
-```
-customer_value_12m      = gross_profit_per_sale × purchases_per_year       (or the value you enter)
-ltv_customers_needed    = ceil(option_monthly / customer_value_12m)
+```math
+\begin{aligned}
+\text{customer value over 12 months} &= \text{gross profit per sale} \times \text{purchases per year} \quad \text{(or the value you enter)} \\
+\text{new customers needed} &= \text{round up}\left(\frac{\text{option monthly}}{\text{customer value over 12 months}}\right)
+\end{aligned}
 ```
 
 It is shown as "~17 new customers/month, value realised over 12 months".
@@ -194,12 +262,14 @@ It is shown as "~17 new customers/month, value realised over 12 months".
 
 Six agent workflows are modelled: invoice processing, lead qualification, report generation, ticket triage, stock data → report, and an end-to-end content engine. They are priced **per task** and valued on **time saved**, not on sales.
 
-**Tokens per task.** A task runs `s` LLM steps. Each step re-reads the base prompt plus everything produced so far:
+**Tokens per task.** A task runs *s* LLM steps. Each step re-reads the base prompt plus everything produced so far:
 
-```
-input(step i)        = base + (i − 1) × growth
-average input / call = base + growth × (s − 1) / 2
-LLM calls / month    = tasks × s        (+ replies, for the content engine)
+```math
+\begin{aligned}
+\text{input}(\text{step } i) &= \text{base} + (i - 1) \times \text{growth} \\
+\text{average input per call} &= \text{base} + \text{growth} \times \frac{s - 1}{2} \\
+\text{LLM calls per month} &= \text{tasks} \times s \quad (+\ \text{replies, for the content engine})
+\end{aligned}
 ```
 
 So cost grows faster than the number of steps: that is why long agents are expensive.
@@ -221,13 +291,16 @@ So cost grows faster than the number of steps: that is why long agents are expen
 
 **Value.**
 
-```
-hours_saved   = tasks × success_rate × minutes_per_task / 60
-review_hours  = tasks × review_share × review_minutes / 60
-net_hours     = hours_saved − review_hours            FTE = net_hours / hours_per_FTE
-benefit       = net_hours × staff_hourly − tasks × error_rate × cost_per_error
-net           = benefit − AI monthly cost              payback = build cost / net
-break-even success rate = (AI cost + review cost + error cost) / (tasks × minutes / 60 × staff_hourly) × 100
+```math
+\begin{aligned}
+\text{hours saved} &= \frac{\text{tasks} \times \text{success rate} \times \text{minutes per task}}{60} \\
+\text{review hours} &= \frac{\text{tasks} \times \text{review share} \times \text{review minutes}}{60} \\
+\text{net hours} &= \text{hours saved} - \text{review hours} \qquad \text{FTE} = \frac{\text{net hours}}{\text{hours per FTE}} \\
+\text{time value} &= \text{net hours} \times \text{staff hourly} \quad \text{(capacity freed)} \\
+\text{benefit} &= \text{time value} \times \text{cash share} - \text{tasks} \times \text{error rate} \times \text{cost per error} \\
+\text{net} &= \text{benefit} - \text{AI monthly cost} \qquad \text{payback} = \frac{\text{build cost}}{\text{net}} \\
+\text{break-even success rate} &= \frac{\text{AI cost} + \text{review cost} \times \text{cash share} + \text{error cost}}{\text{tasks} \times \frac{\text{minutes per task}}{60} \times \text{staff hourly} \times \text{cash share}} \times 100
+\end{aligned}
 ```
 
 Staff hourly cost and hours per FTE (160, or 192 in India) come from the region and are sample assumptions. A sensitivity table shows the result at 50%, 70% and 90% completion. Agent use cases use the profile `automation`, with a cost weight of 50%.
@@ -236,10 +309,12 @@ Staff hourly cost and hours per FTE (160, or 192 in India) come from the region 
 
 Internal tools don't make sales, so they are valued on **staff time saved**:
 
-```
-hours_saved = requests × minutes_saved_per_request / 60        (default 3 minutes, editable)
-benefit     = hours_saved × staff_hourly
-break-even minutes per request = AI monthly cost / (requests / 60 × staff_hourly)
+```math
+\begin{aligned}
+\text{hours saved} &= \frac{\text{requests} \times \text{minutes saved per request}}{60} \quad \text{(default 3 minutes, editable)} \\
+\text{benefit} &= \text{hours saved} \times \text{staff hourly} \times \text{cash share} \\
+\text{break-even minutes per request} &= \frac{\text{AI monthly cost}}{(\text{requests} \div 60) \times \text{staff hourly} \times \text{cash share}}
+\end{aligned}
 ```
 
 Per-seat SaaS for internal tools charges a seat for every daily user (`max(seats, users per day)`). A sensitivity table shows the result at half and double the minutes saved.
@@ -250,16 +325,17 @@ Any number of workloads, up to one per use case (11), are compared together, for
 
 **Up to 5 workloads, every combination** of options and workloads is evaluated (4ⁿ, at most 1,024; options a workload can't use are skipped). **From 6 workloads** (4¹¹ ≈ 4 million combinations), a local search starts from each single stack and from each workload's own best option, then moves one workload at a time to another option while the score improves; the report says how many combinations it checked. On five workloads it finds the same answer as the full search (tested). Workloads on the same stack share its fixed costs:
 
-```
-stack_monthly = Σ workload usage costs (LLM, voice, media, OCR, per-task fees, SaaS plans)
-              + shared infrastructure once (databases, hosting, vector DB, storage, monitoring)
-              + pooled GPUs (C, D): ceil(Σ peak tokens/sec × headroom / throughput of the largest model needed)
-              + maintenance hours × (1 + (n − 1) × extra_effort) × engineer_hourly
-build cost    = build hours × (1 + (n − 1) × extra_effort) × engineer_hourly      (per stack)
-extra_effort  = 50% by default
+```math
+\begin{aligned}
+\text{stack monthly} &= \textstyle\sum \text{workload usage costs (LLM, voice, media, OCR, per-task fees, SaaS plans)} \\
+&\quad + \text{shared infrastructure, once (databases, hosting, vector DB, storage, monitoring)} \\
+&\quad + \text{pooled GPUs (C, D): every workload's loads added on the largest model's GPUs} \\
+&\quad + \text{maintenance hours} \times \big(1 + (n - 1) \times e\big) \times \text{engineer hourly} \\
+\text{build cost} &= \text{build hours} \times \big(1 + (n - 1) \times e\big) \times \text{engineer hourly} \quad \text{(per stack)}
+\end{aligned}
 ```
 
-Mixing stacks therefore pays each stack's base build and maintenance effort, which is the real cost of running two vendors and two skill sets.
+Here *n* is the number of workloads on the stack and *e* the extra effort for each one beyond the first (50% by default). Mixing stacks therefore pays each stack's base build and maintenance effort, which is the real cost of running two vendors and two skill sets.
 
 **Score per combination:** cost score (lowest 36-month TCO ÷ this one) and the average non-cost score of each workload on its option, weighted as for a single workload. The report names the recommended combination, the best single stack, the best mix, the cheapest, and the gap between single and mix.
 
@@ -286,10 +362,10 @@ Percentages are kept between 0 and 100. With several workloads, a marked input m
 
 ## 11. Non-cost scoring (`engine/scoring.js`)
 
-Each option gets a score from 0 to 5 per criterion. The default weights are privacy 25%, time to launch 20%, team fit 20%, quality 15%, lock-in 10% and scalability 10%; all are adjustable.
+Each option gets a score from 0 to 5 per criterion *k*, with weight *w*. The default weights are privacy 25%, time to launch 20%, team fit 20%, quality 15%, lock-in 10% and scalability 10%; all are adjustable.
 
-```
-non_cost_score = Σ(weight × score) / (5 × Σ weight)          → 0..1
+```math
+\text{non-cost score} = \frac{\sum_k w_k \times \text{score}_k}{5 \times \sum_k w_k} \quad \in [0, 1]
 ```
 
 The tables below are **generated from the code** (`node scripts/scoring-table.mjs --write`), and a test fails if they drift out of sync.
@@ -303,56 +379,84 @@ The tables below are **generated from the code** (`node scripts/scoring-table.mj
 | Data privacy & compliance fit | B | 3 | Data goes to an API provider, but you control storage and prompts. |
 | Data privacy & compliance fit | C | 5 | Data never leaves infrastructure you control. |
 | Data privacy & compliance fit | D | 4 | Most traffic stays in-house; complex requests go to an API. |
+| Data privacy & compliance fit | E | 3 | Data goes to an inference provider, as with an API build. |
 | Time to launch | A | 5 | Configure and launch in days. |
 | Time to launch | B | 4 | A few weeks of integration work. |
 | Time to launch | C | 2 | GPU setup, model serving and evaluation take months. |
 | Time to launch | D | 1 | Needs both the API build and the self-hosted stack, plus routing. |
+| Time to launch | E | 4 | Same integration work as an API build; no GPUs to set up. |
 | Team capability fit | A | 5 | Needs almost no engineering. |
 | Team capability fit | B | 4 | Needs at least one developer. |
 | Team capability fit | C | 3 | Needs DevOps/MLOps skills to run GPUs. |
 | Team capability fit | D | 3 | Needs DevOps/MLOps skills plus API integration. |
+| Team capability fit | E | 4 | Needs at least one developer; the provider runs the GPUs. |
 | Quality fit | A | 4 | Good vendor models, limited customisation. |
 | Quality fit | B | 5 | Direct access to frontier models. |
 | Quality fit | C | 4 | Open models are good for routine tasks. |
 | Quality fit | D | 4 | Frontier models for hard requests, open models for routine ones. |
+| Quality fit | E | 4 | Open models are good for routine tasks. |
 | Vendor lock-in (higher = less lock-in) | A | 1 | Workflows, data and pricing tied to one vendor. |
 | Vendor lock-in (higher = less lock-in) | B | 3 | Prompts are portable, but the code targets one provider's API. |
 | Vendor lock-in (higher = less lock-in) | C | 5 | Open weights; you can move providers any time. |
 | Vendor lock-in (higher = less lock-in) | D | 4 | Mostly portable; the API part can be swapped. |
+| Vendor lock-in (higher = less lock-in) | E | 4 | Open weights served by many providers, or later on your own GPUs. |
 | Scalability | A | 3 | Scales, but cost rises with volume and plan limits. |
 | Scalability | B | 5 | Provider scales automatically. |
 | Scalability | C | 3 | You add GPUs yourself as traffic grows. |
 | Scalability | D | 4 | API absorbs peaks above self-hosted capacity. |
+| Scalability | E | 5 | Provider scales automatically. |
 
 ### Rules
 
 | Rule | Effect | Reason |
 |---|---|---|
-| `data_must_stay` | exclude A, B; note D | SaaS and API send data outside the company, which the requirement forbids. |
-| `no_training_only` | privacy: A-1, B-1; note A, B | Only paid tiers with no-training terms are allowed, which narrows vendor choice. |
-| `personal_data_external` | privacy: A-1, B-1; note B | Personal data at an external provider adds compliance work. |
-| `residency_required` | privacy: A-1, B-1; note A, B | External vendors may not offer processing in the required region. |
-| `no_engineers` | teamFit: B=1, C=0, D=0; warn B, C, D | Custom builds need engineers the company does not have. |
-| `small_team` | teamFit: B=5 | A small team handles an API build comfortably. |
+| `data_must_stay` | exclude A, B, E; note D | SaaS and API send data outside the company, which the requirement forbids. |
+| `no_training_only` | privacy: A-1, B-1, E-1; note A, B, E | Only paid tiers with no-training terms are allowed, which narrows vendor choice. |
+| `personal_data_external` | privacy: A-1, B-1, E-1; note B, E | Personal data at an external provider adds compliance work. |
+| `residency_required` | privacy: A-1, B-1, E-1; note A, B, E | External vendors may not offer processing in the required region. |
+| `no_engineers` | teamFit: B=1, C=0, D=0, E=1; warn E, B, C, D | Custom builds need engineers the company does not have. |
+| `small_team` | teamFit: B=5, E=5 | A small team handles an API build comfortably. |
 | `no_devops` | teamFit: C=1, D=1; warn C, D | Running GPUs without DevOps/MLOps skills is high-risk. |
 | `strong_devops` | teamFit: C=5, D=4 | Strong DevOps makes self-hosting a good team fit. |
-| `best_quality` | quality: C=2, D=3; note C | Open models may trail frontier models when the best quality is needed. |
-| `open_model_gap` | note C | Open models may trail frontier models; worth testing before committing. |
-| `basic_quality` | quality: C=5, D=5 | Open models are fully adequate for basic quality needs. |
+| `best_quality` | quality: C=2, D=3, E=2; note C, E | Open models may trail frontier models when the best quality is needed. |
+| `open_model_gap` | note C, E | Open models may trail frontier models; worth testing before committing. |
+| `basic_quality` | quality: C=5, D=5, E=5 | Open models are fully adequate for basic quality needs. |
 | `realtime_voice` | scalability: C-1; note C | Real-time voice on a small GPU pool risks latency at peak. |
 | `ha_without_devops` | scalability: C-1, D-1; note C | High availability needs on-call operations. |
 <!-- SCORING-TABLE:END -->
 
 ## 12. Recommendation (`engine/recommend.js`)
 
-```
-decision_cost = PV_36 + PV of the value given up through lower answer quality
-cost_score    = lowest decision_cost among viable options / this option's decision_cost     → 0..1
-final_score   = cost_weight × cost_score + (1 − cost_weight) × non_cost_score
-cost_weight   = 50%, or 25% for high-ticket profiles (adjustable)
+```math
+\begin{aligned}
+\text{decision cost} &= \text{PV}_{36} + \text{PV of the value given up through lower answer quality} \\
+\text{cost score} &= \frac{\text{lowest decision cost among viable options}}{\text{this option's decision cost}} \quad \in [0, 1] \\
+\text{final score} &= w_{\text{cost}} \times \text{cost score} + (1 - w_{\text{cost}}) \times \text{non-cost score} \\
+w_{\text{cost}} &= 50\%, \text{ or } 25\% \text{ for high-ticket profiles (adjustable)}
+\end{aligned}
 ```
 
-**Quality-adjusted cost.** Open-weight models may complete fewer tasks than frontier API models. The **open-model quality gap** (default 10 percentage points, an assumption you should replace with your own evaluation) lowers, for self-hosted (and for the hybrid's self-hosted share): the completion rate of agents, the minutes saved by internal tools, and the deflection rate (support savings) of chat. The benefit an option loses compared with the best option, grown with volume and discounted like costs, is added to its decision cost. The comparison table shows this as "Decision cost". Several workloads (section 10d) are ranked on present value; the quality gap is not yet applied there.
+**Quality-adjusted cost.** Open-weight models may complete fewer tasks than frontier API models. The **open-model quality gap** (default 10 percentage points, an assumption you should replace with your own evaluation) lowers, for self-hosted and the hosted open model (and for the hybrid's self-hosted share): the completion rate of agents, the minutes saved by internal tools, and the deflection rate (support savings) of chat. The benefit an option loses compared with the best option, grown with volume and discounted like costs, is added to its decision cost. The comparison table shows this as "Decision cost". Several workloads (section 10d) are ranked on present value; the quality gap is not yet applied there.
+
+**Your own test results.** If you run the same set of real examples through an API model and an open model and enter both results (% of tasks each got right), they replace the assumed gap:
+
+```math
+\begin{aligned}
+\text{gap} &= \max(0,\ \text{API result} - \text{open result}) \quad \text{(percentage points)} \\
+\text{agents: completion rate} &= \text{API result}
+\end{aligned}
+```
+
+**Cost per successful task.** When there is a success rate to go on (agents, or any use case with test results), the comparison table adds:
+
+```math
+\begin{aligned}
+\text{cost per success} &= \frac{\text{month-1 cost}}{\text{units} \times \text{success rate}} \qquad \text{units} = \text{tasks (agents) or requests} \\
+\text{success rate} &= \begin{cases} \text{API result} & \text{options A, B} \\ \text{API result} - \text{gap} & \text{options C, E} \\ \text{API result} - \text{gap} \times s & \text{option D} \end{cases}
+\end{aligned}
+```
+
+**Switch point** (`switchPoint`). With growth, another option can become cheaper later. The report names the first month from which another option costs less per month than the recommended one for every remaining month, and the volume then. Options already cheaper in month 1 are left out, because they lost on other criteria. Without a switch, an API-based recommendation shows the break-even volume from section 9.
 
 Excluded options get no score. The explanation is built from fixed sentence templates; no AI-generated text is used.
 
@@ -370,10 +474,13 @@ Excluded options get no score. The explanation is built from fixed sentence temp
 | Engineer hourly cost | × 0.75 | × 1 | × 1.3 |
 | Build and maintenance hours | × 0.7 | × 1 | × 1.5 |
 | Staff hourly cost (time-valued use cases) | × 0.75 | × 1 | × 1.3 |
-| Open-model quality gap | 0 points | your value | max(20, your value) |
+| Open-model quality gap | 0 points | your value (or your test result) | max(20, your value) |
+| Share of time freed that becomes money saved | min(50%, your value) | your value | 100% |
+| Yearly change in AI prices | min(−60%, your value) | your value | max(+10%, your value) |
+| Yearly change in GPU prices | min(−35%, your value) | your value | max(+5%, your value) |
 | Inputs you marked "Not sure" | band from section 10e | your value | band from section 10e |
 
-The report shows how often each option is recommended ("Robust" at 90% or more, otherwise "Close call"), and the 10th, 50th and 90th percentiles of the recommended option's monthly cost, net monthly benefit and 36-month present value. Net benefit is time saved (agents, internal tools) or support savings with no sales uplift (chat), minus AI cost. Runs are seeded, so the same inputs always give the same result. Quantities are drawn independently; correlations (e.g. all prices rising together) are not modelled.
+The report shows how often each option is recommended ("Robust" at 90% or more, otherwise "Close call"), and the 10th, 50th and 90th percentiles of the recommended option's monthly cost, net monthly benefit and 36-month present value. Net benefit is time saved (agents, internal tools) or support savings with no sales uplift (chat), minus AI cost. Runs are seeded, so the same inputs always give the same result. Related quantities move together: each correlated pair shares a normal draw (a Gaussian copula), giving a correlation of about 0.5 between AI API and GPU rental prices (one hardware market), 0.6 between their yearly trends, and 0.7 between engineer and staff pay (one labour market). These correlations are judgements; everything else is drawn independently. With test results entered, the quality gap is varied by moving the open model's result.
 
 **Tornado.** Each quantity, including every applicable input whether marked or not, is moved alone to its low and its high end. Bars show the net monthly benefit at each end, sorted by swing; ⚑ marks a quantity that changes the recommendation. The longest bars are the assumptions worth checking first.
 
@@ -404,16 +511,24 @@ Inputs show the confidence of their default value (hover for the source). The re
 
 These are whole-economy or occupation-group averages, a proxy for the person doing the work today; your own payroll figure is better. The US engineer cost uses BLS "professional and related" total compensation ($74.42/hour); other regions' engineer costs are still estimates. A test checks that `labour.json` and the region defaults agree.
 
+**Keeping the data current** (`.github/workflows/data-refresh.yml`). Every Monday a workflow:
+
+- cross-checks each AI model price (`scripts/update-prices.mjs`) against OpenRouter's price for that provider's own endpoint and LiteLLM's model price file. Prices match within 0.5% rounding (an introductory price counts while it runs). When both sources agree on a different price, and the change is under 80%, the price is updated; batch and cached prices that neither source reports are scaled by the same ratio. Anything else (the sources disagree, only one reports it, a large change, an introductory period) is listed and never changed;
+- refreshes labour costs (`scripts/update-labour.mjs`) from the Eurostat `lc_lci_lev` API (eight euro-area countries) and the BLS ECEC API (US staff, series `CMU1010000220000D`, and engineers, `CMU1010000120000D`). Changes over 25% are listed, not applied. USD figures are recalculated when the exchange rate has moved more than 2% since they were computed. The other countries' statistics have no open API and are listed for a manual check;
+- runs the tests on the result and opens a pull request whose description lists every change with links to the official price pages. Nothing reaches the site until a person merges it. When nothing changed but something needs a look, it updates an issue instead.
+
 **Token counts** (`scripts/count-tokens.mjs`, `data/samples`, `data/token-measurements.json`). Four representative sample texts (a chatbot request with knowledge-base excerpts, a two-page invoice, a support ticket, a report step with a month of data) are counted. Without an API key the script estimates (characters ÷ 4); with `GEMINI_API_KEY` set it measures with Google's free `countTokens` endpoint, and the register marks the counts verified. By the estimate, the samples come out at 0.3–0.6 × the current defaults; the defaults are kept (higher token counts are the conservative direction for API cost) until measured counts are available.
 
 ## 13. Tax (`engine/tax.js`, `data/taxes.json`)
 
 Vendor prices exclude indirect tax. Each country has one or more tax variants (for example Canadian provinces, or US states that do or do not tax SaaS). Each variant lists its components with a rate, whether it is reclaimable, and an official source.
 
-```
-counted(component)   = not component.reclaimable  OR  business is not registered / is exempt
-non_reclaimable_pct  = Σ rate of counted components
-tax_line(option)     = (option_monthly − labour) × non_reclaimable_pct
+```math
+\begin{aligned}
+\text{counted}(\text{component}) &= \text{not reclaimable, or the business is not registered or is exempt} \\
+\text{non-reclaimable rate} &= \textstyle\sum \text{rates of the counted components} \\
+\text{tax line}(\text{option}) &= (\text{option monthly} - \text{labour}) \times \text{non-reclaimable rate}
+\end{aligned}
 ```
 
 | Country | Tax on cloud / SaaS purchases | Reclaimable by a registered business? |

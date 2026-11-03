@@ -42,7 +42,7 @@ function setTable(table, headers, rows, { numericFrom = 1 } = {}) {
   table.append(thead, tbody);
 }
 
-const SHORT = { A: "A. SaaS", B: "B. API", C: "C. Self-hosted", D: "D. Hybrid" };
+const SHORT = { A: "A. SaaS", B: "B. API", C: "C. Self-hosted", D: "D. Hybrid", E: "E. Hosted open model" };
 
 const pctText = (x, d = 1) => (Number.isFinite(x) ? `${x.toFixed(d)}%` : "—");
 const swatch = (id) => el("span", { class: `swatch swatch-${id}`, "aria-hidden": "true" });
@@ -80,6 +80,7 @@ export function renderAll(result, ctx) {
 
   renderSummary(result, ctx, best);
   renderComparison(result, ctx);
+  renderLlmProviders(result, ctx);
   renderCharts(result, ctx);
   renderValue(result, ctx, best);
   renderMatrix(result, ctx);
@@ -211,6 +212,7 @@ export function renderRegister(result, ctx) {
  */
 export function renderSimulation(sim, tor, ctx) {
   const { fmt, inputs } = ctx;
+  fillRiskKpi(tor, ctx);
   const text = $("sim-text");
   if (!sim || !tor) {
     text.replaceChildren(el("p", { class: "sim-pending" }, `Running ${ctx.runs} simulations…`));
@@ -374,6 +376,8 @@ function renderSummary(result, ctx, best) {
     kpi("Monthly range (½× to 2× volume)", `${fmt.compact(result.monthlyRange.low)} – ${fmt.compact(result.monthlyRange.high)}`),
     kpi("36-month total cost of ownership", t.main, [t.sub, ctx.inputs.growthPct > 0 ? `${fmt.money(best.tco36NoGrowth)} with no growth` : null].filter(Boolean).join(" · ") || null),
     kpi("One-time build cost", fmt.money(best.oneTime)),
+    switchKpi(result, ctx, best),
+    riskKpi(),
   );
   const sentences = explain({
     inputs: ctx.inputs,
@@ -387,8 +391,53 @@ function renderSummary(result, ctx, best) {
     robustness: result.robustness,
     hybrid: result.hybrid,
     tax: result.tax,
+    llm: result.llm,
+    switchAt: result.switchAt,
   });
   for (const s of sentences) text.append(el("p", {}, s));
+}
+
+/** When another option would become the cheaper choice: a month (with growth) or a request volume. */
+function switchKpi(result, ctx, best) {
+  const { fmt } = ctx;
+  const s = result.switchAt;
+  if (s) return kpi("Switch point", `Month ${s.month}`, `${SHORT[s.option]} becomes cheaper per month, at ~${fmt.number(Math.round(s.requestsPerMonth))} requests/month`);
+  const be = result.breakeven;
+  const c = result.options.find((o) => o.id === "C");
+  if (best.id === "B" && !c.excluded && Number.isFinite(be?.breakevenRequestsPerMonth)) {
+    return kpi("Switch point", `~${fmt.number(be.breakevenRequestsPerMonth)}`, `Requests/month above which self-hosting is cheaper; you are at ${fmt.number(Math.round(result.volume.requestsPerMonth))}`);
+  }
+  if (result.cheaperNow.length) return kpi("Switch point", "None", `${SHORT[result.cheaperNow[0]]} already costs less per month; ${SHORT[best.id]} wins on other criteria`);
+  return kpi("Switch point", "None in 36 months", "No other option becomes cheaper per month");
+}
+
+/** Filled in by renderSimulation once the tornado has run. */
+function riskKpi() {
+  const node = kpi("Biggest uncertainty", "Checking…", null);
+  node.id = "sum-risk";
+  node.querySelector("dd").classList.add("kpi-text");
+  return node;
+}
+
+/** The assumption that moves the result most, preferring one that is still an estimate. */
+function fillRiskKpi(tor, ctx) {
+  const node = document.getElementById("sum-risk");
+  if (!node) return;
+  const dd = node.querySelector("dd");
+  if (!tor) {
+    dd.replaceChildren("Checking…");
+    return;
+  }
+  const rows = tor.rows.filter((r) => r.swing >= 0.5 || r.flips);
+  const estimate = ctx.register ? rows.find((r) => factorConfidence(r.id, ctx.register, ctx.usedPriceIds) === "estimate") : null;
+  const top = estimate || rows[0];
+  if (!top) {
+    dd.replaceChildren("None found", el("span", { class: "sub" }, "No single assumption moves the result much"));
+    return;
+  }
+  const label = top.label.replace(/(llm|gpu|ai|api)/gi, (m) => m.toUpperCase());
+  const swing = `Net benefit moves by ${ctx.fmt.money(top.swing)}/month across its range${top.flips ? "; it can change the recommendation" : ""}${estimate ? "; still an estimate, check it first" : ""}`;
+  dd.replaceChildren(label, el("span", { class: "sub" }, swing));
 }
 
 /* ---------- 2. comparison table ---------- */
@@ -417,7 +466,9 @@ const shortLabel = (label) => label.replace(/\s*\([^)]*\)/g, "").replace(/^SaaS:
 function renderComparison(result, ctx) {
   const { fmt } = ctx;
   const table = $("cmp-table");
-  const headers = ["Option", "Monthly (month 1)", "One-time", "TCO 36 months", "TCO 36, no growth", "Decision cost*", "Score /100", "Status"];
+  const perSuccess = result.options.some((o) => !o.excluded && o.costPerSuccess != null);
+  const successLabel = result.valueKind === "agent" ? "Per completed task" : "Per correct answer";
+  const headers = ["Option", "Monthly (month 1)", "One-time", "TCO 36 months", "TCO 36, no growth", ...(perSuccess ? [successLabel] : []), "Decision cost*", "Score /100", "Status"];
   setTable(table, headers, [], { numericFrom: 1 });
   table.querySelector("thead th:last-child").classList.remove("num");
   const tbody = table.tBodies[0];
@@ -444,8 +495,9 @@ function renderComparison(result, ctx) {
       el("th", { scope: "row" }, el("span", { title: o.label }, swatch(o.id), SHORT[o.id])),
       el("td", { class: "num" }, monthlyCell),
       el("td", { class: "num" }, cost(o.oneTime)),
-      el("td", { class: "num" }, cost(o.tco36)),
+      el("td", { class: "num", title: !o.excluded && Math.abs(o.tco36FlatPrices - o.tco36) > 1 ? `At today's prices throughout: ${fmt.money(o.tco36FlatPrices)}` : null }, cost(o.tco36)),
       el("td", { class: "num" }, cost(o.tco36NoGrowth)),
+      ...(perSuccess ? [el("td", { class: "num", title: o.successPct != null ? `Month-1 cost ÷ ${successLabel === "Per completed task" ? "tasks completed" : "requests answered correctly"} (${fmt.number(o.successPct, 1)}%)` : null }, o.excluded || o.costPerSuccess == null ? "—" : Number.isFinite(o.costPerSuccess) ? fmt.rate(o.costPerSuccess) : "None succeed")] : []),
       el("td", { class: "num", title: o.valueLostPv > 1 ? `${fmt.money(o.pv36)} present value of cost + ${fmt.money(o.valueLostPv)} value lost through lower completion` : `${fmt.money(o.pv36)} present value of cost` }, cost(o.decisionCost)),
       el("td", { class: "num" }, o.excluded ? "—" : (o.finalScore * 100).toFixed(0)),
       el("td", {}, o.excluded ? el("span", {}, status, " ", o.excluded) : status),
@@ -469,7 +521,7 @@ function renderComparison(result, ctx) {
     note = el("p", { id: "cmp-note", class: "muted" });
     table.closest(".table-wrap").after(note);
   }
-  note.textContent = `* Decision cost: the 36-month cost in present value (discounted at ${ctx.inputs.discountRatePct}% a year), plus the value an option gives up because open models complete fewer tasks (${ctx.inputs.openModelGapPct} points, your assumption). Options are ranked on this, together with the non-cost scores.`;
+  note.textContent = `* Decision cost: the 36-month cost in present value (discounted at ${ctx.inputs.discountRatePct}% a year), plus the value an option gives up because open models complete fewer tasks (${fmt.number(result.quality.gapPct, 1)} points, ${result.quality.measured ? `from your test: ${result.quality.apiPct}% vs ${result.quality.openPct}%` : "your assumption"}).${perSuccess ? ` ${successLabel}: month-1 cost divided by the ${result.valueKind === "agent" ? "tasks each option completes" : "requests each option gets right"}, with open models ${fmt.number(result.quality.gapPct, 1)} points lower.` : ""} Options are ranked on this, together with the non-cost scores.`;
 }
 
 /* ---------- 3–4. charts ---------- */
@@ -482,7 +534,7 @@ function cssVar(name) {
 
 function renderCharts(result, ctx) {
   const { fmt } = ctx;
-  const colors = { A: cssVar("--opt-a"), B: cssVar("--opt-b"), C: cssVar("--opt-c"), D: cssVar("--opt-d") };
+  const colors = Object.fromEntries(OPTION_IDS.map((id) => [id, cssVar(`--opt-${id.toLowerCase()}`)]));
   const ink = cssVar("--ink-soft");
   const grid = cssVar("--hair");
   const viable = result.options.filter((o) => !o.excluded).map((o) => o.id);
@@ -528,7 +580,7 @@ function renderCharts(result, ctx) {
         const rows = items.filter((i) => i.dataset.type !== "scatter" && Number.isFinite(i.parsed.y));
         if (rows.length < 2) return "";
         const low = rows.reduce((a, b) => (b.parsed.y < a.parsed.y ? b : a));
-        return `${cheapestLabel}: ${low.dataset.label.replace(/^[A-D]\. /, "")}`;
+        return `${cheapestLabel}: ${low.dataset.label.replace(/^[A-E]\. /, "")}`;
       },
     },
   });
@@ -644,7 +696,7 @@ function renderValue(result, ctx, best) {
     kpi("Value per conversation", fmt.money(v.valuePerConversation), `Acceptable AI cost at ${inputs.targetSharePct}%: ${fmt.money(v.acceptableAiCostPerConversation)}`),
     kpi("AI cost per conversation", fmt.money(v.aiCostPerConversation), v.aiCostPerConversation > v.acceptableAiCostPerConversation ? "Above your target share" : "Within your target share"),
     kpi("AI cost as % of ticket", pctText(v.aiCostPctOfTicket, 2), `${fmt.money(v.aiCostPerSale)} per sale`),
-    kpi("Support savings / month", fmt.money(v.supportSavings), `${inputs.humanSharePct}% reach a person today; AI fully handles ${inputs.deflectionPct}% of those`),
+    kpi("Support savings / month", fmt.money(v.supportSavings), `${inputs.humanSharePct}% reach a person today; AI fully handles ${inputs.deflectionPct}% of those${v.realisedPct < 100 ? `; ${v.realisedPct}% of ${fmt.money(v.supportTimeValue)} of staff time counted as money saved` : ""}`),
     kpi("Payback (no uplift)", v.paybackAt(0) == null ? "Never" : `${v.paybackAt(0).toFixed(1)} months`, "From support savings alone"),
   );
 
@@ -669,6 +721,15 @@ function renderValue(result, ctx, best) {
   );
 }
 
+/** ", counting 60% of $X of time freed as money saved" when not all time freed is counted. */
+const cashNote = (v, fmt) => (v.realisedPct < 100 ? ` (counting ${v.realisedPct}% of the ${fmt.money(v.timeValue)} of time freed as money saved)` : "");
+
+/** Time freed at staff cost, and how much of it counts as money saved. */
+function timeValueKpi(v, inputs, fmt) {
+  if (v.realisedPct >= 100) return kpi("Value of time saved", fmt.money(v.timeValue), `${fmt.money(inputs.staffHourlyUsd)}/hour, all counted as money saved`);
+  return kpi("Time freed, at staff cost", fmt.money(v.timeValue), `${v.realisedPct}% counted as money saved: ${fmt.money((v.timeValue * v.realisedPct) / 100)}; the rest is extra capacity`);
+}
+
 /** Time saved, in the unit the user chose. */
 export function timeSaved(v, inputs, fmt) {
   const hours = `${fmt.number(Math.round(v.netHours))} hours/month`;
@@ -684,7 +745,7 @@ function renderAgentValue(result, ctx, best, v) {
   if (v.internal) return renderInternalValue(result, ctx, best, v, t);
   lead.replaceChildren(
     el("strong", {}, `With the recommended setup (${best.label}), the agent saves ${t.main}`),
-    ` (${t.sub}) of manual work after review time, worth ${fmt.money(v.benefit)} a month net of errors, against ${fmt.money(best.monthly)} of AI cost. `,
+    ` (${t.sub}) of manual work after review time, worth ${fmt.money(v.benefit)} a month net of errors${cashNote(v, fmt)}, against ${fmt.money(best.monthly)} of AI cost. `,
     v.net > 0
       ? `It pays for itself if the agent completes at least ${Math.min(100, Math.ceil(v.breakevenSuccessPct))}% of ${unit} on its own.`
       : v.breakevenSuccessPct <= 100
@@ -693,9 +754,9 @@ function renderAgentValue(result, ctx, best, v) {
   );
   $("value-kpis").append(
     kpi("Time saved (after review)", t.main, t.sub),
-    kpi("Value of time saved", fmt.money(v.netHours * inputs.staffHourlyUsd), `${fmt.money(inputs.staffHourlyUsd)}/hour`),
+    timeValueKpi(v, inputs, fmt),
     kpi("Error cost / month", fmt.money(v.errorCost), `${inputs.errorPct}% of ${unit} × ${fmt.money(inputs.costPerErrorUsd)}`),
-    kpi(`AI cost per ${unit.replace(/s$/, "")}`, fmt.money(v.aiCostPerTask), `Value per ${unit.replace(/s$/, "")}: ${fmt.money(v.valuePerTask)}`),
+    kpi(`AI cost per ${unit.replace(/s$/, "")}`, fmt.money(v.aiCostPerTask), [`Value per ${unit.replace(/s$/, "")}: ${fmt.money(v.valuePerTask)}`, Number.isFinite(best.costPerSuccess) ? `${fmt.money(best.costPerSuccess)} per completed ${unit.replace(/s$/, "")}` : null].filter(Boolean).join(" · ")),
     kpi("Net benefit / month", fmt.money(v.net), v.net > 0 ? `ROI ${pctText(v.roi * 100, 0)}` : "Negative at these assumptions"),
     kpi("Payback of build cost", v.paybackMonths == null ? "Never" : `${v.paybackMonths.toFixed(1)} months`),
   );
@@ -718,12 +779,12 @@ function renderInternalValue(result, ctx, best, v, t) {
   const { fmt, inputs } = ctx;
   $("value-lead").replaceChildren(
     el("strong", {}, `With the recommended setup (${best.label}), the tool saves ${t.main}`),
-    ` (${t.sub}) of staff time at ${inputs.minutesSavedPerRequest} minutes per request, worth ${fmt.money(v.benefit)} a month against ${fmt.money(best.monthly)} of AI cost. `,
+    ` (${t.sub}) of staff time at ${inputs.minutesSavedPerRequest} minutes per request, worth ${fmt.money(v.benefit)} a month${cashNote(v, fmt)} against ${fmt.money(best.monthly)} of AI cost. `,
     `It pays for itself if each request saves at least ${v.breakevenMinutesPerRequest < 1 ? "a few seconds" : `${Math.ceil(v.breakevenMinutesPerRequest * 10) / 10} minutes`}.`,
   );
   $("value-kpis").append(
     kpi("Staff time saved", t.main, t.sub),
-    kpi("Value of time saved", fmt.money(v.benefit), `${fmt.money(inputs.staffHourlyUsd)}/hour`),
+    timeValueKpi(v, inputs, fmt),
     kpi("AI cost per request", fmt.rate(v.aiCostPerTask)),
     kpi("Net benefit / month", fmt.money(v.net), v.net > 0 ? `ROI ${pctText(v.roi * 100, 0)}` : "Negative at these assumptions"),
     kpi("Payback of build cost", v.paybackMonths == null ? "Never" : `${v.paybackMonths.toFixed(1)} months`),
@@ -831,11 +892,15 @@ function renderAssumptions(result, ctx, best) {
     ...(result.valueKind === "agent" ? [] : [["Conversations reaching a human today", `${inputs.humanSharePct}% (support savings count only these)`]]),
     ["Engineer hourly cost", `${fmt.money(inputs.engineerHourlyUsd)}${sampleTag(region?.engineer_hourly_is_sample && inputs.engineerHourlyUsd === region.engineer_hourly_usd)}`],
     ["Self-hosted model (assumption)", `${model.label}: needs ~${model.vram_gb_needed} GB VRAM (${model.why})`],
-    ["Self-hosted GPUs in month 1", c ? `${c.gpus} (capacity headroom ×${sh.headroom}${inputs.useCase === "voice_agent" && inputs.latency === "realtime" ? `, real-time voice overhead ×${sh.realtime_voice_overhead}` : ""}${inputs.uptime === "high_availability" ? ", minimum 2 for high availability" : ""})` : "—"],
+    ["GPU sizing", "GPU time per request = prompt tokens not served from the prefix cache ÷ prompt-reading speed + output tokens ÷ answer-writing speed; requests in flight must also fit their context in GPU memory. Speeds are assumptions (see prices)."],
+    ["Self-hosted GPUs in month 1", c ? `${c.gpus}${c.gpuSizing ? `, limited by ${BOUND_TEXT[c.gpuSizing.bound]}` : ""} (capacity headroom ×${sh.headroom}${inputs.useCase === "voice_agent" && inputs.latency === "realtime" ? `, real-time voice overhead ×${sh.realtime_voice_overhead}` : ""}${inputs.uptime === "high_availability" ? ", minimum 2 for high availability" : ""})` : "—"],
     ["Hybrid share on self-hosted", hybridText(result)],
     ["Tax", taxText(result.tax)],
-    ["Build hours (A / B / C / D)", OPTION_IDS.map((id) => inputs.buildHours[id]).join(" / ")],
-    ["Maintenance hours per month (A / B / C / D)", OPTION_IDS.map((id) => inputs.maintenanceHours[id]).join(" / ")],
+    ["AI model for the API build", result.llm ? `${result.llm.api.label}${inputs.llmProvider === "cheapest" ? " (cheapest provider for this workload)" : " (your choice)"}` : "—"],
+    ["Hosted open model (option E)", result.llm?.open ? result.llm.open.label : "—"],
+    ["Price change per year", `AI per-token prices ${signed(inputs.llmPriceChangePct)}%, GPU rental ${signed(inputs.gpuPriceChangePct)}% (applied monthly from month 1)`],
+    [`Build hours (${OPTION_IDS.join(" / ")})`, OPTION_IDS.map((id) => inputs.buildHours[id]).join(" / ")],
+    [`Maintenance hours per month (${OPTION_IDS.join(" / ")})`, OPTION_IDS.map((id) => inputs.maintenanceHours[id]).join(" / ")],
     ["Business profile", result.profile.replace(/_/g, " ")],
     ["Cost vs non-cost weight", `${(result.costWeight * 100).toFixed(0)}% / ${(100 - result.costWeight * 100).toFixed(0)}%`],
     ["Exchange rates", `${data.fx.source}, ${data.fx.as_of}${data.fx.is_sample ? " (sample)" : ""}. AED from its 3.6725 USD peg.`],
@@ -848,6 +913,35 @@ function renderAssumptions(result, ctx, best) {
     return [p.label, priceValue(p, fmt), link, p.last_verified, p.is_sample ? "Sample" : "Verified", p.notes || ""];
   });
   setTable($("prices-table"), ["Item", "Price (USD source)", "Source", "Last verified", "Status", "Notes"], priceRows, { numericFrom: 99 });
+}
+
+const BOUND_TEXT = { prefill: "reading prompts", decode: "writing answers", memory: "memory for long prompts" };
+
+const signed = (x) => (x > 0 ? `+${x}` : String(x ?? 0));
+
+/** Every provider's model at this quality level, priced for this workload, plus the hosted open model (E). */
+function renderLlmProviders(result, ctx) {
+  const { fmt, inputs } = ctx;
+  const llm = result.llm;
+  $("llm-compare").hidden = !llm;
+  if (!llm) return;
+  const rate = (m) => `${fmt.money(m.input_price, { decimals: 2 })} in / ${fmt.money(m.output_price, { decimals: 2 })} out`;
+  const rows = llm.candidates.map((c) => ({
+    class: c.provider === llm.api.provider ? "is-recommended" : null,
+    cells: [c.model.label, rate(c.model), fmt.rate(c.perRequest), fmt.money(c.monthly), c.provider === llm.api.provider ? "B. API and D. Hybrid" : ""],
+  }));
+  const e = result.options.find((o) => o.id === "E");
+  if (llm.open && e && Number.isFinite(e.monthly)) {
+    const reqs = Math.max(1, result.volume.requestsPerMonth);
+    rows.push({ cells: [llm.open.label, rate(llm.open), fmt.rate(e.lines[0].usd / reqs), fmt.money(e.lines[0].usd), "E. Hosted open model"] });
+  }
+  setTable($("llm-table"), ["Model", "Price per 1M tokens", "Per request", "Month 1 AI cost", "Used for"], rows, { numericFrom: 2 });
+  const tokens = `${fmt.number(Math.round(result.volume.avgInTokens))} input and ${fmt.number(Math.round(result.volume.avgOutTokens))} output tokens per request`;
+  const cheapest = llm.candidates[0];
+  $("llm-note").textContent =
+    inputs.llmProvider === "cheapest"
+      ? `Each provider's model for this quality level, priced for ${tokens}${inputs.cachedSharePct > 0 ? ", with caching where the prompt is long enough" : ""}. The cheapest is used. Quality differs between providers, so test before you commit.`
+      : `You chose ${llm.api.label}. ${cheapest && cheapest.provider !== llm.api.provider ? `${cheapest.model.label} would cost the least for ${tokens}.` : "It is also the cheapest for this workload."}`;
 }
 
 function hybridText(result) {

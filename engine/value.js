@@ -31,27 +31,32 @@ export function classifyProfile(ticketUsd, conversationsPerMonth, t = PROFILE_TH
  *   hours_saved  = tasks × success × minutes_per_task / 60
  *   review_hours = tasks × review_share × review_minutes / 60
  *   net_hours    = hours_saved − review_hours          (FTE = net_hours / hours_per_FTE)
- *   benefit      = net_hours × staff_hourly − tasks × error_rate × cost_per_error
+ *   time_value   = net_hours × staff_hourly             (capacity freed)
+ *   benefit      = time_value × cash_share − tasks × error_rate × cost_per_error
  *   net          = benefit − option_monthly
+ * cash_share (realisedPct, default 100%) is the part of the time freed that becomes money saved:
+ * fewer hires, less overtime or contractors, or the time sold as paid work.
  * @param p { tasksPerMonth, humanMinutesPerTask, successPct, reviewPct, reviewMinutes, errorPct,
- *            costPerError, staffHourly, fteHoursPerMonth, optionMonthly, oneTime }
+ *            costPerError, staffHourly, fteHoursPerMonth, optionMonthly, oneTime, realisedPct }
  */
 export function agentValue(p) {
   const tasks = p.tasksPerMonth;
+  const cash = (p.realisedPct ?? 100) / 100;
   const at = (successPct) => {
     const hoursSaved = (tasks * (successPct / 100) * p.humanMinutesPerTask) / 60;
     const reviewHours = (tasks * (p.reviewPct / 100) * p.reviewMinutes) / 60;
     const netHours = hoursSaved - reviewHours;
     const errorCost = tasks * (p.errorPct / 100) * p.costPerError;
-    const benefit = netHours * p.staffHourly - errorCost;
+    const timeValue = netHours * p.staffHourly;
+    const benefit = timeValue * cash - errorCost;
     const net = benefit - p.optionMonthly;
-    return { successPct, hoursSaved, reviewHours, netHours, fte: netHours / p.fteHoursPerMonth, errorCost, benefit, net, roi: net / p.optionMonthly, paybackMonths: net > 0 ? p.oneTime / Math.max(EPSILON, net) : null };
+    return { successPct, hoursSaved, reviewHours, netHours, fte: netHours / p.fteHoursPerMonth, timeValue, realisedPct: cash * 100, errorCost, benefit, net, roi: net / p.optionMonthly, paybackMonths: net > 0 ? p.oneTime / Math.max(EPSILON, net) : null };
   };
   const base = at(p.successPct);
   // Success rate at which benefit covers the AI cost (100% caps it: "not reachable").
   const perPointHours = (tasks * p.humanMinutesPerTask) / 60 / 100;
-  const reviewCost = base.reviewHours * p.staffHourly;
-  const breakevenSuccessPct = perPointHours * p.staffHourly > 0 ? (p.optionMonthly + reviewCost + base.errorCost) / (perPointHours * p.staffHourly) : Infinity;
+  const reviewCost = base.reviewHours * p.staffHourly * cash;
+  const breakevenSuccessPct = perPointHours * p.staffHourly * cash > 0 ? (p.optionMonthly + reviewCost + base.errorCost) / (perPointHours * p.staffHourly * cash) : Infinity;
   return {
     kind: "agent",
     ...base,
@@ -78,7 +83,7 @@ export function customerValue12m({ ticket, marginPct, purchaseType = "one_time",
  * All value metrics for one option.
  * @param p { ticket, marginPct, purchaseType, purchasesPerYear, ltv,
  *            conversationsPerMonth, conversionPct, humanCostPerConv, humanSharePct, deflectionPct, targetSharePct,
- *            optionMonthly, oneTime }
+ *            optionMonthly, oneTime, realisedPct }
  */
 export function valueMetrics(p) {
   const conv = p.conversionPct / 100;
@@ -88,7 +93,9 @@ export function valueMetrics(p) {
   const salesPerMonth = p.conversationsPerMonth * conv;
   // Savings only on conversations that would reach a human today (default: all of them).
   const humanShare = (p.humanSharePct ?? 100) / 100;
-  const supportSavings = p.conversationsPerMonth * humanShare * (p.deflectionPct / 100) * p.humanCostPerConv;
+  const supportTimeValue = p.conversationsPerMonth * humanShare * (p.deflectionPct / 100) * p.humanCostPerConv;
+  // Staff time freed only saves money in part (see agentValue).
+  const supportSavings = supportTimeValue * ((p.realisedPct ?? 100) / 100);
   const breakevenExtraSales = grossProfitPerSale > 0 ? p.optionMonthly / grossProfitPerSale : Infinity;
   const ltvBreakevenCustomers = value12m > 0 ? p.optionMonthly / value12m : Infinity;
   const aiCostPerSale = salesPerMonth > 0 ? p.optionMonthly / salesPerMonth : Infinity;
@@ -115,7 +122,9 @@ export function valueMetrics(p) {
     breakevenConversionUpliftPp: p.conversationsPerMonth > 0 ? (breakevenExtraSales / p.conversationsPerMonth) * 100 : Infinity,
     ltvBreakevenCustomers,
     ltvCustomersNeeded: Number.isFinite(ltvBreakevenCustomers) ? Math.ceil(ltvBreakevenCustomers - EPSILON) : Infinity,
+    supportTimeValue,
     supportSavings,
+    realisedPct: p.realisedPct ?? 100,
     sensitivity: [0, 0.5, 1, 2, 5].map((u) => ({ upliftPp: u, roi: roiAt(u), paybackMonths: paybackAt(u) })),
     roiAt,
     paybackAt,
@@ -131,9 +140,9 @@ export function valueForInputs(inputs, vol, monthly, oneTime, { agent, internal,
   if (internal) {
     // Each request saves a few minutes of staff time; no review or error model.
     const at = (minutes) =>
-      agentValue({ tasksPerMonth: vol.requestsPerMonth, humanMinutesPerTask: minutes, successPct: 100, reviewPct: 0, reviewMinutes: 0, errorPct: 0, costPerError: 0, staffHourly: inputs.staffHourlyUsd, fteHoursPerMonth: inputs.fteHoursPerMonth, optionMonthly: monthly, oneTime });
+      agentValue({ tasksPerMonth: vol.requestsPerMonth, humanMinutesPerTask: minutes, successPct: 100, reviewPct: 0, reviewMinutes: 0, errorPct: 0, costPerError: 0, staffHourly: inputs.staffHourlyUsd, fteHoursPerMonth: inputs.fteHoursPerMonth, optionMonthly: monthly, oneTime, realisedPct: inputs.cashSavingsPct });
     const v = at(inputs.minutesSavedPerRequest);
-    const perMinuteValue = (vol.requestsPerMonth / 60) * inputs.staffHourlyUsd;
+    const perMinuteValue = (vol.requestsPerMonth / 60) * inputs.staffHourlyUsd * ((inputs.cashSavingsPct ?? 100) / 100);
     return {
       ...v,
       internal: true,
@@ -154,6 +163,7 @@ export function valueForInputs(inputs, vol, monthly, oneTime, { agent, internal,
       fteHoursPerMonth: inputs.fteHoursPerMonth,
       optionMonthly: monthly,
       oneTime,
+      realisedPct: inputs.cashSavingsPct,
     });
   }
   return valueMetrics({
@@ -170,5 +180,6 @@ export function valueForInputs(inputs, vol, monthly, oneTime, { agent, internal,
     targetSharePct: inputs.targetSharePct,
     optionMonthly: monthly,
     oneTime,
+    realisedPct: inputs.cashSavingsPct,
   });
 }

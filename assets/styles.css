@@ -19,6 +19,7 @@
   --opt-b: #1a4fd6;
   --opt-c: #0b7a4b;
   --opt-d: #b3261e;
+  --opt-e: #6b3fa0;
   --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
   color-scheme: light;
@@ -44,6 +45,7 @@
     --opt-b: #8fb0ff;
     --opt-c: #6fd29b;
     --opt-d: #ff8a80;
+  --opt-e: #c9a0ff;
     color-scheme: dark;
   }
 }
@@ -67,6 +69,7 @@
   --opt-b: #8fb0ff;
   --opt-c: #6fd29b;
   --opt-d: #ff8a80;
+  --opt-e: #c9a0ff;
   color-scheme: dark;
 }
 
@@ -314,6 +317,7 @@ tr.workings > td { background: var(--sunk); padding: 0.6rem 0.75rem 0.8rem; }
 .kpis div { border-right: 1px solid var(--hair); border-bottom: 1px solid var(--hair); padding: 0.6rem 0.75rem; }
 .kpis dt { font-size: 0.78rem; color: var(--muted); }
 .kpis dd { margin: 0.15rem 0 0; font-family: var(--mono); font-size: 1.1rem; font-weight: 600; }
+.kpis dd.kpi-text { font-family: var(--font); font-size: 0.95rem; }
 .kpis dd .sub { display: block; font-family: var(--font); font-size: 0.78rem; font-weight: 400; color: var(--muted); }
 
 .disclaimer { font-size: 0.82rem; color: var(--ink-soft); border: 1px solid var(--hair); padding: 0.55rem 0.75rem; margin-bottom: 1rem; }
@@ -343,6 +347,7 @@ table.data tr.is-excluded td, table.data tr.is-excluded th { color: var(--muted)
 .swatch-B { background: var(--opt-b); }
 .swatch-C { background: var(--opt-c); }
 .swatch-D { background: var(--opt-d); }
+.swatch-E { background: var(--opt-e); }
 
 .chart-box { position: relative; height: 320px; }
 .tornado-box { height: 360px; }
@@ -356,6 +361,8 @@ table.data tr.is-excluded td, table.data tr.is-excluded th { color: var(--muted)
 .warn-list { padding-left: 0; margin: 0; list-style: none; }
 .warn-list li { padding: 0.4rem 0; border-bottom: 1px solid var(--hair); font-size: 0.9rem; }
 .warn-list li:last-child { border-bottom: 0; }
+.limits-list { margin: 0 0 0.75rem; padding-left: 1.2rem; font-size: 0.9rem; }
+.limits-list li { margin: 0.3rem 0; }
 .warn-list .lvl { display: inline-block; min-width: 4.5rem; font-family: var(--mono); font-size: 0.75rem; text-transform: lowercase; }
 .lvl-warning { color: var(--warn); }
 .lvl-info { color: var(--muted); }
@@ -374,10 +381,43 @@ table.data tr.is-excluded td, table.data tr.is-excluded th { color: var(--muted)
 
 .print-only { display: none; }
 
+/* Crawlable summary under the advisor */
+.explainer { margin-top: 2rem; border-top: 1px solid var(--rule); padding-top: 1rem; }
+.explainer-list li { margin-bottom: 0.35rem; }
+.explainer p, .explainer ul { max-width: 80ch; }
+
 /* About page */
-.about { max-width: 760px; padding-top: 1.5rem; }
+.about { max-width: 900px; padding-top: 1.5rem; }
 .about section { border-top: 1px solid var(--rule); padding-top: 1rem; margin-top: 1.25rem; }
 .about li { margin-bottom: 0.35rem; }
+.about h2 { scroll-margin-top: 1rem; }
+.about .method h2 { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--hair); }
+.about .method > h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.about h3 { scroll-margin-top: 1rem; }
+.about code { font-family: var(--mono); font-size: 0.88em; }
+.about .table-wrap { margin: 0.6rem 0 1rem; }
+.about table.data { font-size: 0.82rem; }
+.about table.data td:first-child { min-width: 9rem; }
+.about .conf { cursor: default; margin-left: 0; }
+.breadcrumb { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.6rem; }
+.page-date { margin-top: -0.4rem; }
+.code-ref { font-family: var(--mono); font-size: 0.72rem; font-weight: 400; color: var(--muted); white-space: normal; }
+.code-ref code { font-size: inherit; }
+pre.formula { overflow-x: auto; -webkit-overflow-scrolling: touch; background: var(--sunk); border: 1px solid var(--hair); padding: 0.7rem 0.85rem; margin: 0.6rem 0 1rem; font-size: 0.8rem; line-height: 1.5; }
+pre.formula code { font-family: var(--mono); white-space: pre; }
+.formula.math { overflow-x: auto; -webkit-overflow-scrolling: touch; background: var(--sunk); border: 1px solid var(--hair); border-left: 3px solid var(--rule); padding: 0.9rem 1rem; margin: 0.6rem 0 1.1rem; }
+.formula.math math { font-family: "Cambria Math", "STIX Two Math", "Latin Modern Math", "Noto Sans Math", math, serif; font-size: 1.12em; margin: 0; text-align: left; }
+/* Chromium ignores MathML columnalign, so align the columns of "aligned" (right = left) and "cases" (left left) here. */
+.formula.math mtable[columnalign="right left"] > mtr > mtd:nth-child(odd) { text-align: right; }
+.formula.math mtable[columnalign="right left"] > mtr > mtd:nth-child(even) { text-align: left; }
+.formula.math mtable[columnalign="left left"] > mtr > mtd { text-align: left; }
+.formula.math math[display="block"] { display: inline math; }
+.toc { border: 1px solid var(--hair); padding: 0.8rem 1rem; margin: 1rem 0; font-size: 0.9rem; }
+.toc ol { margin: 0.3rem 0 0; padding-left: 1.3rem; }
+.toc ol ol { columns: 2; column-gap: 1.5rem; font-size: 0.85rem; }
+.toc li { margin-bottom: 0.2rem; break-inside: avoid; }
+.price-notes { font-size: 0.82rem; color: var(--ink-soft); }
+@media (max-width: 640px) { .toc ol ol { columns: 1; } .formula.math { padding: 0.7rem 0.75rem; } .formula.math math { font-size: 0.95em; } }
 
 /* Print: a clean report */
 @media print {

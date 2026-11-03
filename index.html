@@ -4,24 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-  <meta name="description" content="Free, browser-only advisor comparing SaaS, API, self-hosted and hybrid AI stacks: monthly cost, 36-month TCO, break-even and ROI.">
-  <title>AI Stack Advisor: build-vs-buy cost and ROI calculator | Kauntey Acharya</title>
+  <meta name="description" content="Free AI build vs buy calculator: compare SaaS, LLM APIs (Gemini, OpenAI, Claude, Mistral), self-hosted open models on GPUs, hybrid and hosted open models on monthly cost, 36-month TCO, break-even and ROI. Runs in your browser.">
+  <title>AI Stack Advisor: AI build vs buy calculator (LLM API vs self-hosted cost, TCO, ROI)</title>
   <meta name="author" content="Kauntey Acharya">
   <link rel="canonical" href="https://kaunteyacharya.com/ai-stack-advisor/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Kauntey Acharya">
   <meta property="og:url" content="https://kaunteyacharya.com/ai-stack-advisor/">
   <meta property="og:title" content="AI Stack Advisor: build-vs-buy cost and ROI calculator">
-  <meta property="og:description" content="Free, browser-only advisor comparing SaaS, API, self-hosted and hybrid AI stacks: monthly cost, 36-month TCO, break-even and ROI.">
+  <meta property="og:description" content="Free, browser-only advisor comparing five ways to run AI (SaaS, API, self-hosted, hybrid, hosted open model): monthly cost, 36-month TCO, break-even and ROI.">
   <meta property="og:image" content="https://kaunteyacharya.com/og/ai-stack-advisor.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="AI Stack Advisor">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="AI Stack Advisor: build-vs-buy cost and ROI calculator">
-  <meta name="twitter:description" content="Free, browser-only advisor comparing SaaS, API, self-hosted and hybrid AI stacks: monthly cost, 36-month TCO, break-even and ROI.">
+  <meta name="twitter:description" content="Free, browser-only advisor comparing five ways to run AI (SaaS, API, self-hosted, hybrid, hosted open model): monthly cost, 36-month TCO, break-even and ROI.">
   <meta name="twitter:image" content="https://kaunteyacharya.com/og/ai-stack-advisor.png">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"AI Stack Advisor","description":"A free, browser-only tool that compares SaaS, API-based, self-hosted and hybrid AI stacks on monthly cost, 36-month total cost of ownership, break-even volume and ROI.","url":"https://kaunteyacharya.com/ai-stack-advisor/","applicationCategory":"BusinessApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","@id":"https://kaunteyacharya.com/#person","name":"Kauntey Acharya","url":"https://kaunteyacharya.com/"},"isPartOf":{"@id":"https://kaunteyacharya.com/#website"},"subjectOf":{"@type":"BlogPosting","url":"https://kaunteyacharya.com/notes/ai-stack-advisor/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","@id":"https://kaunteyacharya.com/ai-stack-advisor/#app","name":"AI Stack Advisor","alternateName":"AI build vs buy calculator","description":"A free, browser-only tool that compares five ways to run AI (SaaS, an API build on Gemini, OpenAI, Claude or Mistral, a self-hosted open model, a hybrid, and a hosted open model) on monthly cost, 36-month total cost of ownership, break-even volume and ROI.","url":"https://kaunteyacharya.com/ai-stack-advisor/","applicationCategory":"BusinessApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"featureList":["Monthly cost of SaaS, LLM API, self-hosted, hybrid and hosted open-model options","36-month total cost of ownership with growth and price trends","API vs self-hosting break-even volume","GPU sizing for self-hosted open models","ROI, payback and break-even sales","Weighted scoring for privacy, time to launch, team fit, quality, lock-in and scalability","Monte Carlo simulation and tornado chart","Eight currencies with tax by country"],"isAccessibleForFree":true,"inLanguage":"en","author":{"@type":"Person","@id":"https://kaunteyacharya.com/#person","name":"Kauntey Acharya","url":"https://kaunteyacharya.com/"},"isPartOf":{"@id":"https://kaunteyacharya.com/#website"},"subjectOf":[{"@type":"BlogPosting","url":"https://kaunteyacharya.com/notes/ai-stack-advisor/"},{"@type":"TechArticle","@id":"https://kaunteyacharya.com/ai-stack-advisor/about.html#article","url":"https://kaunteyacharya.com/ai-stack-advisor/about.html"}]}</script>
   <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./assets/styles.css">
   <script src="./assets/theme.js"></script>
@@ -33,11 +33,11 @@
 
   <header class="site-header">
     <div class="wrap header-inner">
-      <a class="brand" href="./index.html" aria-label="AI Stack Advisor home">
+      <a class="brand" href="./" aria-label="AI Stack Advisor home">
         <span>AI Stack Advisor</span>
       </a>
       <nav class="header-nav" aria-label="Main">
-        <a href="./about.html">Method &amp; about</a>
+        <a href="./about.html">How it works</a>
         <button type="button" class="btn-ghost" id="theme-toggle" aria-label="Toggle dark mode">Theme</button>
       </nav>
     </div>
@@ -165,6 +165,11 @@
         <section class="card" aria-labelledby="cmp-title">
           <h2 id="cmp-title" data-term="tco">Option comparison</h2>
           <div class="table-wrap"><table id="cmp-table" class="data"></table></div>
+          <div id="llm-compare" data-view="analyst">
+            <h3 data-term="provider">AI providers compared</h3>
+            <p id="llm-note" class="muted"></p>
+            <div class="table-wrap"><table id="llm-table" class="data"></table></div>
+          </div>
         </section>
 
         <section class="card" aria-labelledby="curve-title" data-view="analyst">
@@ -222,6 +227,18 @@
           <div id="law-note" class="law-note"></div>
         </section>
 
+        <section class="card limits" aria-labelledby="limits-title">
+          <h2 id="limits-title">Limits of this estimate</h2>
+          <ul class="limits-list">
+            <li>A planning estimate, not a quote. Vendor prices change often, and large customers negotiate.</li>
+            <li>GPU speeds, model memory, build and maintenance hours, and the open-model quality gap are assumptions. Benchmark your own model and test it on your own examples before committing.</li>
+            <li>Self-hosting is costed on rented GPUs running all month. Cold starts, autoscaling, data transfer fees and compliance audits are not included.</li>
+            <li>Time freed counts as money saved only in the share you set; the yearly price changes are trends, not forecasts.</li>
+            <li>Data-protection and tax notes point to what to review with an adviser; they are not legal or tax advice.</li>
+          </ul>
+          <p class="muted">Every formula, assumption and price is set out on the <a href="./about.html">How it works</a> page.</p>
+        </section>
+
         <section class="card" aria-labelledby="assump-title" data-view="analyst">
           <h2 id="assump-title">Assumptions &amp; prices used</h2>
           <div class="table-wrap"><table id="assump-table" class="data"></table></div>
@@ -241,6 +258,20 @@
       </div>
     </section>
   </main>
+
+  <section class="wrap explainer no-print" aria-labelledby="explainer-title">
+    <h2 id="explainer-title">What this AI cost calculator answers</h2>
+    <p>AI Stack Advisor compares five ways to run an AI chatbot, voice agent, document processor, internal copilot or workflow agent: a <strong>SaaS tool</strong>, a custom build on <strong>LLM APIs</strong> (Google Gemini, OpenAI, Anthropic Claude or Mistral), a <strong>self-hosted open model</strong> on rented GPUs, a <strong>hybrid</strong> of the two, and a <strong>hosted open model</strong> paid per token. It uses published vendor prices and official labour statistics, and runs entirely in your browser.</p>
+    <ul class="explainer-list">
+      <li><a href="./about.html#method-2">How much will an LLM API cost per month</a> for my volume and prompt size, with caching and batch prices?</li>
+      <li><a href="./about.html#method-4">How many GPUs does self-hosting an open model need</a>, and what do they cost?</li>
+      <li><a href="./about.html#method-9">At what volume is self-hosting cheaper than an API?</a></li>
+      <li><a href="./about.html#method-8">What is the 36-month total cost of ownership</a> as usage grows and AI prices fall?</li>
+      <li><a href="./about.html#method-10">What ROI and payback can I expect</a>, and how many extra sales cover the cost?</li>
+      <li><a href="./about.html#method-12">Which option should I choose</a>, and how sure is that answer?</li>
+    </ul>
+    <p class="muted">Every formula, assumption and price, with its source and the date it was checked: <a href="./about.html">How AI Stack Advisor works</a>.</p>
+  </section>
 
   <div id="result-bar" class="result-bar no-print" hidden>
     <button type="button" id="result-bar-btn" class="result-bar-btn" aria-label="Jump to the results">

@@ -9,9 +9,9 @@ test("TCO = one-time + sum of monthly costs", () => {
 });
 
 test("with zero growth, TCO_36 = one-time + 36 × month-1 cost", () => {
-  const inputs = withDefaults({ usersPerDay: 500, requestsPerUser: 5, growthPct: 0 });
+  const inputs = withDefaults({ usersPerDay: 500, requestsPerUser: 5, growthPct: 0, llmPriceChangePct: 0, gpuPriceChangePct: 0 });
   const t = projectTco(inputs, TEST_PRICES);
-  for (const id of ["A", "B", "C", "D"]) {
+  for (const id of ["A", "B", "C", "D", "E"]) {
     const r = t[id];
     assert.ok(Math.abs(r.tco36 - (r.oneTime + 36 * r.monthly[0])) < 1e-6);
     assert.ok(Math.abs(r.tco12 - (r.oneTime + 12 * r.monthly[0])) < 1e-6);

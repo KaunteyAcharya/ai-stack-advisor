@@ -1,13 +1,14 @@
 // The single `inputs` object the whole engine works from (schema: docs/inputs.schema.json).
 // Money is stored in USD. Percentages are stored as 0–100 numbers.
 
-export const OPTION_IDS = ["A", "B", "C", "D"];
+export const OPTION_IDS = ["A", "B", "C", "D", "E"];
 
 export const OPTION_LABELS = {
   A: "SaaS subscription",
   B: "API-based custom build",
   C: "Self-hosted open source",
   D: "Hybrid",
+  E: "Hosted open model",
 };
 
 export const DEFAULT_INPUTS = {
@@ -78,6 +79,9 @@ export const DEFAULT_INPUTS = {
   latency: "standard", // relaxed | standard | realtime
   uptime: "business_hours", // best_effort | business_hours | high_availability
   quality: "good", // basic | good | best_available
+  llmProvider: "cheapest", // cheapest | google | openai | anthropic | mistral (data/prices.json llm_providers)
+  llmPriceChangePct: -30, // yearly change in per-token AI prices (negative = cheaper), applied month by month
+  gpuPriceChangePct: -15, // yearly change in GPU rental prices
 
   engineers: "one", // none | one | small_team
   devops: "some", // none | some | strong
@@ -98,15 +102,18 @@ export const DEFAULT_INPUTS = {
   humanSharePct: 20, // share of conversations that reach a human today
   deflectionPct: 60,
   targetSharePct: 10,
+  cashSavingsPct: 100, // share of staff time freed that becomes money saved (fewer hires, less overtime, paid work)
 
   shareSelfPct: null, // null = automatic: the cheapest split from 10% to 90%
-  buildHours: { A: 20, B: 120, C: 240, D: 300 },
-  evalHours: { A: 8, B: 16, C: 32, D: 32 }, // testing quality on your own data before launch (one-time)
-  maintenanceHours: { A: 4, B: 10, C: 30, D: 35 },
+  buildHours: { A: 20, B: 120, C: 240, D: 300, E: 120 },
+  evalHours: { A: 8, B: 16, C: 32, D: 32, E: 32 }, // testing quality on your own data before launch (one-time)
+  maintenanceHours: { A: 4, B: 10, C: 30, D: 35, E: 10 },
   weights: { privacy: 25, timeToLaunch: 20, teamFit: 20, quality: 15, lockIn: 10, scalability: 10 },
   costWeightPct: null, // null = automatic (50, or 25 for high-ticket profiles)
   discountRatePct: 10, // annual rate for the present value of 36-month costs
   openModelGapPct: 10, // percentage points fewer tasks completed by self-hosted open models (assumption)
+  evalApiSuccessPct: null, // your own test: share of tasks an API model gets right (replaces the gap when both are set)
+  evalOpenSuccessPct: null, // your own test: share of tasks an open model gets right
 
   // Multiple workloads: the fields above describe workload 1; up to two more live here, each
   // holding only WORKLOAD_KEYS. Everything else (country, data rules, team, tax…) is shared.
@@ -129,7 +136,7 @@ export const WORKLOAD_KEYS = [
   "useBatch", "saasStepsPerTask", "externalFeePerTaskUsd", "humanMinutesPerTask", "successPct", "reviewPct",
   "reviewMinutes", "errorPct", "costPerErrorUsd", "staffHourlyUsd", "marketDataMonthlyUsd", "videosPerMonth",
   "secondsPerVideo", "videoTier", "imagesPerMonth", "xPostsPerMonth", "repliesPerMonth", "xRepliesSharePct",
-  "replyInTokens", "replyOutTokens", "minutesSavedPerRequest",
+  "replyInTokens", "replyOutTokens", "minutesSavedPerRequest", "evalApiSuccessPct", "evalOpenSuccessPct",
   "usersPerDay", "requestsPerUser", "peakSharePct", "seats",
   "ticketUsd", "marginPct", "purchaseType", "purchasesPerYear", "ltvUsd", "conversationsPerMonth", "conversionPct",
   "humanCostPerConvUsd", "humanSharePct", "deflectionPct", "targetSharePct",
