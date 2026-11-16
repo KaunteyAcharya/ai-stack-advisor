@@ -1,16 +1,16 @@
 {
   "base": "USD",
-  "as_of": "2026-11-02",
+  "as_of": "2026-11-16",
   "source": "European Central Bank euro foreign exchange reference rates",
   "source_url": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
   "rates": {
     "USD": 1,
-    "INR": 94.909504,
-    "EUR": 0.891583,
-    "GBP": 0.745185,
-    "CHF": 0.819633,
-    "CAD": 1.397379,
-    "AUD": 1.42689,
+    "INR": 93.927728,
+    "EUR": 0.907935,
+    "GBP": 0.757672,
+    "CHF": 0.839295,
+    "CAD": 1.428545,
+    "AUD": 1.480025,
     "AED": 3.6725
   },
   "is_sample": false,
